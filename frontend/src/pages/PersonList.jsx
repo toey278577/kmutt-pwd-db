@@ -211,8 +211,7 @@ export default function PersonList() {
                 <FormField label="วันเกิด" type="date" value={form.birthDate} onChange={(v) => setForm({ ...form, birthDate: v })} />
                 <SelectField label="เพศ" value={form.gender} onChange={(v) => setForm({ ...form, gender: v })}
                   options={[['MALE','ชาย'],['FEMALE','หญิง'],['OTHER','อื่นๆ']]} />
-                <SelectField label="สถานภาพ" value={form.maritalStatus} onChange={(v) => setForm({ ...form, maritalStatus: v })}
-                  options={[['SINGLE','โสด'],['MARRIED','สมรส'],['OTHER','อื่นๆ']]} />
+                <MaritalField value={form.maritalStatus} onChange={(v) => setForm({ ...form, maritalStatus: v })} />
                 <FormField label="สัญชาติ" value={form.nationality} onChange={(v) => setForm({ ...form, nationality: v })} />
                 <FormField label="ศาสนา" value={form.religion} onChange={(v) => setForm({ ...form, religion: v })} />
                 <FormField label="ระดับการศึกษา" value={form.educationLevel} onChange={(v) => setForm({ ...form, educationLevel: v })} />
@@ -287,6 +286,39 @@ function SelectField({ label, value = '', onChange, options }) {
         </select>
         <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
       </div>
+    </div>
+  );
+}
+
+const MARITAL_OPTS = ['SINGLE', 'MARRIED', 'OTHER'];
+function MaritalField({ value, onChange }) {
+  const isCustom = value && !MARITAL_OPTS.includes(value);
+  const selectVal = isCustom ? 'OTHER' : (value || 'SINGLE');
+
+  return (
+    <div>
+      <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">สถานภาพ</label>
+      <div className="relative mb-2">
+        <select
+          className="w-full appearance-none rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all cursor-pointer pr-9"
+          value={selectVal}
+          onChange={(e) => onChange(e.target.value === 'OTHER' ? 'OTHER' : e.target.value)}
+        >
+          <option value="SINGLE">โสด</option>
+          <option value="MARRIED">สมรส</option>
+          <option value="OTHER">อื่นๆ (ระบุ)</option>
+        </select>
+        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+      </div>
+      {selectVal === 'OTHER' && (
+        <input
+          type="text"
+          placeholder="ระบุสถานภาพ เช่น หย่าร้าง, หม้าย..."
+          className="w-full rounded-xl border border-orange-300 px-3.5 py-2.5 text-sm text-gray-800 bg-orange-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
+          value={isCustom ? value : ''}
+          onChange={(e) => onChange(e.target.value || 'OTHER')}
+        />
+      )}
     </div>
   );
 }

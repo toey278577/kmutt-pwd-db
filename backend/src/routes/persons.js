@@ -4,6 +4,11 @@ const prisma = require('../prismaClient');
 
 const toDate = (val) => (val && String(val).trim() !== '') ? new Date(val) : null;
 const toEnum = (val) => (val && String(val).trim() !== '') ? val : null;
+const MARITAL_ENUMS = ['SINGLE', 'MARRIED', 'OTHER'];
+const toMarital = (val) => {
+  if (!val || String(val).trim() === '') return null;
+  return MARITAL_ENUMS.includes(val) ? val : 'OTHER';
+};
 
 router.get('/', async (req, res) => {
   try {
@@ -53,7 +58,7 @@ router.post('/', async (req, res) => {
   try {
     const { birthDate, maritalStatus, gender, lifeStatus, ...rest } = req.body;
     const person = await prisma.person.create({
-      data: { ...rest, birthDate: toDate(birthDate), maritalStatus: toEnum(maritalStatus), gender, lifeStatus },
+      data: { ...rest, birthDate: toDate(birthDate), maritalStatus: toMarital(maritalStatus), gender, lifeStatus },
     });
     res.status(201).json(person);
   } catch (err) {
@@ -66,7 +71,7 @@ router.put('/:id', async (req, res) => {
     const { birthDate, maritalStatus, gender, lifeStatus, ...rest } = req.body;
     const person = await prisma.person.update({
       where: { id: parseInt(req.params.id) },
-      data: { ...rest, birthDate: toDate(birthDate), maritalStatus: toEnum(maritalStatus), gender, lifeStatus },
+      data: { ...rest, birthDate: toDate(birthDate), maritalStatus: toMarital(maritalStatus), gender, lifeStatus },
     });
     res.json(person);
   } catch (err) {
