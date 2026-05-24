@@ -37,16 +37,38 @@ export default function OrganizationList() {
 
   return (
     <div>
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-extrabold text-orange-950">สถานประกอบการ</h1>
-          <p className="text-sm text-gray-400 mt-0.5">{orgs.length} แห่ง</p>
+      <div className="mb-7 rounded-2xl overflow-hidden relative shadow-md border border-orange-100"
+        style={{ background: 'linear-gradient(135deg,#fff7ed 0%,#ffedd5 60%,#fed7aa 100%)' }}>
+        <div className="absolute -right-10 -top-10 w-52 h-52 rounded-full opacity-20"
+          style={{ background: 'radial-gradient(circle,#ea580c,transparent)' }} />
+        <div className="absolute right-28 -bottom-8 w-32 h-32 rounded-full opacity-10"
+          style={{ background: '#c2410c' }} />
+        <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
+          style={{ background: 'linear-gradient(180deg,#ea580c,#fb923c)' }} />
+        <div className="relative px-8 py-6 flex items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
+              <Building2 size={22} color="white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <div className="h-px w-5 bg-orange-400 rounded-full" />
+                <span className="text-xs font-bold text-orange-400 uppercase tracking-widest">ฐานข้อมูล</span>
+              </div>
+              <h1 className="text-2xl font-extrabold text-orange-950 leading-tight">สถานประกอบการ</h1>
+              <p className="text-sm text-orange-400 font-semibold mt-0.5">{orgs.length} แห่งในระบบ</p>
+            </div>
+          </div>
+          {canEdit && (
+            <button
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg active:scale-95 transition-all flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}
+              onClick={() => openModal()}>
+              <Plus size={16} /> เพิ่มองค์กร
+            </button>
+          )}
         </div>
-        {canEdit && (
-          <button className="btn btn-primary gap-2" onClick={() => openModal()}>
-            <Plus size={16} /> เพิ่มองค์กร
-          </button>
-        )}
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">

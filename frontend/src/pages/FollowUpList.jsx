@@ -32,9 +32,28 @@ export default function FollowUpList() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-extrabold text-orange-950">ติดตามผล</h1>
-        <p className="text-sm text-gray-400 mt-0.5">{rows.length} รายการ</p>
+      <div className="mb-7 rounded-2xl overflow-hidden relative shadow-md border border-orange-100"
+        style={{ background: 'linear-gradient(135deg,#fff7ed 0%,#ffedd5 60%,#fed7aa 100%)' }}>
+        <div className="absolute -right-10 -top-10 w-52 h-52 rounded-full opacity-20"
+          style={{ background: 'radial-gradient(circle,#ea580c,transparent)' }} />
+        <div className="absolute right-28 -bottom-8 w-32 h-32 rounded-full opacity-10"
+          style={{ background: '#c2410c' }} />
+        <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
+          style={{ background: 'linear-gradient(180deg,#ea580c,#fb923c)' }} />
+        <div className="relative px-8 py-6 flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
+            <Target size={22} color="white" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-0.5">
+              <div className="h-px w-5 bg-orange-400 rounded-full" />
+              <span className="text-xs font-bold text-orange-400 uppercase tracking-widest">ภาพรวม</span>
+            </div>
+            <h1 className="text-2xl font-extrabold text-orange-950 leading-tight">ติดตามผล</h1>
+            <p className="text-sm text-orange-400 font-semibold mt-0.5">{rows.length} รายการในระบบ</p>
+          </div>
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden overflow-x-auto">
