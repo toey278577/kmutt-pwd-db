@@ -207,7 +207,7 @@ export default function PersonList() {
                 <div className="col-span-2">
                   <FormField label="ชื่อ-นามสกุล *" value={form.fullName} onChange={(v) => setForm({ ...form, fullName: v })} />
                 </div>
-                <FormField label="เลขบัตรประชาชน" value={form.thaiId} onChange={(v) => setForm({ ...form, thaiId: v })} />
+                <FormField label="เลขบัตรประชาชน" value={form.thaiId} onChange={(v) => setForm({ ...form, thaiId: v })} numericOnly maxLength={13} />
                 <FormField label="วันเกิด" type="date" value={form.birthDate} onChange={(v) => setForm({ ...form, birthDate: v })} />
                 <SelectField label="เพศ" value={form.gender} onChange={(v) => setForm({ ...form, gender: v })}
                   options={[['MALE','ชาย'],['FEMALE','หญิง'],['OTHER','อื่นๆ']]} />
@@ -226,7 +226,7 @@ export default function PersonList() {
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">ข้อมูลติดต่อ</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <FormField label="เบอร์โทร" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
+                <FormField label="เบอร์โทร" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} numericOnly maxLength={10} />
                 <FormField label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
                 <FormField label="จังหวัด" value={form.province} onChange={(v) => setForm({ ...form, province: v })} />
                 <div className="col-span-2">
@@ -250,15 +250,24 @@ export default function PersonList() {
   );
 }
 
-function FormField({ label, value = '', onChange, type = 'text' }) {
+function FormField({ label, value = '', onChange, type = 'text', maxLength, numericOnly }) {
+  const handleChange = (e) => {
+    let v = e.target.value;
+    if (numericOnly) v = v.replace(/\D/g, '');
+    if (maxLength) v = v.slice(0, maxLength);
+    onChange(v);
+  };
   return (
     <div>
-      <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">{label}</label>
+      <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">
+        {label}{maxLength && <span className="ml-1 font-normal text-gray-300">({value.length}/{maxLength})</span>}
+      </label>
       <input
         type={type}
+        inputMode={numericOnly ? 'numeric' : undefined}
         className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={handleChange}
       />
     </div>
   );
