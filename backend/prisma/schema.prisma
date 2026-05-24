@@ -1,0 +1,235 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Person {
+  id               Int      @id @default(autoincrement())
+  thaiId           String?  @unique @map("thai_id") @db.VarChar(13)
+  fullName         String   @map("full_name") @db.VarChar(255)
+  gender           Gender
+  birthDate        DateTime? @map("birth_date") @db.Date
+  phone            String?  @db.VarChar(20)
+  email            String?  @db.VarChar(255)
+  address          String?  @db.Text
+  province         String?  @db.VarChar(100)
+  nationality      String?  @db.VarChar(100)
+  religion         String?  @db.VarChar(100)
+  maritalStatus    MaritalStatus? @map("marital_status")
+  educationLevel   String?  @map("education_level") @db.VarChar(100)
+  lifeStatus       LifeStatus @default(ALIVE) @map("life_status")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  photos           PersonPhoto[]
+  disabilityInfos  DisabilityInfo[]
+  trainingRecords  TrainingRecord[]
+  workExperiences  WorkExperience[]
+  skills           Skill[]
+  followUps        FollowUp[]
+  organizations    PersonOrganization[]
+
+  @@map("persons")
+}
+
+model PersonPhoto {
+  id          Int      @id @default(autoincrement())
+  personId    Int      @map("person_id")
+  photoType   String?  @map("photo_type") @db.VarChar(50)
+  photoDate   DateTime? @map("photo_date") @db.Date
+  description String?  @db.Text
+  filePath    String?  @map("file_path") @db.VarChar(500)
+
+  person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@map("person_photos")
+}
+
+model DisabilityType {
+  id              Int    @id @default(autoincrement())
+  typeName        String @map("type_name") @db.VarChar(100)
+
+  disabilityInfos DisabilityInfo[]
+
+  @@map("disability_types")
+}
+
+model DisabilityInfo {
+  id                 Int    @id @default(autoincrement())
+  personId           Int    @map("person_id")
+  disabilityTypeId   Int    @map("disability_type_id")
+  disabilityLevel    String? @map("disability_level") @db.VarChar(100)
+  assistiveDevice    String? @map("assistive_device") @db.Text
+  workLimitation     String? @map("work_limitation") @db.Text
+  accommodationNeed  String? @map("accommodation_need") @db.Text
+
+  person             Person         @relation(fields: [personId], references: [id], onDelete: Cascade)
+  disabilityType     DisabilityType @relation(fields: [disabilityTypeId], references: [id])
+
+  @@map("disability_infos")
+}
+
+model TrainingRecord {
+  id               Int      @id @default(autoincrement())
+  personId         Int      @map("person_id")
+  courseName       String   @map("course_name") @db.VarChar(255)
+  organizer        String?  @db.VarChar(255)
+  startDate        DateTime? @map("start_date") @db.Date
+  endDate          DateTime? @map("end_date") @db.Date
+  trainingType     TrainingType? @map("training_type")
+  skillsGained     String?  @map("skills_gained") @db.Text
+  evaluationResult String?  @map("evaluation_result") @db.VarChar(100)
+
+  person           Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@map("training_records")
+}
+
+model WorkExperience {
+  id               Int      @id @default(autoincrement())
+  personId         Int      @map("person_id")
+  organizationName String   @map("organization_name") @db.VarChar(255)
+  jobType          String?  @map("job_type") @db.VarChar(100)
+  startDate        DateTime? @map("start_date") @db.Date
+  endDate          DateTime? @map("end_date") @db.Date
+  workMode         WorkMode? @map("work_mode")
+  income           Decimal? @db.Decimal(10, 2)
+  outcome          String?  @db.Text
+
+  person           Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@map("work_experiences")
+}
+
+model Skill {
+  id         Int        @id @default(autoincrement())
+  personId   Int        @map("person_id")
+  skillName  String     @map("skill_name") @db.VarChar(100)
+  skillLevel SkillLevel @map("skill_level")
+
+  person     Person     @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@map("skills")
+}
+
+model FollowUp {
+  id               Int              @id @default(autoincrement())
+  personId         Int              @map("person_id")
+  followUpDate     DateTime         @map("follow_up_date") @db.Date
+  employmentStatus EmploymentStatus @map("employment_status")
+  jobType          String?          @map("job_type") @db.VarChar(100)
+  income           Decimal?         @db.Decimal(10, 2)
+  skillMatch       SkillMatch?      @map("skill_match")
+  satisfaction     String?          @db.VarChar(255)
+  issues           String?          @db.Text
+
+  person           Person           @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@map("follow_ups")
+}
+
+model Organization {
+  id           Int    @id @default(autoincrement())
+  orgName      String @map("org_name") @db.VarChar(255)
+  businessType String? @map("business_type") @db.VarChar(100)
+  address      String? @db.Text
+  contactName  String? @map("contact_name") @db.VarChar(255)
+  phone        String? @db.VarChar(20)
+  email        String? @db.VarChar(255)
+  note         String? @db.Text
+
+  persons      PersonOrganization[]
+
+  @@map("organizations")
+}
+
+model PersonOrganization {
+  id            Int      @id @default(autoincrement())
+  personId      Int      @map("person_id")
+  orgId         Int      @map("org_id")
+  roleType      RoleType @map("role_type")
+  startDate     DateTime? @map("start_date") @db.Date
+  endDate       DateTime? @map("end_date") @db.Date
+  amount        Decimal? @db.Decimal(10, 2)
+  supportDetail String?  @map("support_detail") @db.Text
+  note          String?  @db.Text
+
+  person        Person       @relation(fields: [personId], references: [id], onDelete: Cascade)
+  organization  Organization @relation(fields: [orgId], references: [id])
+
+  @@map("person_organizations")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  OTHER
+}
+
+enum LifeStatus {
+  ALIVE
+  DECEASED
+}
+
+enum TrainingType {
+  TRAIN
+  LEARN
+  EARN
+}
+
+enum WorkMode {
+  INTERNSHIP
+  EMPLOYMENT
+  FREELANCE
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum EmploymentStatus {
+  EMPLOYED
+  UNEMPLOYED
+  STUDYING
+}
+
+enum SkillMatch {
+  MATCH
+  NOT_MATCH
+}
+
+enum RoleType {
+  INTERNSHIP
+  EMPLOYMENT
+  OTHER
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+  VIEWER
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  role      UserRole @default(STAFF)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}

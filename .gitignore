@@ -1,0 +1,9 @@
+# Claude Code internal
+.claude/
+
+# Logs
+*.log
+backend/backend.log
+
+# Env files (each subfolder has its own .gitignore for .env)
+.env

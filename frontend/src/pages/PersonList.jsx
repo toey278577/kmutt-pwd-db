@@ -1,0 +1,261 @@
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown } from 'lucide-react';
+import { getPersons, createPerson, updatePerson, deletePerson } from '../api';
+import { useAuth } from '../context/AuthContext';
+
+const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
+const GENDER_BADGE = { MALE: 'badge-primary', FEMALE: 'badge-secondary', OTHER: 'badge-ghost' };
+
+const emptyForm = {
+  fullName: '', thaiId: '', gender: 'MALE', birthDate: '',
+  phone: '', email: '', address: '', province: '',
+  nationality: 'ไทย', religion: 'พุทธ', maritalStatus: 'SINGLE',
+  educationLevel: '', lifeStatus: 'ALIVE',
+};
+
+export default function PersonList() {
+  const navigate = useNavigate();
+  const { canEdit } = useAuth();
+  const modalRef = useRef(null);
+  const [persons, setPersons] = useState([]);
+  const [search, setSearch] = useState('');
+  const [form, setForm] = useState(emptyForm);
+  const [editId, setEditId] = useState(null);
+
+  const load = (q = '') => getPersons(q ? { search: q } : {}).then((r) => setPersons(r.data));
+  useEffect(() => { load(); }, []);
+
+  const openModal = (person = null) => {
+    if (person) {
+      setForm({ ...emptyForm, ...person, birthDate: person.birthDate?.slice(0, 10) || '' });
+      setEditId(person.id);
+    } else {
+      setForm(emptyForm);
+      setEditId(null);
+    }
+    modalRef.current?.showModal();
+  };
+
+  const handleSave = async () => {
+    const payload = { ...form };
+    if (!payload.birthDate) delete payload.birthDate;
+    if (!payload.thaiId) delete payload.thaiId;
+    try {
+      if (editId) await updatePerson(editId, payload);
+      else await createPerson(payload);
+      modalRef.current?.close();
+      load(search);
+    } catch (err) {
+      alert(err.response?.data?.error || 'เกิดข้อผิดพลาด');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm('ยืนยันลบข้อมูล?')) return;
+    await deletePerson(id);
+    load(search);
+  };
+
+  const initials = (name = '') => name.slice(0, 2).toUpperCase();
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-extrabold text-orange-950">ข้อมูลคนพิการ</h1>
+          <p className="text-sm text-gray-400 mt-0.5">{persons.length} รายการ</p>
+        </div>
+        {canEdit && (
+          <button className="btn btn-primary gap-2" onClick={() => openModal()}>
+            <Plus size={16} /> เพิ่มคนพิการ
+          </button>
+        )}
+      </div>
+
+      {/* Search */}
+      <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-4 mb-5 flex gap-3">
+        <div className="flex items-center gap-2 flex-1 max-w-md rounded-xl border border-gray-200 px-3.5 py-2 bg-gray-50 hover:bg-white focus-within:bg-white focus-within:ring-2 focus-within:ring-orange-400/40 focus-within:border-orange-400 transition-all">
+          <Search size={15} className="text-gray-400 flex-shrink-0" />
+          <input
+            type="text" placeholder="ค้นหาชื่อ หรือ เลขบัตรประชาชน..."
+            className="grow text-sm bg-transparent outline-none text-gray-800"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && load(search)}
+          />
+        </div>
+        <button className="btn btn-primary btn-sm h-auto" onClick={() => load(search)}>ค้นหา</button>
+        {search && <button className="btn btn-ghost btn-sm h-auto" onClick={() => { setSearch(''); load(''); }}>ล้าง</button>}
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+        <table className="table table-zebra w-full">
+          <thead>
+            <tr className="bg-orange-50 text-orange-600 text-xs uppercase tracking-wider">
+              <th className="w-10">#</th>
+              <th>ชื่อ-นามสกุล</th>
+              <th>เลขบัตร</th>
+              <th>เพศ</th>
+              <th>จังหวัด</th>
+              <th>การศึกษา</th>
+              <th>สถานะ</th>
+              <th className="text-center">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {persons.length === 0 && (
+              <tr>
+                <td colSpan={8} className="text-center py-14 text-gray-400">
+                  <UserRound size={40} className="mx-auto mb-2 text-gray-200" />
+                  ไม่พบข้อมูล
+                </td>
+              </tr>
+            )}
+            {persons.map((p, i) => (
+              <tr key={p.id} className="hover:bg-orange-50/40 transition-colors">
+                <td className="text-gray-400 text-xs">{i + 1}</td>
+                <td>
+                  <div className="flex items-center gap-3">
+                    <div className="avatar placeholder">
+                      <div className="w-9 h-9 rounded-full bg-orange-100 text-orange-600 text-xs font-bold flex items-center justify-center">
+                        <span>{initials(p.fullName)}</span>
+                      </div>
+                    </div>
+                    <span className="font-semibold text-orange-950 text-sm">{p.fullName}</span>
+                  </div>
+                </td>
+                <td className="font-mono text-sm text-gray-500">{p.thaiId || '—'}</td>
+                <td>
+                  <span className={`badge badge-sm font-semibold ${GENDER_BADGE[p.gender]}`}>
+                    {GENDER_LABELS[p.gender]}
+                  </span>
+                </td>
+                <td className="text-sm text-gray-600">{p.province || '—'}</td>
+                <td className="text-sm text-gray-600">{p.educationLevel || '—'}</td>
+                <td>
+                  <span className={`badge badge-sm font-semibold ${p.lifeStatus === 'ALIVE' ? 'badge-success' : 'badge-ghost'}`}>
+                    {p.lifeStatus === 'ALIVE' ? 'มีชีวิต' : 'เสียชีวิต'}
+                  </span>
+                </td>
+                <td>
+                  <div className="flex items-center justify-center gap-1">
+                    <button className="btn btn-ghost btn-xs text-orange-500 hover:bg-orange-50" onClick={() => navigate(`/persons/${p.id}`)}>
+                      <Eye size={14} />
+                    </button>
+                    {canEdit && <>
+                      <button className="btn btn-ghost btn-xs text-amber-500 hover:bg-amber-50" onClick={() => openModal(p)}>
+                        <Pencil size={14} />
+                      </button>
+                      <button className="btn btn-ghost btn-xs text-red-500 hover:bg-red-50" onClick={() => handleDelete(p.id)}>
+                        <Trash2 size={14} />
+                      </button>
+                    </>}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Modal */}
+      <dialog ref={modalRef} className="modal">
+        <div className="modal-box max-w-2xl p-0 overflow-hidden bg-white shadow-2xl">
+          {/* Header */}
+          <div className="px-6 py-5 flex items-center gap-3" style={{ background: 'linear-gradient(135deg,#431407 0%,#c2410c 100%)' }}>
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
+              <UserRound size={20} color="#fff" />
+            </div>
+            <div>
+              <h3 className="text-white font-bold text-base leading-tight">{editId ? 'แก้ไขข้อมูลคนพิการ' : 'เพิ่มข้อมูลคนพิการใหม่'}</h3>
+              <p className="text-orange-300/80 text-xs mt-0.5">กรุณากรอกข้อมูลให้ครบถ้วน</p>
+            </div>
+          </div>
+          {/* Body */}
+          <div className="p-6 max-h-[65vh] overflow-y-auto space-y-5">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-1 h-4 rounded-full bg-orange-500" />
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">ข้อมูลส่วนตัว</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <FormField label="ชื่อ-นามสกุล *" value={form.fullName} onChange={(v) => setForm({ ...form, fullName: v })} />
+                </div>
+                <FormField label="เลขบัตรประชาชน" value={form.thaiId} onChange={(v) => setForm({ ...form, thaiId: v })} />
+                <FormField label="วันเกิด" type="date" value={form.birthDate} onChange={(v) => setForm({ ...form, birthDate: v })} />
+                <SelectField label="เพศ" value={form.gender} onChange={(v) => setForm({ ...form, gender: v })}
+                  options={[['MALE','ชาย'],['FEMALE','หญิง'],['OTHER','อื่นๆ']]} />
+                <SelectField label="สถานภาพ" value={form.maritalStatus} onChange={(v) => setForm({ ...form, maritalStatus: v })}
+                  options={[['SINGLE','โสด'],['MARRIED','สมรส'],['OTHER','อื่นๆ']]} />
+                <FormField label="สัญชาติ" value={form.nationality} onChange={(v) => setForm({ ...form, nationality: v })} />
+                <FormField label="ศาสนา" value={form.religion} onChange={(v) => setForm({ ...form, religion: v })} />
+                <FormField label="ระดับการศึกษา" value={form.educationLevel} onChange={(v) => setForm({ ...form, educationLevel: v })} />
+                <SelectField label="สถานะ" value={form.lifeStatus} onChange={(v) => setForm({ ...form, lifeStatus: v })}
+                  options={[['ALIVE','มีชีวิต'],['DECEASED','เสียชีวิต']]} />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-1 h-4 rounded-full bg-orange-500" />
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">ข้อมูลติดต่อ</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <FormField label="เบอร์โทร" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
+                <FormField label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
+                <FormField label="จังหวัด" value={form.province} onChange={(v) => setForm({ ...form, province: v })} />
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">ที่อยู่</label>
+                  <textarea
+                    className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all resize-none"
+                    rows={2} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Footer */}
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
+            <button className="px-5 py-2 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors" onClick={() => modalRef.current?.close()}>ยกเลิก</button>
+            <button className="px-6 py-2 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg active:scale-95 transition-all" style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }} onClick={handleSave}>บันทึก</button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop"><button>close</button></form>
+      </dialog>
+    </div>
+  );
+}
+
+function FormField({ label, value = '', onChange, type = 'text' }) {
+  return (
+    <div>
+      <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">{label}</label>
+      <input
+        type={type}
+        className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
+  );
+}
+
+function SelectField({ label, value = '', onChange, options }) {
+  return (
+    <div>
+      <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">{label}</label>
+      <div className="relative">
+        <select
+          className="w-full appearance-none rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all cursor-pointer pr-9"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        >
+          {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+        </select>
+        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+      </div>
+    </div>
+  );
+}

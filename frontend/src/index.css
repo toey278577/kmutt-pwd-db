@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: light;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-sans: 'Sarabun', sans-serif;
+  /* Override DaisyUI primary → orange-600 */
+  --color-primary: oklch(0.646 0.222 41.116);
+  --color-primary-content: oklch(1 0 0);
+  --p: oklch(0.646 0.222 41.116);
+  --pc: oklch(1 0 0);
+  --pf: oklch(0.55 0.2 41.116);
+}
+
+* { font-family: 'Sarabun', sans-serif; }
+
+body {
+  background: #fff7ed;
+  font-family: 'Sarabun', sans-serif;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #fff7ed; }
+::-webkit-scrollbar-thumb { background: #fed7aa; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #fb923c; }

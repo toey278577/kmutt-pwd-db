@@ -1,0 +1,26 @@
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'kmutt_pwd_secret_2024';
+
+function authenticate(req, res, next) {
+  const header = req.headers['authorization'];
+  if (!header) return res.status(401).json({ error: 'No token' });
+  const token = header.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'No token' });
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+}
+
+function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({ error: 'Permission denied' });
+    }
+    next();
+  };
+}
+
+module.exports = { authenticate, requireRole };
