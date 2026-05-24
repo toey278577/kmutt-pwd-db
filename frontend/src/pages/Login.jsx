@@ -89,7 +89,7 @@ export default function Login() {
           ระบบสำหรับเจ้าหน้าที่เท่านั้น — กรุณาติดต่อผู้ดูแลระบบหากลืมรหัสผ่าน
         </p>
         <p className="text-center text-xs text-gray-300 mt-2">
-          Developed by Suthat Srisawat
+          Developed by Suthat Srisawat 2026
         </p>
       </div>
     </div>
