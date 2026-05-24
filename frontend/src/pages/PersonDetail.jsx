@@ -65,6 +65,24 @@ export default function PersonDetail() {
   const openDialog = (type) => { setForm({}); setDialogType(type); modalRef.current?.showModal(); };
 
   const handleSave = async () => {
+    if (dialogType === 'training' && !form.courseName?.trim())
+      return alert('กรุณากรอกชื่อหลักสูตร');
+    if (dialogType === 'workexp' && !form.organizationName?.trim())
+      return alert('กรุณากรอกชื่อองค์กร');
+    if (dialogType === 'workexp' && !form.workMode)
+      return alert('กรุณาเลือกรูปแบบงาน');
+    if (dialogType === 'followup' && !form.followUpDate)
+      return alert('กรุณากรอกวันที่ติดตาม');
+    if (dialogType === 'followup' && !form.employmentStatus)
+      return alert('กรุณาเลือกสถานะงาน');
+    if (dialogType === 'skill' && !form.skillName?.trim())
+      return alert('กรุณากรอกชื่อทักษะ');
+    if (dialogType === 'skill' && !form.skillLevel)
+      return alert('กรุณาเลือกระดับทักษะ');
+    if (dialogType === 'personorg' && !form.orgId)
+      return alert('กรุณาเลือกสถานประกอบการ');
+    if (dialogType === 'personorg' && !form.roleType)
+      return alert('กรุณาเลือกบทบาท');
     try {
       if (dialogType === 'training') { await createTraining(id, form); getTraining(id).then((r) => setTraining(r.data)); }
       else if (dialogType === 'workexp') { await createWorkExp(id, form); getWorkExp(id).then((r) => setWorkexp(r.data)); }
