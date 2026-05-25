@@ -68,10 +68,14 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const { birthDate, maritalStatus, gender, lifeStatus, ...rest } = req.body;
+    const { fullName, thaiId, phone, email, address, province, nationality, religion, educationLevel,
+            birthDate, maritalStatus, gender, lifeStatus } = req.body;
+    const data = { fullName, phone, email, address, province, nationality, religion, educationLevel,
+                   birthDate: toDate(birthDate), maritalStatus: toMarital(maritalStatus), gender, lifeStatus };
+    if (thaiId) data.thaiId = thaiId;
     const person = await prisma.person.update({
       where: { id: parseInt(req.params.id) },
-      data: { ...rest, birthDate: toDate(birthDate), maritalStatus: toMarital(maritalStatus), gender, lifeStatus },
+      data,
     });
     res.json(person);
   } catch (err) {

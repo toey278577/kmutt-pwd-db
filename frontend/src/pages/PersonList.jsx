@@ -38,7 +38,10 @@ export default function PersonList() {
   };
 
   const handleSave = async () => {
-    const payload = { ...form };
+    const { fullName, thaiId, gender, birthDate, phone, email, address, province,
+            nationality, religion, maritalStatus, educationLevel, lifeStatus } = form;
+    const payload = { fullName, thaiId, gender, birthDate, phone, email, address, province,
+                      nationality, religion, maritalStatus, educationLevel, lifeStatus };
     if (!payload.birthDate) delete payload.birthDate;
     if (!payload.thaiId) delete payload.thaiId;
     try {
