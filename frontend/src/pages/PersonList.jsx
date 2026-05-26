@@ -211,7 +211,7 @@ export default function PersonList() {
                   <FormField label="ชื่อ-นามสกุล *" value={form.fullName} onChange={(v) => setForm({ ...form, fullName: v })} />
                 </div>
                 <FormField label="เลขบัตรประชาชน" value={form.thaiId} onChange={(v) => setForm({ ...form, thaiId: v })} numericOnly maxLength={13} />
-                <FormField label="วันเกิด" type="date" value={form.birthDate} onChange={(v) => setForm({ ...form, birthDate: v })} />
+                <ThaiDateField label="วันเกิด" value={form.birthDate} onChange={(v) => setForm({ ...form, birthDate: v })} />
                 <SelectField label="เพศ" value={form.gender} onChange={(v) => setForm({ ...form, gender: v })}
                   options={[['MALE','ชาย'],['FEMALE','หญิง'],['OTHER','อื่นๆ']]} />
                 <MaritalField value={form.maritalStatus} onChange={(v) => setForm({ ...form, maritalStatus: v })} />
@@ -289,6 +289,34 @@ function SelectField({ label, value = '', onChange, options }) {
         </select>
         <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
       </div>
+    </div>
+  );
+}
+
+function ThaiDateField({ label, value = '', onChange }) {
+  const toDisplay = (iso) => {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-');
+    if (!y || !m || !d) return '';
+    return `${d}/${m}/${parseInt(y) + 543}`;
+  };
+  const [display, setDisplay] = useState(() => toDisplay(value));
+  useEffect(() => { setDisplay(toDisplay(value)); }, [value]);
+  const handleChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 8);
+    let fmt = raw.length <= 2 ? raw : raw.length <= 4 ? `${raw.slice(0,2)}/${raw.slice(2)}` : `${raw.slice(0,2)}/${raw.slice(2,4)}/${raw.slice(4)}`;
+    setDisplay(fmt);
+    if (raw.length === 8) {
+      const yAD = parseInt(raw.slice(4, 8)) - 543;
+      onChange(`${yAD}-${raw.slice(2,4)}-${raw.slice(0,2)}`);
+    } else if (raw.length === 0) onChange('');
+  };
+  return (
+    <div>
+      <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">{label}</label>
+      <input type="text" placeholder="วว/ดด/ปปปป (พ.ศ.)" maxLength={10}
+        className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
+        value={display} onChange={handleChange} />
     </div>
   );
 }

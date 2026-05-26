@@ -324,8 +324,8 @@ export default function PersonDetail() {
             {dialogType === 'training' && <>
               <F12 label="ชื่อหลักสูตร *" value={form.courseName} onChange={v => setForm({...form, courseName: v})} />
               <F12 label="หน่วยงาน" value={form.organizer} onChange={v => setForm({...form, organizer: v})} />
-              <F label="วันเริ่ม" type="date" value={form.startDate} onChange={v => setForm({...form, startDate: v})} />
-              <F label="วันสิ้นสุด" type="date" value={form.endDate} onChange={v => setForm({...form, endDate: v})} />
+              <ThaiDate label="วันเริ่ม" value={form.startDate} onChange={v => setForm({...form, startDate: v})} />
+              <ThaiDate label="วันสิ้นสุด" value={form.endDate} onChange={v => setForm({...form, endDate: v})} />
               <Sel label="รูปแบบ" value={form.trainingType} onChange={v => setForm({...form, trainingType: v})}
                 options={[['','— เลือกรูปแบบ —'],['TRAIN','อบรม (Train)'],['LEARN','เรียนรู้ (Learn)'],['EARN','ฝึกงาน (Earn)']]} />
               <F label="ผลประเมิน" value={form.evaluationResult} onChange={v => setForm({...form, evaluationResult: v})} />
@@ -338,13 +338,13 @@ export default function PersonDetail() {
               <Sel label="รูปแบบงาน" value={form.workMode} onChange={v => setForm({...form, workMode: v})}
                 options={[['','— เลือกรูปแบบ —'],['INTERNSHIP','ฝึกงาน'],['EMPLOYMENT','จ้างงาน'],['FREELANCE','Freelance']]} />
               <F label="รายได้ (บาท)" type="number" value={form.income} onChange={v => setForm({...form, income: v})} />
-              <F label="วันเริ่ม" type="date" value={form.startDate} onChange={v => setForm({...form, startDate: v})} />
-              <F label="วันสิ้นสุด" type="date" value={form.endDate} onChange={v => setForm({...form, endDate: v})} />
+              <ThaiDate label="วันเริ่ม" value={form.startDate} onChange={v => setForm({...form, startDate: v})} />
+              <ThaiDate label="วันสิ้นสุด" value={form.endDate} onChange={v => setForm({...form, endDate: v})} />
               <F12 label="ผลลัพธ์ / ความสำเร็จ" value={form.outcome} onChange={v => setForm({...form, outcome: v})} />
             </>}
 
             {dialogType === 'followup' && <>
-              <F12 label="วันที่ติดตาม *" type="date" value={form.followUpDate} onChange={v => setForm({...form, followUpDate: v})} />
+              <ThaiDate12 label="วันที่ติดตาม *" value={form.followUpDate} onChange={v => setForm({...form, followUpDate: v})} />
               <Sel12 label="สถานะงาน *" value={form.employmentStatus} onChange={v => setForm({...form, employmentStatus: v})}
                 options={[['','— เลือกสถานะ —'],['EMPLOYED','มีงานทำ'],['UNEMPLOYED','ว่างงาน'],['STUDYING','ศึกษาต่อ']]} />
               <F label="ประเภทงาน" value={form.jobType} onChange={v => setForm({...form, jobType: v})} />
@@ -366,8 +366,8 @@ export default function PersonDetail() {
                 options={[['','— เลือกสถานประกอบการ —'], ...orgs.map(o => [String(o.id), o.orgName])]} />
               <Sel12 label="บทบาท *" value={form.roleType} onChange={v => setForm({...form, roleType: v})}
                 options={[['','— เลือกบทบาท —'],['INTERNSHIP','ฝึกงาน'],['EMPLOYMENT','จ้างงาน'],['OTHER','อื่นๆ']]} />
-              <F label="วันเริ่ม" type="date" value={form.startDate} onChange={v => setForm({...form, startDate: v})} />
-              <F label="วันสิ้นสุด" type="date" value={form.endDate} onChange={v => setForm({...form, endDate: v})} />
+              <ThaiDate label="วันเริ่ม" value={form.startDate} onChange={v => setForm({...form, startDate: v})} />
+              <ThaiDate label="วันสิ้นสุด" value={form.endDate} onChange={v => setForm({...form, endDate: v})} />
               <F label="เงินสนับสนุน (บาท)" type="number" value={form.amount} onChange={v => setForm({...form, amount: v})} />
               <F label="หมายเหตุ" value={form.note} onChange={v => setForm({...form, note: v})} />
               <F12 label="รายละเอียดการสนับสนุน" value={form.supportDetail} onChange={v => setForm({...form, supportDetail: v})} />
@@ -395,6 +395,33 @@ const F = ({ label, value = '', onChange, type = 'text' }) => (
   </div>
 );
 const F12 = (p) => <div className="col-span-2"><F {...p} /></div>;
+
+function ThaiDate({ label, value = '', onChange }) {
+  const toDisplay = (iso) => {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-');
+    if (!y || !m || !d) return '';
+    return `${d}/${m}/${parseInt(y) + 543}`;
+  };
+  const [display, setDisplay] = useState(() => toDisplay(value));
+  useEffect(() => { setDisplay(toDisplay(value)); }, [value]);
+  const handleChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 8);
+    let fmt = raw.length <= 2 ? raw : raw.length <= 4 ? `${raw.slice(0,2)}/${raw.slice(2)}` : `${raw.slice(0,2)}/${raw.slice(2,4)}/${raw.slice(4)}`;
+    setDisplay(fmt);
+    if (raw.length === 8) {
+      const yAD = parseInt(raw.slice(4, 8)) - 543;
+      onChange(`${yAD}-${raw.slice(2,4)}-${raw.slice(0,2)}`);
+    } else if (raw.length === 0) onChange('');
+  };
+  return (
+    <div>
+      <label className={labelCls}>{label}</label>
+      <input type="text" placeholder="วว/ดด/ปปปป (พ.ศ.)" maxLength={10} className={inputCls} value={display} onChange={handleChange} />
+    </div>
+  );
+}
+const ThaiDate12 = (p) => <div className="col-span-2"><ThaiDate {...p} /></div>;
 
 const Sel = ({ label, value = '', onChange, options }) => (
   <div>
