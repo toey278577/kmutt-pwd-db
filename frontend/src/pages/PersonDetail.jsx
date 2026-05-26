@@ -156,7 +156,7 @@ export default function PersonDetail() {
           <InfoCard title="ข้อมูลส่วนตัว" items={[
             ['เลขบัตรประชาชน', person.thaiId],
             ['เพศ', GENDER_LABELS[person.gender]],
-            ['วันเกิด', person.birthDate ? `${person.birthDate.slice(0, 10)} (${age} ปี)` : null],
+            ['วันเกิด', person.birthDate ? `${fmtDate(person.birthDate)} (${age} ปี)` : null],
             ['สัญชาติ', person.nationality],
             ['ศาสนา', person.religion],
             ['สถานภาพ', MARITAL_LABELS[person.maritalStatus]],
@@ -271,7 +271,7 @@ export default function PersonDetail() {
             <tbody>
               {followup.map((f) => (
                 <tr key={f.id} className="hover:bg-orange-50/40">
-                  <td className="text-orange-600 font-semibold text-xs">{f.followUpDate?.slice(0,10)}</td>
+                  <td className="text-orange-600 font-semibold text-xs">{fmtDate(f.followUpDate) || '—'}</td>
                   <td><span className={`badge badge-sm font-semibold ${EMP_BADGE[f.employmentStatus]}`}>{EMP_LABELS[f.employmentStatus]}</span></td>
                   <td className="text-gray-500">{f.jobType || '—'}</td>
                   <td className="font-medium text-gray-700">{f.income ? `฿${Number(f.income).toLocaleString()}` : '—'}</td>

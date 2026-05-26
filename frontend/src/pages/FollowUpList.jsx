@@ -9,6 +9,12 @@ const EMP = {
   STUDYING:   { cls: 'badge-info',     label: 'ศึกษาต่อ' },
 };
 
+const fmtDate = (iso) => {
+  if (!iso) return null;
+  const [y, m, d] = iso.slice(0, 10).split('-');
+  return `${d}/${m}/${parseInt(y) + 543}`;
+};
+
 export default function FollowUpList() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
@@ -85,7 +91,7 @@ export default function FollowUpList() {
                 <tr key={f.id} className="hover:bg-orange-50/40 transition-colors">
                   <td>
                     <span className="bg-orange-50 text-orange-600 text-xs font-bold px-2.5 py-1 rounded-lg">
-                      {f.followUpDate?.slice(0, 10)}
+                      {fmtDate(f.followUpDate) || '—'}
                     </span>
                   </td>
                   <td>
