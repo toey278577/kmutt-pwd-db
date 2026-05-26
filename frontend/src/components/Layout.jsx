@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, Shield, Eye } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, Shield, Eye, BookOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const menu = [
@@ -8,6 +8,7 @@ const menu = [
   { label: 'การอบรม & ฝึกงาน', icon: GraduationCap, path: '/training' },
   { label: 'ติดตามผล', icon: Target, path: '/followup' },
   { label: 'สถานประกอบการ', icon: Building2, path: '/organizations' },
+  { label: 'คู่มือการใช้งาน', icon: BookOpen, path: '/help' },
 ];
 
 const ROLE_LABEL = { ADMIN: 'ผู้ดูแลระบบ', STAFF: 'เจ้าหน้าที่', VIEWER: 'ผู้ดูข้อมูล' };

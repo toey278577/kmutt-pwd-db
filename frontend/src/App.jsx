@@ -9,6 +9,7 @@ import OrganizationList from './pages/OrganizationList';
 import FollowUpList from './pages/FollowUpList';
 import TrainingList from './pages/TrainingList';
 import UserManagement from './pages/UserManagement';
+import Help from './pages/Help';
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const { user } = useAuth();
@@ -32,6 +33,7 @@ function AppRoutes() {
               <Route path="/training" element={<TrainingList />} />
               <Route path="/followup" element={<FollowUpList />} />
               <Route path="/organizations" element={<OrganizationList />} />
+              <Route path="/help" element={<Help />} />
               <Route path="/users" element={
                 <ProtectedRoute adminOnly>
                   <UserManagement />
