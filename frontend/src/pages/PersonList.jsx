@@ -5,7 +5,7 @@ import { getPersons, createPerson, updatePerson, deletePerson } from '../api';
 import { useAuth } from '../context/AuthContext';
 
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
-const GENDER_BADGE = { MALE: 'badge-primary', FEMALE: 'badge-secondary', OTHER: 'badge-ghost' };
+const GENDER_BADGE = { MALE: 'bg-sky-100 text-sky-600 border-sky-200', FEMALE: 'bg-pink-100 text-pink-500 border-pink-200', OTHER: 'bg-gray-100 text-gray-500 border-gray-200' };
 
 const emptyForm = {
   fullName: '', thaiId: '', gender: 'MALE', birthDate: '',
