@@ -34,6 +34,24 @@ function calcAge(birthDate) {
   return age;
 }
 
+const fmtDate = (iso) => {
+  if (!iso) return null;
+  const [y, m, d] = iso.slice(0, 10).split('-');
+  return `${d}/${m}/${parseInt(y) + 543}`;
+};
+
+const DateRange = ({ start, end, noEndLabel = 'ปัจจุบัน' }) => (
+  <div className="flex items-center gap-1.5 whitespace-nowrap">
+    <span className="bg-orange-50 text-orange-600 text-xs font-bold px-2 py-0.5 rounded-lg border border-orange-100">
+      {fmtDate(start) || '—'}
+    </span>
+    <span className="text-gray-300 text-xs">→</span>
+    <span className="bg-gray-50 text-gray-400 text-xs font-medium px-2 py-0.5 rounded-lg border border-gray-100">
+      {fmtDate(end) || noEndLabel}
+    </span>
+  </div>
+);
+
 export default function PersonDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -183,7 +201,7 @@ export default function PersonDetail() {
                 <tr key={t.id} className="hover:bg-orange-50/40">
                   <td className="font-semibold text-orange-950">{t.courseName}</td>
                   <td className="text-gray-500">{t.organizer || '—'}</td>
-                  <td className="text-gray-500 text-xs">{t.startDate?.slice(0,10)} – {t.endDate?.slice(0,10) || '—'}</td>
+                  <td><DateRange start={t.startDate} end={t.endDate} noEndLabel="—" /></td>
                   <td>{t.trainingType && <span className="badge badge-sm bg-orange-100 text-orange-700 border-0">{t.trainingType}</span>}</td>
                   <td className="text-gray-600 max-w-xs truncate">{t.skillsGained || '—'}</td>
                   <td className="text-gray-600">{t.evaluationResult || '—'}</td>
@@ -210,7 +228,7 @@ export default function PersonDetail() {
                   <td className="text-gray-500">{w.jobType || '—'}</td>
                   <td>{w.workMode && <span className="badge badge-sm bg-emerald-100 text-emerald-700 border-0">{w.workMode === 'INTERNSHIP' ? 'ฝึกงาน' : w.workMode === 'EMPLOYMENT' ? 'จ้างงาน' : 'Freelance'}</span>}</td>
                   <td className="font-medium text-gray-700">{w.income ? `฿${Number(w.income).toLocaleString()}` : '—'}</td>
-                  <td className="text-gray-500 text-xs">{w.startDate?.slice(0,10)} – {w.endDate?.slice(0,10) || 'ปัจจุบัน'}</td>
+                  <td><DateRange start={w.startDate} end={w.endDate} noEndLabel="ปัจจุบัน" /></td>
                   <td className="text-gray-600 max-w-xs truncate">{w.outcome || '—'}</td>
                   {canEdit && <td><DelBtn onClick={() => deleteWorkExp(id, w.id).then(() => getWorkExp(id).then(r => setWorkexp(r.data)))} /></td>}
                 </tr>
@@ -285,7 +303,7 @@ export default function PersonDetail() {
                 <tr key={po.id} className="hover:bg-orange-50/40">
                   <td className="font-semibold text-orange-950">{po.organization?.orgName}</td>
                   <td><span className="badge badge-sm bg-orange-100 text-orange-700 border-0">{ROLE_TYPE_LABELS[po.roleType] || po.roleType}</span></td>
-                  <td className="text-gray-500 text-xs">{po.startDate?.slice(0,10)} – {po.endDate?.slice(0,10) || '—'}</td>
+                  <td><DateRange start={po.startDate} end={po.endDate} noEndLabel="—" /></td>
                   <td className="font-medium text-gray-700">{po.amount ? `฿${Number(po.amount).toLocaleString()}` : '—'}</td>
                   <td className="text-gray-600 text-xs max-w-xs truncate">{po.supportDetail || '—'}</td>
                   {canEdit && <td><DelBtn onClick={() => deletePersonOrg(id, po.id).then(() => getPersonOrgs(id).then(r => setPersonOrgs(r.data)))} /></td>}
