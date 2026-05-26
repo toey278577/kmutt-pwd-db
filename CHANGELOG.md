@@ -5,6 +5,40 @@
 
 ---
 
+## เทคโนโลยีที่ใช้พัฒนา
+
+### Frontend
+| เทคโนโลยี | หน้าที่ |
+|-----------|---------|
+| React 19 | Framework หลัก |
+| Vite | Build tool |
+| Tailwind CSS 4 | Styling |
+| DaisyUI 5 | UI Component library |
+| React Router 7 | Routing |
+| Axios | HTTP client เรียก API |
+| Recharts | กราฟใน Dashboard |
+| Lucide React | Icons |
+| Google Fonts (Sarabun) | ฟอนต์ภาษาไทย |
+
+### Backend
+| เทคโนโลยี | หน้าที่ |
+|-----------|---------|
+| Node.js + Express 5 | Web server |
+| Prisma 7 | ORM จัดการ database |
+| PostgreSQL | ฐานข้อมูลหลัก |
+| JWT (jsonwebtoken) | Authentication |
+| bcryptjs | เข้ารหัสรหัสผ่าน |
+| CORS | จัดการ cross-origin |
+
+### Deploy / Infrastructure
+| บริการ | ใช้ทำอะไร |
+|--------|----------|
+| Vercel | Host frontend |
+| Render | Host backend + PostgreSQL |
+| GitHub | Source code + auto deploy |
+
+---
+
 ## 26 พฤษภาคม 2568
 
 ### ฟีเจอร์ใหม่
