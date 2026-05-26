@@ -9,6 +9,24 @@ const TYPE = {
   EARN:  { cls: 'badge-success',  label: 'ฝึกงาน' },
 };
 
+const fmtDate = (iso) => {
+  if (!iso) return null;
+  const [y, m, d] = iso.slice(0, 10).split('-');
+  return `${d}/${m}/${parseInt(y) + 543}`;
+};
+
+const DateRange = ({ start, end }) => (
+  <div className="flex items-center gap-1.5 whitespace-nowrap">
+    <span className="bg-orange-50 text-orange-600 text-xs font-bold px-2 py-0.5 rounded-lg border border-orange-100">
+      {fmtDate(start) || '—'}
+    </span>
+    <span className="text-gray-300 text-xs">→</span>
+    <span className="bg-gray-50 text-gray-400 text-xs font-medium px-2 py-0.5 rounded-lg border border-gray-100">
+      {fmtDate(end) || '—'}
+    </span>
+  </div>
+);
+
 export default function TrainingList() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
@@ -104,12 +122,7 @@ export default function TrainingList() {
                       ? <span className={`badge badge-sm font-semibold ${tp.cls}`}>{tp.label}</span>
                       : <span className="text-gray-300">—</span>}
                   </td>
-                  <td className="text-xs text-gray-500">
-                    <span className="bg-orange-50 text-orange-600 font-bold px-2 py-1 rounded-lg">
-                      {t.startDate?.slice(0, 10) || '—'}
-                    </span>
-                    {t.endDate && <span className="ml-1">– {t.endDate.slice(0, 10)}</span>}
-                  </td>
+                  <td><DateRange start={t.startDate} end={t.endDate} /></td>
                   <td className="text-sm text-gray-600 max-w-xs truncate">{t.skillsGained || '—'}</td>
                   <td className="text-sm text-gray-600">{t.evaluationResult || '—'}</td>
                 </tr>
