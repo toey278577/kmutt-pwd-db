@@ -22,8 +22,13 @@ export default function PersonList() {
   const [search, setSearch] = useState('');
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
+  const [page, setPage] = useState(1);
 
-  const load = (q = '') => getPersons(q ? { search: q } : {}).then((r) => setPersons(r.data));
+  const PAGE_SIZE = 10;
+  const totalPages = Math.ceil(persons.length / PAGE_SIZE);
+  const paged = persons.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const load = (q = '') => getPersons(q ? { search: q } : {}).then((r) => { setPersons(r.data); setPage(1); });
   useEffect(() => { load(); }, []);
 
   const openModal = (person = null) => {
@@ -139,9 +144,9 @@ export default function PersonList() {
                 </td>
               </tr>
             )}
-            {persons.map((p, i) => (
+            {paged.map((p, i) => (
               <tr key={p.id} className="hover:bg-orange-50/40 transition-colors">
-                <td className="text-gray-400 text-xs">{i + 1}</td>
+                <td className="text-gray-400 text-xs">{(page - 1) * PAGE_SIZE + i + 1}</td>
                 <td>
                   <div className="flex items-center gap-3">
                     <div className="avatar placeholder">
@@ -184,6 +189,50 @@ export default function PersonList() {
             ))}
           </tbody>
         </table>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-5 py-4 border-t border-orange-100">
+            <span className="text-sm text-gray-400">
+              หน้า <span className="font-bold text-orange-600">{page}</span> จาก {totalPages}
+              <span className="ml-2 text-gray-300">({persons.length} รายการ)</span>
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-3 py-1.5 rounded-lg text-sm font-semibold border border-gray-200 text-gray-500 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                ←
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 2)
+                .reduce((acc, n, idx, arr) => {
+                  if (idx > 0 && n - arr[idx - 1] > 1) acc.push('…');
+                  acc.push(n);
+                  return acc;
+                }, [])
+                .map((n, idx) =>
+                  n === '…'
+                    ? <span key={`ellipsis-${idx}`} className="px-1 text-gray-300 text-sm">…</span>
+                    : <button key={n}
+                        onClick={() => setPage(n)}
+                        className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${
+                          page === n
+                            ? 'text-white shadow-sm'
+                            : 'border border-gray-200 text-gray-500 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600'
+                        }`}
+                        style={page === n ? { background: 'linear-gradient(135deg,#ea580c,#c2410c)' } : {}}>
+                        {n}
+                      </button>
+                )}
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="px-3 py-1.5 rounded-lg text-sm font-semibold border border-gray-200 text-gray-500 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                →
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal */}
