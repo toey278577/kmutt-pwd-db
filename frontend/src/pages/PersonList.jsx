@@ -68,9 +68,9 @@ export default function PersonList() {
   const initials = (name = '') => name.slice(0, 2).toUpperCase();
 
   return (
-    <div>
+    <div className="flex flex-col" style={{ height: 'calc(100vh - 56px)' }}>
       {/* Header Banner */}
-      <div className="mb-7 rounded-2xl overflow-hidden relative shadow-md border border-orange-100"
+      <div className="mb-3 rounded-2xl overflow-hidden relative shadow-md border border-orange-100 flex-shrink-0"
         style={{ background: 'linear-gradient(135deg,#fff7ed 0%,#ffedd5 60%,#fed7aa 100%)' }}>
         <div className="absolute -right-10 -top-10 w-52 h-52 rounded-full opacity-20"
           style={{ background: 'radial-gradient(circle,#ea580c,transparent)' }} />
@@ -78,35 +78,35 @@ export default function PersonList() {
           style={{ background: '#c2410c' }} />
         <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
           style={{ background: 'linear-gradient(180deg,#ea580c,#fb923c)' }} />
-        <div className="relative px-8 py-6 flex items-center justify-between gap-6">
+        <div className="relative px-8 py-4 flex items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md flex-shrink-0"
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-md flex-shrink-0"
               style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
-              <Users size={22} color="white" />
+              <Users size={20} color="white" />
             </div>
             <div>
               <div className="flex items-center gap-2 mb-0.5">
                 <div className="h-px w-5 bg-orange-400 rounded-full" />
                 <span className="text-xs font-bold text-orange-400 uppercase tracking-widest">ฐานข้อมูล</span>
               </div>
-              <h1 className="text-2xl font-extrabold text-orange-950 leading-tight">ข้อมูลคนพิการ</h1>
-              <p className="text-sm text-orange-400 font-semibold mt-0.5">{persons.length} รายการในระบบ</p>
+              <h1 className="text-xl font-extrabold text-orange-950 leading-tight">ข้อมูลคนพิการ</h1>
+              <p className="text-xs text-orange-400 font-semibold mt-0.5">{persons.length} รายการในระบบ</p>
             </div>
           </div>
           {canEdit && (
             <button
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg active:scale-95 transition-all flex-shrink-0"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg active:scale-95 transition-all flex-shrink-0"
               style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}
               onClick={() => openModal()}>
-              <Plus size={16} /> เพิ่มคนพิการ
+              <Plus size={15} /> เพิ่มคนพิการ
             </button>
           )}
         </div>
       </div>
 
       {/* Search */}
-      <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-4 mb-5 flex gap-3">
-        <div className="flex items-center gap-2 flex-1 max-w-md rounded-xl border border-gray-200 px-3.5 py-2 bg-gray-50 hover:bg-white focus-within:bg-white focus-within:ring-2 focus-within:ring-orange-400/40 focus-within:border-orange-400 transition-all">
+      <div className="bg-white rounded-2xl shadow-sm border border-orange-100 px-4 py-2.5 mb-3 flex gap-3 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-1 max-w-md rounded-xl border border-gray-200 px-3.5 py-1.5 bg-gray-50 hover:bg-white focus-within:bg-white focus-within:ring-2 focus-within:ring-orange-400/40 focus-within:border-orange-400 transition-all">
           <Search size={15} className="text-gray-400 flex-shrink-0" />
           <input
             type="text" placeholder="ค้นหาชื่อ หรือ เลขบัตรประชาชน..."
@@ -121,9 +121,10 @@ export default function PersonList() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
-        <table className="table table-zebra w-full">
-          <thead>
+      <div className="flex-1 min-h-0 bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-auto">
+        <table className="table table-sm table-zebra w-full">
+          <thead className="sticky top-0 z-10">
             <tr className="bg-orange-50 text-orange-600 text-xs uppercase tracking-wider">
               <th className="w-10">#</th>
               <th>ชื่อ-นามสกุล</th>
@@ -148,11 +149,9 @@ export default function PersonList() {
               <tr key={p.id} className="hover:bg-orange-50/40 transition-colors">
                 <td className="text-gray-400 text-xs">{(page - 1) * PAGE_SIZE + i + 1}</td>
                 <td>
-                  <div className="flex items-center gap-3">
-                    <div className="avatar placeholder">
-                      <div className="w-9 h-9 rounded-full bg-orange-100 text-orange-600 text-xs font-bold flex items-center justify-center">
-                        <span>{initials(p.fullName)}</span>
-                      </div>
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-orange-100 text-orange-600 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                      {initials(p.fullName)}
                     </div>
                     <span className="font-semibold text-orange-950 text-sm">{p.fullName}</span>
                   </div>
@@ -189,9 +188,10 @@ export default function PersonList() {
             ))}
           </tbody>
         </table>
+        </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-4 border-t border-orange-100">
+          <div className="flex items-center justify-between px-5 py-3 border-t border-orange-100 flex-shrink-0">
             <span className="text-sm text-gray-400">
               หน้า <span className="font-bold text-orange-600">{page}</span> จาก {totalPages}
               <span className="ml-2 text-gray-300">({persons.length} รายการ)</span>
