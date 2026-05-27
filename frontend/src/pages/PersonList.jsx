@@ -58,6 +58,7 @@ export default function PersonList() {
                       nationality, religion, maritalStatus, educationLevel, lifeStatus };
     if (!payload.birthDate) delete payload.birthDate;
     if (!payload.thaiId) delete payload.thaiId;
+    if (!editId && !disabilityTypeId) return alert('กรุณาเลือกประเภทความพิการ');
     try {
       if (editId) {
         await updatePerson(editId, payload);
@@ -320,7 +321,7 @@ export default function PersonList() {
                   value={disabilityTypeId}
                   onChange={(e) => setDisabilityTypeId(e.target.value)}
                 >
-                  <option value="">— {editId ? 'เพิ่มประเภทความพิการ' : 'ไม่ระบุ / เลือกภายหลัง'} —</option>
+                  <option value="">— {editId ? 'เพิ่มประเภทความพิการ' : 'เลือกประเภทความพิการ *'} —</option>
                   {disabilityTypes.map((t) => (
                     <option key={t.id} value={String(t.id)}>{t.typeName}</option>
                   ))}
