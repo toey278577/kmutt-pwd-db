@@ -37,9 +37,13 @@ export default function Layout({ children }) {
     <div className="flex min-h-screen">
 
       {/* ── Mobile top bar ── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center gap-3 px-4 py-3 shadow-md"
-        style={{ background: 'linear-gradient(160deg,#431407 0%,#9a3412 100%)' }}>
-        <button onClick={() => setOpen(true)} className="text-white/80 hover:text-white">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center gap-3 px-4 shadow-md"
+        style={{
+          background: 'linear-gradient(160deg,#431407 0%,#9a3412 100%)',
+          paddingTop: 'max(12px, env(safe-area-inset-top))',
+          paddingBottom: '12px',
+        }}>
+        <button onClick={() => setOpen(true)} className="text-white/80 hover:text-white p-1 -ml-1">
           <Menu size={22} />
         </button>
         <img src="/logo-icon.png" alt="KMUTT" className="h-7 w-7 object-contain rounded-md bg-white/10 p-0.5 flex-shrink-0" />
@@ -135,8 +139,12 @@ export default function Layout({ children }) {
       </aside>
 
       {/* ── Main content ── */}
-      <main className="flex-1 overflow-auto bg-orange-50 min-h-screen pt-14 md:pt-0 p-4 md:p-7">
-        {children}
+      <main className="flex-1 overflow-auto bg-orange-50 min-h-screen md:p-7">
+        {/* Safe-area spacer — mobile only */}
+        <div className="md:hidden" style={{ height: 'max(56px, calc(env(safe-area-inset-top) + 44px))' }} />
+        <div className="p-4 md:p-0">
+          {children}
+        </div>
       </main>
     </div>
   );
