@@ -288,45 +288,40 @@ export default function PersonList() {
                 <FormField label="ระดับการศึกษา" value={form.educationLevel} onChange={(v) => setForm({ ...form, educationLevel: v })} />
                 <SelectField label="สถานะ" value={form.lifeStatus} onChange={(v) => setForm({ ...form, lifeStatus: v })}
                   options={[['ALIVE','มีชีวิต'],['DECEASED','เสียชีวิต']]} />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-1 h-4 rounded-full bg-cyan-500" />
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">ข้อมูลความพิการ</p>
-              </div>
-              {/* แสดงรายการที่มีอยู่แล้ว (กรณี edit) */}
-              {editPersonDisabilities.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {editPersonDisabilities.map((d) => (
-                    <div key={d.id} className="flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold px-2.5 py-1.5 rounded-xl">
-                      <span>{d.disabilityType?.typeName}</span>
-                      <button
-                        type="button"
-                        className="text-red-400 hover:text-red-600 transition-colors ml-1"
-                        onClick={async () => {
-                          await deleteDisabilityInfo(editId, d.id);
-                          setEditPersonDisabilities(prev => prev.filter(x => x.id !== d.id));
-                        }}>
-                        <Trash2 size={11} />
-                      </button>
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">
+                    ประเภทความพิการ {!editId && <span className="text-red-400">*</span>}
+                  </label>
+                  {editPersonDisabilities.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {editPersonDisabilities.map((d) => (
+                        <div key={d.id} className="flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold px-2.5 py-1.5 rounded-xl">
+                          <span>{d.disabilityType?.typeName}</span>
+                          <button type="button" className="text-red-400 hover:text-red-600 transition-colors ml-1"
+                            onClick={async () => {
+                              await deleteDisabilityInfo(editId, d.id);
+                              setEditPersonDisabilities(prev => prev.filter(x => x.id !== d.id));
+                            }}>
+                            <Trash2 size={11} />
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
+                  <div className="relative">
+                    <select
+                      className="w-full appearance-none rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all cursor-pointer pr-9"
+                      value={disabilityTypeId}
+                      onChange={(e) => setDisabilityTypeId(e.target.value)}
+                    >
+                      <option value="">— {editId ? 'เพิ่มประเภทความพิการ' : 'เลือกประเภทความพิการ'} —</option>
+                      {disabilityTypes.map((t) => (
+                        <option key={t.id} value={String(t.id)}>{t.typeName}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  </div>
                 </div>
-              )}
-              {/* dropdown เพิ่มประเภทใหม่ */}
-              <div className="relative">
-                <select
-                  className="w-full appearance-none rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all cursor-pointer pr-9"
-                  value={disabilityTypeId}
-                  onChange={(e) => setDisabilityTypeId(e.target.value)}
-                >
-                  <option value="">— {editId ? 'เพิ่มประเภทความพิการ' : 'เลือกประเภทความพิการ *'} —</option>
-                  {disabilityTypes.map((t) => (
-                    <option key={t.id} value={String(t.id)}>{t.typeName}</option>
-                  ))}
-                </select>
-                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
             </div>
             <div>
