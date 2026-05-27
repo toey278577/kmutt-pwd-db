@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, GraduationCap, Briefcase, Star, Target, ChevronDown, Building2 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, GraduationCap, Briefcase, Star, Target, ChevronDown, Building2, Accessibility } from 'lucide-react';
 import {
   getPerson, getTraining, createTraining, deleteTraining,
   getWorkExp, createWorkExp, deleteWorkExp,
@@ -8,6 +8,7 @@ import {
   getSkills, createSkill, deleteSkill,
   getPersonOrgs, createPersonOrg, deletePersonOrg,
   getOrganizations,
+  getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo,
 } from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -65,6 +66,7 @@ export default function PersonDetail() {
   const [skills, setSkills] = useState([]);
   const [personOrgs, setPersonOrgs] = useState([]);
   const [orgs, setOrgs] = useState([]);
+  const [disabilityTypes, setDisabilityTypes] = useState([]);
   const [dialogType, setDialogType] = useState('');
   const [form, setForm] = useState({});
 
@@ -76,6 +78,7 @@ export default function PersonDetail() {
     getSkills(id).then((r) => setSkills(r.data));
     getPersonOrgs(id).then((r) => setPersonOrgs(r.data));
     getOrganizations().then((r) => setOrgs(r.data));
+    getDisabilityTypes().then((r) => setDisabilityTypes(r.data));
   };
 
   useEffect(() => { reloadAll(); }, [id]);
@@ -101,12 +104,15 @@ export default function PersonDetail() {
       return alert('กรุณาเลือกสถานประกอบการ');
     if (dialogType === 'personorg' && !form.roleType)
       return alert('กรุณาเลือกบทบาท');
+    if (dialogType === 'disability' && !form.disabilityTypeId)
+      return alert('กรุณาเลือกประเภทความพิการ');
     try {
       if (dialogType === 'training') { await createTraining(id, form); getTraining(id).then((r) => setTraining(r.data)); }
       else if (dialogType === 'workexp') { await createWorkExp(id, form); getWorkExp(id).then((r) => setWorkexp(r.data)); }
       else if (dialogType === 'followup') { await createFollowUp(id, form); getFollowUp(id).then((r) => setFollowup(r.data)); }
       else if (dialogType === 'skill') { await createSkill(id, form); getSkills(id).then((r) => setSkills(r.data)); }
       else if (dialogType === 'personorg') { await createPersonOrg(id, form); getPersonOrgs(id).then((r) => setPersonOrgs(r.data)); }
+      else if (dialogType === 'disability') { await createDisabilityInfo(id, form); getPerson(id).then((r) => setPerson(r.data)); }
       modalRef.current?.close();
     } catch (err) { alert(err.response?.data?.error || 'เกิดข้อผิดพลาด'); }
   };
@@ -168,12 +174,26 @@ export default function PersonDetail() {
             ['จังหวัด', person.province],
             ['ที่อยู่', person.address],
           ]} />
-          {person.disabilityInfos?.length > 0 && (
-            <div className="md:col-span-2 bg-white rounded-2xl shadow-sm border border-orange-100 p-5">
-              <p className="font-bold text-orange-950 text-sm mb-3">ข้อมูลความพิการ</p>
-              <div className="grid grid-cols-2 gap-3">
+          <div className="md:col-span-2 bg-white rounded-2xl shadow-sm border border-orange-100 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-bold text-orange-950 text-sm">ข้อมูลความพิการ</p>
+              {canEdit && (
+                <button className="btn btn-outline btn-primary btn-xs gap-1" onClick={() => openDialog('disability')}>
+                  <Plus size={13} /> เพิ่ม
+                </button>
+              )}
+            </div>
+            {person.disabilityInfos?.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {person.disabilityInfos.map((d) => (
-                  <div key={d.id} className="rounded-xl bg-orange-50 border border-orange-100 p-3">
+                  <div key={d.id} className="rounded-xl bg-orange-50 border border-orange-100 p-3 relative">
+                    {canEdit && (
+                      <button
+                        className="absolute top-2 right-2 text-red-300 hover:text-red-500 transition-colors"
+                        onClick={() => deleteDisabilityInfo(id, d.id).then(() => getPerson(id).then(r => setPerson(r.data)))}>
+                        <Trash2 size={13} />
+                      </button>
+                    )}
                     <span className="badge badge-sm bg-orange-100 text-orange-700 font-semibold border-0 mb-2">
                       {d.disabilityType?.typeName}
                     </span>
@@ -184,8 +204,10 @@ export default function PersonDetail() {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <p className="text-sm text-gray-300 text-center py-4">ยังไม่มีข้อมูลความพิการ</p>
+            )}
+          </div>
         </div>
       )}
 
@@ -325,6 +347,7 @@ export default function PersonDetail() {
               {dialogType === 'followup' && <Target size={20} color="#fff" />}
               {dialogType === 'skill' && <Star size={20} color="#fff" />}
               {dialogType === 'personorg' && <Building2 size={20} color="#fff" />}
+              {dialogType === 'disability' && <Accessibility size={20} color="#fff" />}
             </div>
             <div>
               <h3 className="text-white font-bold text-base leading-tight">
@@ -333,6 +356,7 @@ export default function PersonDetail() {
                 {dialogType === 'followup' && 'บันทึกติดตามผล'}
                 {dialogType === 'skill' && 'เพิ่มทักษะ'}
                 {dialogType === 'personorg' && 'เชื่อมสถานประกอบการ'}
+                {dialogType === 'disability' && 'เพิ่มข้อมูลความพิการ'}
               </h3>
               <p className="text-orange-300/80 text-xs mt-0.5">กรุณากรอกข้อมูลให้ครบถ้วน</p>
             </div>
@@ -389,6 +413,15 @@ export default function PersonDetail() {
               <F label="เงินสนับสนุน (บาท)" type="number" value={form.amount} onChange={v => setForm({...form, amount: v})} />
               <F label="หมายเหตุ" value={form.note} onChange={v => setForm({...form, note: v})} />
               <F12 label="รายละเอียดการสนับสนุน" value={form.supportDetail} onChange={v => setForm({...form, supportDetail: v})} />
+            </>}
+
+            {dialogType === 'disability' && <>
+              <SelData12 label="ประเภทความพิการ *" value={form.disabilityTypeId} onChange={v => setForm({...form, disabilityTypeId: v})}
+                options={[['','— เลือกประเภทความพิการ —'], ...disabilityTypes.map(t => [String(t.id), t.typeName])]} />
+              <F12 label="ระดับความพิการ" value={form.disabilityLevel} onChange={v => setForm({...form, disabilityLevel: v})} />
+              <F12 label="อุปกรณ์ช่วยเหลือ" value={form.assistiveDevice} onChange={v => setForm({...form, assistiveDevice: v})} />
+              <F12 label="ข้อจำกัดด้านงาน" value={form.workLimitation} onChange={v => setForm({...form, workLimitation: v})} />
+              <F12 label="ความต้องการพิเศษ" value={form.accommodationNeed} onChange={v => setForm({...form, accommodationNeed: v})} />
             </>}
           </div>
 

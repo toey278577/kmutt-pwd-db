@@ -10,6 +10,57 @@ const toMarital = (val) => {
   return MARITAL_ENUMS.includes(val) ? val : 'OTHER';
 };
 
+router.get('/disability-types', async (req, res) => {
+  try {
+    const types = await prisma.disabilityType.findMany({ orderBy: { id: 'asc' } });
+    res.json(types);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/:id/disability', async (req, res) => {
+  try {
+    const infos = await prisma.disabilityInfo.findMany({
+      where: { personId: parseInt(req.params.id) },
+      include: { disabilityType: true },
+    });
+    res.json(infos);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/:id/disability', async (req, res) => {
+  try {
+    const { disabilityTypeId, disabilityLevel, assistiveDevice, workLimitation, accommodationNeed } = req.body;
+    if (!disabilityTypeId) return res.status(400).json({ error: 'กรุณาเลือกประเภทความพิการ' });
+    const info = await prisma.disabilityInfo.create({
+      data: {
+        personId: parseInt(req.params.id),
+        disabilityTypeId: parseInt(disabilityTypeId),
+        disabilityLevel: disabilityLevel || null,
+        assistiveDevice: assistiveDevice || null,
+        workLimitation: workLimitation || null,
+        accommodationNeed: accommodationNeed || null,
+      },
+      include: { disabilityType: true },
+    });
+    res.status(201).json(info);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.delete('/:id/disability/:did', async (req, res) => {
+  try {
+    await prisma.disabilityInfo.delete({ where: { id: parseInt(req.params.did) } });
+    res.json({ message: 'Deleted' });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 router.get('/', async (req, res) => {
   try {
     const { search, province, gender } = req.query;

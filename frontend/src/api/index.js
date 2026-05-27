@@ -34,6 +34,11 @@ export const createPerson = (data) => api.post('/persons', data);
 export const updatePerson = (id, data) => api.put(`/persons/${id}`, data);
 export const deletePerson = (id) => api.delete(`/persons/${id}`);
 
+export const getDisabilityTypes = () => api.get('/persons/disability-types');
+export const getDisabilityInfos = (id) => api.get(`/persons/${id}/disability`);
+export const createDisabilityInfo = (id, data) => api.post(`/persons/${id}/disability`, data);
+export const deleteDisabilityInfo = (id, did) => api.delete(`/persons/${id}/disability/${did}`);
+
 export const getTraining = (id) => api.get(`/persons/${id}/training`);
 export const createTraining = (id, data) => api.post(`/persons/${id}/training`, data);
 export const updateTraining = (id, tid, data) => api.put(`/persons/${id}/training/${tid}`, data);
