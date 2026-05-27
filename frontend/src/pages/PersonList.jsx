@@ -7,6 +7,15 @@ import { useAuth } from '../context/AuthContext';
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
 const GENDER_BADGE = { MALE: 'bg-sky-100 text-sky-600 border-sky-200', FEMALE: 'bg-pink-100 text-pink-500 border-pink-200', OTHER: 'bg-gray-100 text-gray-500 border-gray-200' };
 
+const PREFIXES = ['นาย', 'นาง', 'นางสาว', 'เด็กชาย', 'เด็กหญิง'];
+
+const splitPrefix = (fullName = '') => {
+  for (const p of PREFIXES) {
+    if (fullName.startsWith(p)) return { prefix: p, nameOnly: fullName.slice(p.length).trim() };
+  }
+  return { prefix: '', nameOnly: fullName };
+};
+
 const emptyForm = {
   fullName: '', thaiId: '', gender: 'MALE', birthDate: '',
   phone: '', email: '', address: '', province: '',
@@ -26,6 +35,8 @@ export default function PersonList() {
   const [disabilityTypes, setDisabilityTypes] = useState([]);
   const [disabilityTypeId, setDisabilityTypeId] = useState('');
   const [editPersonDisabilities, setEditPersonDisabilities] = useState([]);
+  const [prefix, setPrefix] = useState('นาย');
+  const [nameOnly, setNameOnly] = useState('');
 
   const PAGE_SIZE = 10;
   const totalPages = Math.ceil(persons.length / PAGE_SIZE);
@@ -39,11 +50,16 @@ export default function PersonList() {
 
   const openModal = (person = null) => {
     if (person) {
+      const { prefix: p, nameOnly: n } = splitPrefix(person.fullName || '');
       setForm({ ...emptyForm, ...person, birthDate: person.birthDate?.slice(0, 10) || '' });
+      setPrefix(p || 'นาย');
+      setNameOnly(n);
       setEditId(person.id);
       setEditPersonDisabilities(person.disabilityInfos || []);
     } else {
       setForm(emptyForm);
+      setPrefix('นาย');
+      setNameOnly('');
       setEditId(null);
       setEditPersonDisabilities([]);
     }
@@ -52,7 +68,9 @@ export default function PersonList() {
   };
 
   const handleSave = async () => {
-    const { fullName, thaiId, gender, birthDate, phone, email, address, province,
+    if (!nameOnly.trim()) return alert('กรุณากรอกชื่อ-นามสกุล');
+    const fullName = `${prefix}${prefix ? ' ' : ''}${nameOnly.trim()}`;
+    const { thaiId, gender, birthDate, phone, email, address, province,
             nationality, religion, maritalStatus, educationLevel, lifeStatus } = form;
     const payload = { fullName, thaiId, gender, birthDate, phone, email, address, province,
                       nationality, religion, maritalStatus, educationLevel, lifeStatus };
@@ -276,7 +294,27 @@ export default function PersonList() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2">
-                  <FormField label="ชื่อ-นามสกุล *" value={form.fullName} onChange={(v) => setForm({ ...form, fullName: v })} />
+                  <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">ชื่อ-นามสกุล *</label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-shrink-0">
+                      <select
+                        className="appearance-none rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all cursor-pointer pr-7"
+                        value={prefix}
+                        onChange={(e) => setPrefix(e.target.value)}
+                      >
+                        <option value="">ไม่ระบุ</option>
+                        {PREFIXES.map((p) => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                      <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="ชื่อ นามสกุล"
+                      className="flex-1 rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
+                      value={nameOnly}
+                      onChange={(e) => setNameOnly(e.target.value)}
+                    />
+                  </div>
                 </div>
                 <FormField label="เลขบัตรประชาชน" value={form.thaiId} onChange={(v) => setForm({ ...form, thaiId: v })} numericOnly maxLength={13} />
                 <ThaiDateField label="วันเกิด" value={form.birthDate} onChange={(v) => setForm({ ...form, birthDate: v })} />
