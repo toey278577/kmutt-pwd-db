@@ -62,18 +62,19 @@ export default function FollowUpList() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden overflow-x-auto">
-        <table className="table table-zebra w-full">
+      <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+        <div className="overflow-x-auto">
+        <table className="table table-zebra w-full" style={{ minWidth: '720px' }}>
           <thead>
             <tr className="bg-orange-50 text-orange-600 text-xs uppercase tracking-wider">
-              <th>วันที่ติดตาม</th>
-              <th>ชื่อ</th>
-              <th>สถานะงาน</th>
-              <th>ประเภทงาน</th>
-              <th>รายได้</th>
-              <th>ทักษะสอดคล้อง</th>
-              <th>ความพึงพอใจ</th>
-              <th>ปัญหา</th>
+              <th style={{ minWidth: '110px' }}>วันที่ติดตาม</th>
+              <th style={{ minWidth: '140px' }}>ชื่อ</th>
+              <th style={{ minWidth: '90px' }}>สถานะงาน</th>
+              <th style={{ minWidth: '100px' }}>ประเภทงาน</th>
+              <th style={{ minWidth: '80px' }}>รายได้</th>
+              <th style={{ minWidth: '90px' }}>ทักษะสอดคล้อง</th>
+              <th style={{ minWidth: '100px' }}>ความพึงพอใจ</th>
+              <th style={{ minWidth: '120px' }}>ปัญหา</th>
             </tr>
           </thead>
           <tbody>
@@ -124,6 +125,7 @@ export default function FollowUpList() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
