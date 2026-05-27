@@ -72,15 +72,16 @@ export default function OrganizationList() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
-        <table className="table table-zebra w-full">
+        <div className="overflow-x-auto">
+        <table className="table table-zebra w-full" style={{ minWidth: '640px' }}>
           <thead>
             <tr className="bg-orange-50 text-orange-600 text-xs uppercase tracking-wider">
               <th className="w-10">#</th>
-              <th>ชื่อองค์กร</th>
-              <th>ประเภทธุรกิจ</th>
-              <th>ผู้ติดต่อ</th>
-              <th>เบอร์โทร / Email</th>
-              <th className="text-center">จัดการ</th>
+              <th style={{ minWidth: '180px' }}>ชื่อองค์กร</th>
+              <th style={{ minWidth: '120px' }}>ประเภทธุรกิจ</th>
+              <th style={{ minWidth: '110px' }}>ผู้ติดต่อ</th>
+              <th style={{ minWidth: '140px' }}>เบอร์โทร / Email</th>
+              <th className="text-center" style={{ minWidth: '80px' }}>จัดการ</th>
             </tr>
           </thead>
           <tbody>
@@ -97,7 +98,7 @@ export default function OrganizationList() {
                 <td className="text-gray-400 text-xs">{i + 1}</td>
                 <td>
                   <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black ${COLORS[i % COLORS.length]}`}>
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black flex-shrink-0 ${COLORS[i % COLORS.length]}`}>
                       {o.orgName.slice(0, 2)}
                     </div>
                     <span className="font-semibold text-orange-950 text-sm">{o.orgName}</span>
@@ -129,6 +130,7 @@ export default function OrganizationList() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       <dialog ref={modalRef} className="modal">
