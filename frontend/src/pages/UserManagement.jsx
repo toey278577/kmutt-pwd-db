@@ -117,15 +117,16 @@ export default function UserManagement() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
-        <table className="table table-zebra w-full">
+        <div className="overflow-x-auto">
+        <table className="table table-zebra w-full" style={{ minWidth: '600px' }}>
           <thead>
             <tr className="bg-orange-50 text-orange-600 text-xs uppercase tracking-wider">
-              <th>ชื่อ</th>
-              <th>อีเมล</th>
-              <th>บทบาท</th>
-              <th>สถานะ</th>
-              <th>วันที่สร้าง</th>
-              <th></th>
+              <th style={{ minWidth: '150px' }}>ชื่อ</th>
+              <th style={{ minWidth: '160px' }}>อีเมล</th>
+              <th style={{ minWidth: '110px' }}>บทบาท</th>
+              <th style={{ minWidth: '90px' }}>สถานะ</th>
+              <th style={{ minWidth: '100px' }}>วันที่สร้าง</th>
+              <th style={{ minWidth: '70px' }}></th>
             </tr>
           </thead>
           <tbody>
@@ -173,6 +174,7 @@ export default function UserManagement() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
 
       <dialog ref={modalRef} className="modal">
