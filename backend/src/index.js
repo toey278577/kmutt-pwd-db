@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',')
-  : ['http://localhost:5173', 'http://localhost:5174'];
+  : ['http://localhost:5173', 'http://localhost:5174', 'https://kmutt-pwd-db.vercel.app'];
 
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
