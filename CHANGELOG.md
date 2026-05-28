@@ -39,6 +39,44 @@
 
 ---
 
+## 28 พฤษภาคม 2568
+
+### ฟีเจอร์ใหม่
+- **ข้อมูลความพิการ (Disability Info CRUD)** — เพิ่ม/ลบประเภทความพิการในหน้า PersonDetail tab "ข้อมูลพื้นฐาน" และใน modal เพิ่ม/แก้ไขคนพิการ รองรับทั้ง 7 ประเภทความพิการ
+- **คำนำหน้าชื่อ** — เพิ่ม dropdown นาย/นาง/นางสาว/เด็กชาย/เด็กหญิง ในฟอร์มเพิ่ม/แก้ไขคนพิการ ไม่ต้องพิมพ์คำนำหน้าเอง
+- **บังคับเลือกประเภทความพิการ** — ฟอร์มเพิ่มคนพิการใหม่ต้องเลือกประเภทความพิการทุกครั้ง
+- **Toast Notification Login** — popup แจ้งเตือนเมื่อ login สำเร็จ (สีเขียว) และ login ผิด (สีแดง) พร้อม animation bounce-in
+
+### Mobile Responsive
+- **OrganizationList** — เปลี่ยนเป็น horizontal scroll table (เลื่อนซ้าย-ขวาได้)
+- **UserManagement** — เพิ่ม horizontal scroll table
+- **FollowUpList** — เพิ่ม horizontal scroll table
+
+### Bug fixes
+- **VITE_API_URL ไม่ถูกต้องใน production** — เพิ่มไฟล์ `.env.production` ชี้ไปที่ Render backend
+- **CORS ไม่อนุญาต Vercel** — เพิ่ม `https://kmutt-pwd-db.vercel.app` ใน allowedOrigins
+- **Toast ไม่ขึ้นเมื่อ login ผิด** — แก้ interceptor ให้ข้าม redirect เมื่อเป็น `/auth/login` endpoint
+- **Dashboard กราฟ "ประเภทความพิการ" ว่างเปล่า** — เพิ่ม API + UI ให้กรอกข้อมูลความพิการได้
+
+### ไฟล์ที่เปลี่ยน
+| ไฟล์ | การเปลี่ยนแปลง |
+|------|---------------|
+| `backend/src/routes/persons.js` | เพิ่ม routes disability-types, /:id/disability (GET/POST/DELETE) |
+| `backend/src/index.js` | เพิ่ม Vercel origin ใน CORS |
+| `backend/src/reset-admin.js` | **สร้างใหม่** — script reset password admin |
+| `backend/package.json` | เพิ่ม script `reset-admin` |
+| `frontend/.env.production` | **สร้างใหม่** — VITE_API_URL สำหรับ production |
+| `frontend/src/api/index.js` | เพิ่ม disability API functions, fix interceptor |
+| `frontend/src/pages/PersonDetail.jsx` | เพิ่ม disability CRUD UI ใน tab 0 |
+| `frontend/src/pages/PersonList.jsx` | เพิ่ม name prefix dropdown, disability dropdown ใน modal |
+| `frontend/src/pages/OrganizationList.jsx` | Horizontal scroll table |
+| `frontend/src/pages/UserManagement.jsx` | Horizontal scroll table |
+| `frontend/src/pages/FollowUpList.jsx` | Horizontal scroll table |
+| `frontend/src/pages/Login.jsx` | Toast notification component |
+| `frontend/src/index.css` | เพิ่ม `@keyframes bounce-in` animation |
+
+---
+
 ## 26 พฤษภาคม 2568
 
 ### ฟีเจอร์ใหม่
