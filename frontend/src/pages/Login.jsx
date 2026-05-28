@@ -1,8 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { Eye, EyeOff, LogIn, CheckCircle2, XCircle } from 'lucide-react';
 import { login } from '../api';
 import { useAuth } from '../context/AuthContext';
+
+function Toast({ type, message, onClose }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 3000);
+    return () => clearTimeout(t);
+  }, []);
+
+  const isSuccess = type === 'success';
+  return (
+    <div className={`fixed top-6 left-1/2 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border
+      transition-all duration-300 animate-bounce-in
+      ${isSuccess
+        ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+        : 'bg-red-50 border-red-200 text-red-800'
+      }`}
+      style={{
+        transform: 'translateX(-50%)',
+        minWidth: '280px',
+        backdropFilter: 'blur(8px)',
+      }}>
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0
+        ${isSuccess ? 'bg-emerald-100' : 'bg-red-100'}`}>
+        {isSuccess
+          ? <CheckCircle2 size={20} className="text-emerald-600" />
+          : <XCircle size={20} className="text-red-500" />}
+      </div>
+      <div className="flex-1">
+        <p className="text-sm font-bold">
+          {isSuccess ? 'เข้าสู่ระบบสำเร็จ' : 'เข้าสู่ระบบไม่สำเร็จ'}
+        </p>
+        <p className="text-xs opacity-70 mt-0.5">{message}</p>
+      </div>
+      <button onClick={onClose} className="opacity-40 hover:opacity-70 transition-opacity text-lg leading-none ml-1">✕</button>
+    </div>
+  );
+}
 
 export default function Login() {
   const navigate = useNavigate();
@@ -10,18 +46,23 @@ export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [toast, setToast] = useState(null);
+
+  const showToast = (type, message) => setToast({ type, message });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
+    setToast(null);
     try {
       const res = await login(form);
-      loginSuccess(res.data);
-      navigate('/', { replace: true });
+      showToast('success', `ยินดีต้อนรับ ${res.data.user?.name || ''}`);
+      setTimeout(() => {
+        loginSuccess(res.data);
+        navigate('/', { replace: true });
+      }, 1200);
     } catch (err) {
-      setError(err.response?.data?.error || 'เข้าสู่ระบบไม่สำเร็จ');
+      showToast('error', err.response?.data?.error || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
     } finally {
       setLoading(false);
     }
@@ -29,6 +70,8 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-orange-50 px-4">
+      {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
+
       <div className="w-full max-w-sm">
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-orange-100">
           <div className="px-8 pt-8 pb-6 text-center" style={{ background: 'linear-gradient(135deg,#431407,#9a3412)' }}>
@@ -67,12 +110,6 @@ export default function Login() {
                 </button>
               </div>
             </div>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl px-3.5 py-2.5 text-sm text-red-600 font-medium">
-                {error}
-              </div>
-            )}
 
             <button
               type="submit"
