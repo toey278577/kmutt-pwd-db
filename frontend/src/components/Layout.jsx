@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, Shield, Eye, BookOpen, Printer, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, Shield, Eye, BookOpen, Printer, Menu, X, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const menu = [
@@ -14,7 +14,8 @@ const menu = [
 ];
 
 const ROLE_LABEL = { ADMIN: 'ผู้ดูแลระบบ', STAFF: 'เจ้าหน้าที่', VIEWER: 'ผู้ดูข้อมูล' };
-const ROLE_ICON = { ADMIN: Shield, STAFF: UserCog, VIEWER: Eye };
+const ROLE_COLOR = { ADMIN: 'from-red-400 to-orange-500', STAFF: 'from-orange-400 to-amber-500', VIEWER: 'from-sky-400 to-cyan-500' };
+const ROLE_BADGE = { ADMIN: 'bg-red-500/20 text-red-200 border-red-500/30', STAFF: 'bg-orange-500/20 text-orange-200 border-orange-500/30', VIEWER: 'bg-sky-500/20 text-sky-200 border-sky-500/30' };
 
 export default function Layout({ children }) {
   const navigate = useNavigate();
@@ -22,38 +23,27 @@ export default function Layout({ children }) {
   const { user, logout, isAdmin } = useAuth();
   const [open, setOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login', { replace: true });
-  };
+  const handleLogout = () => { logout(); navigate('/login', { replace: true }); };
+  const handleNav = (path) => { navigate(path); setOpen(false); };
 
-  const handleNav = (path) => {
-    navigate(path);
-    setOpen(false);
-  };
-
-  const RoleIcon = ROLE_ICON[user?.role] || UserCog;
+  const initials = user?.name?.slice(0, 2) || 'U';
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-orange-50/50">
 
       {/* ── Mobile top bar ── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center gap-3 px-4 shadow-md"
-        style={{
-          background: 'linear-gradient(160deg,#431407 0%,#9a3412 100%)',
-          paddingTop: 'max(12px, env(safe-area-inset-top))',
-          paddingBottom: '12px',
-        }}>
-        <button onClick={() => setOpen(true)} className="text-white/80 hover:text-white p-1 -ml-1">
-          <Menu size={22} />
+      <div className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center gap-3 px-4 h-14 shadow-lg"
+        style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 100%)' }}>
+        <button onClick={() => setOpen(true)} className="text-white/70 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition-all">
+          <Menu size={20} />
         </button>
-        <img src="/logo-icon.png" alt="KMUTT" className="h-7 w-7 object-contain rounded-md bg-white/10 p-0.5 flex-shrink-0" />
+        <img src="/logo-icon.png" alt="KMUTT" className="h-7 w-7 object-contain rounded-lg bg-white/10 p-0.5 flex-shrink-0" />
         <span className="text-white font-bold text-sm truncate">ระบบฐานข้อมูลคนพิการ มจธ.</span>
       </div>
 
       {/* ── Backdrop ── */}
       {open && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => setOpen(false)} />
+        <div className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
       )}
 
       {/* ── Sidebar ── */}
@@ -61,89 +51,104 @@ export default function Layout({ children }) {
         className={`fixed md:sticky md:top-0 md:h-screen inset-y-0 left-0 z-50 w-64 flex-shrink-0 flex flex-col
           transition-transform duration-300 ease-in-out
           ${open ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
-        style={{ background: 'linear-gradient(160deg,#431407 0%,#9a3412 60%,#431407 100%)' }}
-      >
-        {/* Logo */}
-        <div className="px-4 py-4 border-b border-white/10 flex items-center gap-3">
-          <div className="bg-white rounded-2xl px-3 py-3 shadow-lg flex items-center gap-3 flex-1 min-w-0">
-            <img src="/logo-icon.png" alt="KMUTT" className="h-11 w-11 object-contain flex-shrink-0" />
+        style={{ background: 'linear-gradient(180deg,#1c0a00 0%,#431407 40%,#7c2d12 100%)' }}>
+
+        {/* Glow blob */}
+        <div className="absolute top-0 left-0 w-full h-64 pointer-events-none overflow-hidden rounded-none">
+          <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full opacity-20 blur-3xl"
+            style={{ background: 'radial-gradient(circle,#ea580c,transparent)' }} />
+        </div>
+
+        {/* ── Logo ── */}
+        <div className="relative px-4 pt-5 pb-4 flex items-center gap-3 border-b border-white/5">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-lg flex-shrink-0">
+              <img src="/logo-icon.png" alt="KMUTT" className="h-8 w-8 object-contain" />
+            </div>
             <div className="min-w-0">
-              <p className="text-orange-700 font-black text-sm leading-none tracking-tight">PWDs</p>
-              <p className="text-orange-500 text-[10px] font-medium leading-snug mt-0.5">ระบบฐานข้อมูลคนพิการ<br/>มจธ.</p>
+              <p className="text-orange-400 font-black text-sm leading-none tracking-tight">PWDs</p>
+              <p className="text-orange-200/50 text-[10px] font-medium leading-snug mt-0.5">ระบบฐานข้อมูลคนพิการ<br/>มจธ.</p>
             </div>
           </div>
-          <button onClick={() => setOpen(false)} className="md:hidden text-white/60 hover:text-white flex-shrink-0">
-            <X size={20} />
+          <button onClick={() => setOpen(false)} className="md:hidden text-white/40 hover:text-white flex-shrink-0 p-1 rounded-lg hover:bg-white/10 transition-all">
+            <X size={18} />
           </button>
         </div>
 
-        {/* Menu */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          <p className="text-orange-500 text-xs font-bold tracking-widest px-3 mb-2 uppercase">เมนูหลัก</p>
+        {/* ── Menu ── */}
+        <nav className="relative flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+          <p className="text-orange-500/60 text-[10px] font-bold tracking-[0.15em] px-3 mb-3 uppercase">เมนูหลัก</p>
           {menu.map(({ label, icon: Icon, path }) => {
             const active = location.pathname === path;
             return (
-              <button
-                key={path}
-                onClick={() => handleNav(path)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200 group
+              <button key={path} onClick={() => handleNav(path)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-left transition-all duration-200 group relative
                   ${active
-                    ? 'bg-white/10 border border-white/20 text-white'
-                    : 'text-orange-200/70 hover:bg-white/5 hover:text-orange-100 border border-transparent'
+                    ? 'text-white'
+                    : 'text-orange-200/50 hover:text-orange-100 hover:bg-white/5'
                   }`}
-              >
-                <Icon size={17} className={active ? 'text-orange-300' : 'text-orange-400/60 group-hover:text-orange-300'} />
-                <span className={`text-sm flex-1 ${active ? 'font-semibold' : 'font-normal'}`}>{label}</span>
-                {active && <div className="w-1.5 h-1.5 rounded-full bg-orange-400 shadow-[0_0_6px_#fb923c]" />}
+                style={active ? { background: 'linear-gradient(135deg,rgba(234,88,12,0.3),rgba(194,65,12,0.2))', boxShadow: 'inset 0 0 0 1px rgba(251,146,60,0.2)' } : {}}>
+
+                {active && (
+                  <div className="absolute inset-0 rounded-2xl blur-sm opacity-30"
+                    style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }} />
+                )}
+                <div className={`relative w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all ${active ? 'text-orange-300' : 'text-orange-400/50 group-hover:text-orange-300'}`}
+                  style={active ? { background: 'rgba(234,88,12,0.25)' } : {}}>
+                  <Icon size={16} />
+                </div>
+                <span className={`relative text-sm flex-1 ${active ? 'font-bold' : 'font-normal'}`}>{label}</span>
+                {active && <ChevronRight size={14} className="relative text-orange-400 flex-shrink-0" />}
               </button>
             );
           })}
 
           {isAdmin && (
             <>
-              <p className="text-orange-500 text-xs font-bold tracking-widest px-3 mt-4 mb-2 uppercase">ผู้ดูแลระบบ</p>
-              <button
-                onClick={() => handleNav('/users')}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200 group
-                  ${location.pathname === '/users'
-                    ? 'bg-white/10 border border-white/20 text-white'
-                    : 'text-orange-200/70 hover:bg-white/5 hover:text-orange-100 border border-transparent'
-                  }`}
-              >
-                <UserCog size={17} className={location.pathname === '/users' ? 'text-orange-300' : 'text-orange-400/60 group-hover:text-orange-300'} />
-                <span className={`text-sm flex-1 ${location.pathname === '/users' ? 'font-semibold' : 'font-normal'}`}>จัดการผู้ใช้</span>
-                {location.pathname === '/users' && <div className="w-1.5 h-1.5 rounded-full bg-orange-400 shadow-[0_0_6px_#fb923c]" />}
+              <div className="pt-3 pb-1">
+                <p className="text-orange-500/60 text-[10px] font-bold tracking-[0.15em] px-3 uppercase">ผู้ดูแลระบบ</p>
+              </div>
+              <button onClick={() => handleNav('/users')}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-left transition-all duration-200 group relative
+                  ${location.pathname === '/users' ? 'text-white' : 'text-orange-200/50 hover:text-orange-100 hover:bg-white/5'}`}
+                style={location.pathname === '/users' ? { background: 'linear-gradient(135deg,rgba(234,88,12,0.3),rgba(194,65,12,0.2))', boxShadow: 'inset 0 0 0 1px rgba(251,146,60,0.2)' } : {}}>
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${location.pathname === '/users' ? 'text-orange-300' : 'text-orange-400/50 group-hover:text-orange-300'}`}
+                  style={location.pathname === '/users' ? { background: 'rgba(234,88,12,0.25)' } : {}}>
+                  <UserCog size={16} />
+                </div>
+                <span className={`text-sm flex-1 ${location.pathname === '/users' ? 'font-bold' : 'font-normal'}`}>จัดการผู้ใช้</span>
+                {location.pathname === '/users' && <ChevronRight size={14} className="text-orange-400" />}
               </button>
             </>
           )}
         </nav>
 
-        {/* User Footer */}
-        <div className="px-4 py-4 border-t border-white/10">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-orange-600/40 border border-orange-500/30 text-orange-200 text-xs font-bold flex items-center justify-center flex-shrink-0">
-              {user?.name?.slice(0, 2) || 'U'}
+        {/* ── User Card ── */}
+        <div className="relative p-3 border-t border-white/5">
+          <div className="flex items-center gap-3 px-3 py-3 rounded-2xl"
+            style={{ background: 'rgba(255,255,255,0.04)', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)' }}>
+            {/* Avatar */}
+            <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${ROLE_COLOR[user?.role] || 'from-orange-400 to-amber-500'} flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow-lg`}>
+              {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-semibold leading-none truncate">{user?.name}</p>
-              <div className="flex items-center gap-1 mt-0.5">
-                <RoleIcon size={10} className="text-orange-400" />
-                <p className="text-orange-400 text-xs">{ROLE_LABEL[user?.role] || 'เจ้าหน้าที่'}</p>
-              </div>
+              <p className="text-white text-sm font-bold leading-none truncate">{user?.name}</p>
+              <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${ROLE_BADGE[user?.role] || ROLE_BADGE.STAFF}`}>
+                {ROLE_LABEL[user?.role] || 'เจ้าหน้าที่'}
+              </span>
             </div>
             <button onClick={handleLogout} title="ออกจากระบบ"
-              className="text-orange-400/60 hover:text-orange-200 transition-colors p-1 rounded-lg hover:bg-white/5">
-              <LogOut size={15} />
+              className="text-orange-400/40 hover:text-red-400 transition-colors p-1.5 rounded-xl hover:bg-red-500/10 flex-shrink-0">
+              <LogOut size={14} />
             </button>
           </div>
         </div>
       </aside>
 
-      {/* ── Main content ── */}
-      <main className="flex-1 overflow-auto bg-orange-50 min-h-screen md:p-7">
-        {/* Safe-area spacer — mobile only */}
-        <div className="md:hidden" style={{ height: 'max(56px, calc(env(safe-area-inset-top) + 44px))' }} />
-        <div className="p-4 md:p-0">
+      {/* ── Main ── */}
+      <main className="flex-1 overflow-auto min-h-screen">
+        <div className="md:hidden" style={{ height: '56px' }} />
+        <div className="p-4 md:p-7">
           {children}
         </div>
       </main>

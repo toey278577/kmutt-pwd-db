@@ -167,34 +167,30 @@ export default function PersonList() {
 
   return (
     <div className="flex flex-col" style={{ height: 'calc(100vh - 56px)' }}>
-      {/* Header Banner */}
-      <div className="mb-3 rounded-2xl overflow-hidden relative shadow-md border border-orange-100 flex-shrink-0"
-        style={{ background: 'linear-gradient(135deg,#fff7ed 0%,#ffedd5 60%,#fed7aa 100%)' }}>
-        <div className="absolute -right-10 -top-10 w-52 h-52 rounded-full opacity-20"
-          style={{ background: 'radial-gradient(circle,#ea580c,transparent)' }} />
-        <div className="absolute right-28 -bottom-8 w-32 h-32 rounded-full opacity-10"
-          style={{ background: '#c2410c' }} />
-        <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
-          style={{ background: 'linear-gradient(180deg,#ea580c,#fb923c)' }} />
-        <div className="relative px-8 py-4 flex items-center justify-between gap-6">
+      {/* Header */}
+      <div className="mb-4 relative overflow-hidden rounded-3xl flex-shrink-0"
+        style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
+        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-20 blur-2xl"
+          style={{ background: 'radial-gradient(circle,#fb923c,transparent)' }} />
+        <div className="absolute inset-0 opacity-5"
+          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+        <div className="relative px-6 py-5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-md flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
-              <Users size={20} color="white" />
+            <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
+              <Users size={22} color="white" />
             </div>
             <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <div className="h-px w-5 bg-orange-400 rounded-full" />
-                <span className="text-xs font-bold text-orange-400 uppercase tracking-widest">ฐานข้อมูล</span>
-              </div>
-              <h1 className="text-xl font-extrabold text-orange-950 leading-tight">ข้อมูลคนพิการ</h1>
-              <p className="text-xs text-orange-400 font-semibold mt-0.5">{persons.length} รายการในระบบ</p>
+              <p className="text-orange-300/70 text-xs font-bold tracking-[0.12em] uppercase mb-0.5">ฐานข้อมูล</p>
+              <h1 className="text-xl font-black text-white leading-tight">ข้อมูลคนพิการ</h1>
+              <p className="text-orange-200/50 text-xs mt-0.5">
+                <span className="text-orange-300 font-bold">{persons.length}</span> รายการในระบบ
+              </p>
             </div>
           </div>
           {canEdit && (
             <button
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg active:scale-95 transition-all flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold text-white active:scale-95 transition-all flex-shrink-0 border border-white/20 backdrop-blur-sm"
+              style={{ background: 'rgba(234,88,12,0.4)', boxShadow: '0 0 20px rgba(234,88,12,0.3)' }}
               onClick={() => openModal()}>
               <Plus size={15} /> เพิ่มคนพิการ
             </button>
@@ -203,131 +199,123 @@ export default function PersonList() {
       </div>
 
       {/* Search */}
-      <div className="bg-white rounded-2xl shadow-sm border border-orange-100 px-4 py-2.5 mb-3 flex gap-3 flex-shrink-0">
-        <div className="flex items-center gap-2 flex-1 max-w-md rounded-xl border border-gray-200 px-3.5 py-1.5 bg-gray-50 hover:bg-white focus-within:bg-white focus-within:ring-2 focus-within:ring-orange-400/40 focus-within:border-orange-400 transition-all">
-          <Search size={15} className="text-gray-400 flex-shrink-0" />
+      <div className="bg-white rounded-2xl border border-orange-100 px-4 py-3 mb-4 flex gap-2 flex-shrink-0 shadow-sm">
+        <div className="flex items-center gap-2 flex-1 rounded-xl border border-gray-100 px-3.5 py-2 bg-gray-50/80 focus-within:bg-white focus-within:ring-2 focus-within:ring-orange-400/30 focus-within:border-orange-300 transition-all">
+          <Search size={14} className="text-gray-300 flex-shrink-0" />
           <input
             type="text" placeholder="ค้นหาชื่อ หรือ เลขบัตรประชาชน..."
-            className="grow text-sm bg-transparent outline-none text-gray-800"
+            className="grow text-sm bg-transparent outline-none text-gray-700 placeholder:text-gray-300"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && load(search)}
           />
         </div>
-        <button className="btn btn-primary btn-sm h-auto" onClick={() => load(search)}>ค้นหา</button>
-        {search && <button className="btn btn-ghost btn-sm h-auto" onClick={() => { setSearch(''); load(''); }}>ล้าง</button>}
+        <button
+          className="px-4 py-2 rounded-xl text-sm font-bold text-white transition-all active:scale-95 flex-shrink-0"
+          style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}
+          onClick={() => load(search)}>ค้นหา</button>
+        {search && (
+          <button
+            className="px-3 py-2 rounded-xl text-sm font-semibold text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all flex-shrink-0"
+            onClick={() => { setSearch(''); load(''); }}>ล้าง</button>
+        )}
       </div>
 
       {/* Table */}
-      <div className="flex-1 min-h-0 bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden flex flex-col">
+      <div className="flex-1 min-h-0 bg-white rounded-3xl border border-orange-100/80 shadow-sm overflow-hidden flex flex-col">
         <div className="flex-1 overflow-auto">
-        <table className="table table-sm table-zebra w-full">
-          <thead className="sticky top-0 z-10">
-            <tr className="bg-orange-50 text-orange-600 text-xs uppercase tracking-wider">
-              <th className="w-10">#</th>
-              <th>ชื่อ-นามสกุล</th>
-              <th>เลขบัตร</th>
-              <th>เพศ</th>
-              <th>จังหวัด</th>
-              <th>การศึกษา</th>
-              <th>สถานะ</th>
-              <th className="text-center">จัดการ</th>
-            </tr>
-          </thead>
-          <tbody>
-            {persons.length === 0 && (
-              <tr>
-                <td colSpan={8} className="text-center py-14 text-gray-400">
-                  <UserRound size={40} className="mx-auto mb-2 text-gray-200" />
-                  ไม่พบข้อมูล
-                </td>
+          <table className="w-full text-sm">
+            <thead className="sticky top-0 z-10">
+              <tr style={{ background: 'linear-gradient(135deg,#431407,#7c2d12)' }}>
+                {['#','ชื่อ-นามสกุล','เลขบัตร','เพศ','จังหวัด','การศึกษา','สถานะ','จัดการ'].map((h, i) => (
+                  <th key={h} className={`px-4 py-3.5 text-left text-xs font-bold text-orange-200/70 uppercase tracking-wider ${i === 0 ? 'w-10' : ''} ${i === 7 ? 'text-center' : ''}`}>{h}</th>
+                ))}
               </tr>
-            )}
-            {paged.map((p, i) => (
-              <tr key={p.id} className="hover:bg-orange-50/40 transition-colors">
-                <td className="text-gray-400 text-xs">{(page - 1) * PAGE_SIZE + i + 1}</td>
-                <td>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-orange-100 text-orange-600 text-xs font-bold flex items-center justify-center flex-shrink-0">
-                      {initials(p.fullName)}
+            </thead>
+            <tbody>
+              {persons.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="text-center py-16 text-gray-300">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-16 h-16 rounded-3xl bg-orange-50 flex items-center justify-center">
+                        <UserRound size={28} className="text-orange-200" />
+                      </div>
+                      <p className="text-sm font-medium">ไม่พบข้อมูล</p>
                     </div>
-                    <span className="font-semibold text-orange-950 text-sm">{p.fullName}</span>
-                  </div>
-                </td>
-                <td className="font-mono text-sm text-gray-500">{p.thaiId || '—'}</td>
-                <td>
-                  <span className={`badge badge-sm font-semibold ${GENDER_BADGE[p.gender]}`}>
-                    {GENDER_LABELS[p.gender]}
-                  </span>
-                </td>
-                <td className="text-sm text-gray-600">{p.province || '—'}</td>
-                <td className="text-sm text-gray-600">{p.educationLevel || '—'}</td>
-                <td>
-                  <span className={`badge badge-sm font-semibold ${p.lifeStatus === 'ALIVE' ? 'badge-success' : 'badge-ghost'}`}>
-                    {p.lifeStatus === 'ALIVE' ? 'มีชีวิต' : 'เสียชีวิต'}
-                  </span>
-                </td>
-                <td>
-                  <div className="flex items-center justify-center gap-1">
-                    <button className="btn btn-ghost btn-xs text-orange-500 hover:bg-orange-50" onClick={() => navigate(`/persons/${p.id}`)}>
-                      <Eye size={14} />
-                    </button>
-                    {canEdit && <>
-                      <button className="btn btn-ghost btn-xs text-amber-500 hover:bg-amber-50" onClick={() => openModal(p)}>
-                        <Pencil size={14} />
+                  </td>
+                </tr>
+              )}
+              {paged.map((p, i) => (
+                <tr key={p.id}
+                  className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors cursor-pointer group"
+                  onClick={() => navigate(`/persons/${p.id}`)}>
+                  <td className="px-4 py-3.5 text-gray-300 text-xs font-mono">{(page - 1) * PAGE_SIZE + i + 1}</td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-2xl text-white text-xs font-black flex items-center justify-center flex-shrink-0 shadow-sm"
+                        style={{ background: `linear-gradient(135deg,${['#ea580c','#06b6d4','#10b981','#8b5cf6','#ec4899'][i % 5]},${['#c2410c','#0284c7','#047857','#7c3aed','#db2777'][i % 5]})` }}>
+                        {initials(p.fullName)}
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-800 text-sm leading-none">{p.fullName}</p>
+                        <p className="text-gray-300 text-xs mt-0.5">{p.disabilityInfos?.[0]?.disabilityType?.typeName || ''}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3.5 font-mono text-xs text-gray-400">{p.thaiId || '—'}</td>
+                  <td className="px-4 py-3.5">
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${GENDER_BADGE[p.gender]}`}>
+                      {GENDER_LABELS[p.gender]}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5 text-gray-500 text-sm">{p.province || '—'}</td>
+                  <td className="px-4 py-3.5 text-gray-400 text-xs max-w-[120px] truncate">{p.educationLevel || '—'}</td>
+                  <td className="px-4 py-3.5">
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${p.lifeStatus === 'ALIVE' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-gray-100 text-gray-400 border border-gray-200'}`}>
+                      {p.lifeStatus === 'ALIVE' ? 'มีชีวิต' : 'เสียชีวิต'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center justify-center gap-1">
+                      <button className="w-7 h-7 rounded-xl flex items-center justify-center text-orange-400 hover:bg-orange-50 hover:text-orange-600 transition-all" onClick={() => navigate(`/persons/${p.id}`)}>
+                        <Eye size={14} />
                       </button>
-                      <button className="btn btn-ghost btn-xs text-red-500 hover:bg-red-50" onClick={() => handleDelete(p.id)}>
-                        <Trash2 size={14} />
-                      </button>
-                    </>}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                      {canEdit && <>
+                        <button className="w-7 h-7 rounded-xl flex items-center justify-center text-amber-400 hover:bg-amber-50 hover:text-amber-600 transition-all" onClick={() => openModal(p)}>
+                          <Pencil size={14} />
+                        </button>
+                        <button className="w-7 h-7 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-50 hover:text-red-600 transition-all" onClick={() => handleDelete(p.id)}>
+                          <Trash2 size={14} />
+                        </button>
+                      </>}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-orange-100 flex-shrink-0">
-            <span className="text-sm text-gray-400">
-              หน้า <span className="font-bold text-orange-600">{page}</span> จาก {totalPages}
-              <span className="ml-2 text-gray-300">({persons.length} รายการ)</span>
+          <div className="flex items-center justify-between px-5 py-3.5 border-t border-gray-50 flex-shrink-0">
+            <span className="text-xs text-gray-400">
+              หน้า <span className="font-bold text-orange-600">{page}</span> / {totalPages}
+              <span className="ml-1.5 text-gray-300">· {persons.length} รายการ</span>
             </span>
             <div className="flex items-center gap-1">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-3 py-1.5 rounded-lg text-sm font-semibold border border-gray-200 text-gray-500 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-                ←
-              </button>
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                className="w-8 h-8 rounded-xl text-sm font-bold border border-gray-100 text-gray-400 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all">←</button>
               {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 2)
-                .reduce((acc, n, idx, arr) => {
-                  if (idx > 0 && n - arr[idx - 1] > 1) acc.push('…');
-                  acc.push(n);
-                  return acc;
-                }, [])
-                .map((n, idx) =>
-                  n === '…'
-                    ? <span key={`ellipsis-${idx}`} className="px-1 text-gray-300 text-sm">…</span>
-                    : <button key={n}
-                        onClick={() => setPage(n)}
-                        className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${
-                          page === n
-                            ? 'text-white shadow-sm'
-                            : 'border border-gray-200 text-gray-500 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600'
-                        }`}
-                        style={page === n ? { background: 'linear-gradient(135deg,#ea580c,#c2410c)' } : {}}>
-                        {n}
-                      </button>
+                .filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
+                .reduce((acc, n, idx, arr) => { if (idx > 0 && n - arr[idx-1] > 1) acc.push('…'); acc.push(n); return acc; }, [])
+                .map((n, idx) => n === '…'
+                  ? <span key={`e-${idx}`} className="px-1 text-gray-200 text-xs">…</span>
+                  : <button key={n} onClick={() => setPage(n)}
+                      className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${page === n ? 'text-white shadow-sm' : 'border border-gray-100 text-gray-400 hover:bg-orange-50 hover:text-orange-600'}`}
+                      style={page === n ? { background: 'linear-gradient(135deg,#ea580c,#c2410c)' } : {}}>{n}</button>
                 )}
-              <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="px-3 py-1.5 rounded-lg text-sm font-semibold border border-gray-200 text-gray-500 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-                →
-              </button>
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                className="w-8 h-8 rounded-xl text-sm font-bold border border-gray-100 text-gray-400 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all">→</button>
             </div>
           </div>
         )}
@@ -335,15 +323,18 @@ export default function PersonList() {
 
       {/* Modal */}
       <dialog ref={modalRef} className="modal">
-        <div className="modal-box max-w-3xl p-0 overflow-hidden bg-white shadow-2xl">
+        <div className="modal-box max-w-3xl p-0 overflow-hidden bg-white shadow-2xl rounded-3xl">
           {/* Header */}
-          <div className="px-6 py-5 flex items-center gap-3" style={{ background: 'linear-gradient(135deg,#431407 0%,#c2410c 100%)' }}>
-            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
+          <div className="relative px-6 py-5 flex items-center gap-4 overflow-hidden"
+            style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
+            <div className="absolute inset-0 opacity-5"
+              style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
+            <div className="relative w-11 h-11 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
               <UserRound size={20} color="#fff" />
             </div>
-            <div>
-              <h3 className="text-white font-bold text-base leading-tight">{editId ? 'แก้ไขข้อมูลคนพิการ' : 'เพิ่มข้อมูลคนพิการใหม่'}</h3>
-              <p className="text-orange-300/80 text-xs mt-0.5">กรุณากรอกข้อมูลให้ครบถ้วนตามแบบฟอร์ม กกจ.พก.1</p>
+            <div className="relative">
+              <h3 className="text-white font-black text-base leading-tight">{editId ? 'แก้ไขข้อมูลคนพิการ' : 'เพิ่มข้อมูลคนพิการใหม่'}</h3>
+              <p className="text-orange-200/60 text-xs mt-0.5">กรอกข้อมูลให้ครบถ้วนตามแบบฟอร์ม กกจ.พก.1</p>
             </div>
           </div>
           {/* Body */}
@@ -538,9 +529,14 @@ export default function PersonList() {
             </Section>
           </div>
           {/* Footer */}
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
-            <button className="px-5 py-2 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors" onClick={() => modalRef.current?.close()}>ยกเลิก</button>
-            <button className="px-6 py-2 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg active:scale-95 transition-all" style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }} onClick={handleSave}>บันทึก</button>
+          <div className="px-6 py-4 bg-gray-50/80 border-t border-gray-100 flex justify-end gap-2">
+            <button
+              className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-all active:scale-95"
+              onClick={() => modalRef.current?.close()}>ยกเลิก</button>
+            <button
+              className="px-6 py-2.5 rounded-2xl text-sm font-bold text-white shadow-lg active:scale-95 transition-all"
+              style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', boxShadow: '0 4px 15px rgba(234,88,12,0.3)' }}
+              onClick={handleSave}>บันทึกข้อมูล</button>
           </div>
         </div>
         <form method="dialog" className="modal-backdrop"><button>close</button></form>

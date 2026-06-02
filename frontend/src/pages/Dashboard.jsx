@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, Building2, GraduationCap, TrendingUp } from 'lucide-react';
+import { Users, Building2, GraduationCap, TrendingUp, ArrowUpRight } from 'lucide-react';
 import {
   PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar,
   XAxis, YAxis, ResponsiveContainer, CartesianGrid,
@@ -11,223 +11,209 @@ const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อ�
 const EMP_LABELS = { EMPLOYED: 'มีงานทำ', UNEMPLOYED: 'ว่างงาน', STUDYING: 'ศึกษาต่อ' };
 
 const statCards = [
-  { key: 'totalPersons', label: 'คนพิการทั้งหมด', icon: Users, from: '#ea580c', to: '#c2410c' },
-  { key: 'totalOrgs', label: 'สถานประกอบการ', icon: Building2, from: '#0891b2', to: '#0284c7' },
-  { key: 'totalTraining', label: 'บันทึกการอบรม', icon: GraduationCap, from: '#059669', to: '#047857' },
+  { key: 'totalPersons', label: 'คนพิการทั้งหมด', icon: Users, gradient: 'from-orange-500 to-red-500', glow: 'shadow-orange-200', bg: 'bg-orange-50', text: 'text-orange-600' },
+  { key: 'totalOrgs', label: 'สถานประกอบการ', icon: Building2, gradient: 'from-cyan-500 to-blue-500', glow: 'shadow-cyan-200', bg: 'bg-cyan-50', text: 'text-cyan-600' },
+  { key: 'totalTraining', label: 'บันทึกการอบรม', icon: GraduationCap, gradient: 'from-emerald-500 to-teal-500', glow: 'shadow-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-600' },
 ];
 
 const CustomTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-orange-950 text-white px-3 py-2 rounded-xl text-xs shadow-xl">
+    <div className="bg-gray-900/90 backdrop-blur-sm text-white px-3 py-2 rounded-xl text-xs shadow-2xl border border-white/10">
       <b>{payload[0].name}</b>: {payload[0].value}
     </div>
   );
 };
 
 const RADIAN = Math.PI / 180;
-const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
   if (percent < 0.05) return null;
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-  return (
-    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight="bold">
-      {`${(percent * 100).toFixed(0)}%`}
-    </text>
-  );
+  const r = innerRadius + (outerRadius - innerRadius) * 0.55;
+  const x = cx + r * Math.cos(-midAngle * RADIAN);
+  const y = cy + r * Math.sin(-midAngle * RADIAN);
+  return <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight="700">{`${(percent*100).toFixed(0)}%`}</text>;
 };
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
+  useEffect(() => { getDashboardStats().then(r => setStats(r.data)); }, []);
 
-  useEffect(() => {
-    getDashboardStats().then((r) => setStats(r.data));
-  }, []);
-
-  if (!stats) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <span className="loading loading-spinner loading-lg text-primary" />
+  if (!stats) return (
+    <div className="flex items-center justify-center h-96">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-12 h-12 rounded-2xl animate-pulse" style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }} />
+        <span className="text-orange-400 text-sm font-semibold">กำลังโหลด...</span>
       </div>
-    );
-  }
+    </div>
+  );
 
-  const genderData = stats.byGender.map((g) => ({ ...g, name: GENDER_LABELS[g.name] || g.name }));
-  const empData = stats.byEmployment.map((e) => ({ ...e, name: EMP_LABELS[e.name] || e.name }));
+  const genderData = stats.byGender.map(g => ({ ...g, name: GENDER_LABELS[g.name] || g.name }));
+  const empData = stats.byEmployment.map(e => ({ ...e, name: EMP_LABELS[e.name] || e.name }));
 
   return (
-    <div>
-      {/* Hero Banner */}
-      <div className="mb-7 rounded-2xl overflow-hidden relative shadow-md border border-orange-100"
-        style={{ background: 'linear-gradient(135deg,#fff7ed 0%,#ffedd5 60%,#fed7aa 100%)' }}>
-        <div className="absolute -right-10 -top-10 w-52 h-52 rounded-full opacity-20"
-          style={{ background: 'radial-gradient(circle,#ea580c,transparent)' }} />
-        <div className="absolute right-28 -bottom-8 w-32 h-32 rounded-full opacity-10"
-          style={{ background: '#c2410c' }} />
-        <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
-          style={{ background: 'linear-gradient(180deg,#ea580c,#fb923c)' }} />
-        <div className="relative px-8 py-6 flex items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-px w-6 bg-orange-400 rounded-full" />
-              <span className="text-orange-500 text-[11px] font-bold tracking-widest uppercase">King Mongkut's University of Technology Thonburi</span>
+    <div className="space-y-6">
+
+      {/* ═══ HERO BANNER ═══ */}
+      <div className="relative overflow-hidden rounded-3xl p-6 md:p-8"
+        style={{ background: 'linear-gradient(135deg,#431407 0%,#9a3412 50%,#ea580c 100%)' }}>
+        {/* Decorative blobs */}
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle,#fb923c,transparent)' }} />
+        <div className="absolute -bottom-10 left-20 w-48 h-48 rounded-full opacity-15 blur-2xl" style={{ background: 'radial-gradient(circle,#fbbf24,transparent)' }} />
+        <div className="absolute top-0 right-0 w-full h-full opacity-5"
+          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+
+        <div className="relative flex items-center justify-between gap-6">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm text-orange-200 text-xs font-bold tracking-widest uppercase border border-white/10">
+                KMUTT · มจธ.
+              </span>
             </div>
-            <h1 className="text-2xl font-extrabold text-orange-950 leading-tight">ระบบฐานข้อมูลคนพิการ</h1>
-            <p className="text-sm text-orange-700/60 mt-1 font-medium">โครงการฝึกอบรม-ฝึกงาน มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</p>
+            <h1 className="text-2xl md:text-3xl font-black text-white leading-tight mb-1">
+              ระบบฐานข้อมูลคนพิการ
+            </h1>
+            <p className="text-orange-200/70 text-sm font-medium">
+              โครงการฝึกอบรม-ฝึกงาน เพื่อเตรียมความพร้อมเข้าสู่สถานประกอบการ
+            </p>
           </div>
-          <img src="/logo.jpg" alt="KMUTT" className="h-16 object-contain opacity-90 flex-shrink-0 relative" />
+          <img src="/logo.jpg" alt="KMUTT"
+            className="h-16 md:h-20 object-contain opacity-90 flex-shrink-0 drop-shadow-2xl" />
+        </div>
+
+        {/* Mini stat strip */}
+        <div className="relative mt-5 grid grid-cols-3 gap-3">
+          {statCards.map(({ key, label, icon: Icon }) => (
+            <div key={key} className="rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 px-4 py-3 flex items-center gap-3">
+              <Icon size={18} className="text-orange-200 flex-shrink-0" />
+              <div>
+                <p className="text-white text-xl font-black leading-none">{stats[key]}</p>
+                <p className="text-orange-200/70 text-xs mt-0.5">{label}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-7">
-        {statCards.map(({ key, label, icon: Icon, from, to }) => (
-          <div key={key} className="rounded-2xl p-5 relative overflow-hidden shadow-lg"
-            style={{ background: `linear-gradient(135deg,${from},${to})` }}>
-            <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-white/10" />
-            <div className="absolute -bottom-6 right-8 w-16 h-16 rounded-full bg-white/5" />
-            <div className="flex items-start justify-between relative">
-              <div>
-                <p className="text-white/70 text-xs font-medium mb-1">{label}</p>
-                <p className="text-white text-4xl font-black">{stats[key]}</p>
-              </div>
-              <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center">
-                <Icon size={22} color="#fff" />
-              </div>
-            </div>
-            <div className="flex items-center gap-1 mt-3 relative">
-              <TrendingUp size={13} color="rgba(255,255,255,0.6)" />
-              <span className="text-white/60 text-xs">ข้อมูลล่าสุด</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Charts Row 1: เพศ / ประเภทความพิการ / สถานะงาน */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
-        <ChartCard title="แยกตามเพศ" accentColor="#ea580c">
+      {/* ═══ CHART ROW 1 ═══ */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <GlassChart title="แยกตามเพศ" accent="#ea580c">
           {genderData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={210}>
+            <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie data={genderData} dataKey="value" nameKey="name" cx="50%" cy="50%"
-                  outerRadius={72} innerRadius={32} paddingAngle={3}
-                  labelLine={false} label={renderCustomLabel}>
+                  outerRadius={75} innerRadius={35} paddingAngle={4} labelLine={false} label={renderLabel}>
                   {genderData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '0.78rem' }} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '0.75rem' }} />
               </PieChart>
             </ResponsiveContainer>
           ) : <EmptyChart />}
-        </ChartCard>
+        </GlassChart>
 
-        <ChartCard title="ประเภทความพิการ" accentColor="#06b6d4">
+        <GlassChart title="ประเภทความพิการ" accent="#06b6d4">
           {stats.byDisabilityType.length > 0 ? (
-            <ResponsiveContainer width="100%" height={210}>
+            <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie data={stats.byDisabilityType} dataKey="value" nameKey="name" cx="50%" cy="50%"
-                  outerRadius={72} innerRadius={32} paddingAngle={3}
-                  labelLine={false} label={renderCustomLabel}>
+                  outerRadius={75} innerRadius={35} paddingAngle={4} labelLine={false} label={renderLabel}>
                   {stats.byDisabilityType.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '0.72rem' }} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '0.68rem' }} />
               </PieChart>
             </ResponsiveContainer>
           ) : <EmptyChart />}
-        </ChartCard>
+        </GlassChart>
 
-        <ChartCard title="สถานะการมีงานทำ" accentColor="#10b981">
+        <GlassChart title="สถานะการมีงานทำ" accent="#10b981">
           {empData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={210}>
-              <BarChart data={empData} barSize={28}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#fff7ed" vertical={false} />
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={empData} barSize={32}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(234,88,12,0.04)' }} />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(234,88,12,0.05)', radius: 8 }} />
+                <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                   {empData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           ) : <EmptyChart />}
-        </ChartCard>
+        </GlassChart>
       </div>
 
-      {/* Charts Row 2: วุฒิ / ช่วงอายุ / ภูมิภาค */}
+      {/* ═══ CHART ROW 2 ═══ */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <ChartCard title="วุฒิการศึกษา" accentColor="#f59e0b">
+        <GlassChart title="วุฒิการศึกษา" accent="#f59e0b">
           {stats.byEducation?.length > 0 ? (
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={210}>
               <PieChart>
                 <Pie data={stats.byEducation} dataKey="value" nameKey="name" cx="50%" cy="50%"
-                  outerRadius={72} innerRadius={32} paddingAngle={3}
-                  labelLine={false} label={renderCustomLabel}>
+                  outerRadius={75} innerRadius={35} paddingAngle={4} labelLine={false} label={renderLabel}>
                   {stats.byEducation.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '0.70rem' }} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '0.68rem' }} />
               </PieChart>
             </ResponsiveContainer>
           ) : <EmptyChart />}
-        </ChartCard>
+        </GlassChart>
 
-        <ChartCard title="ช่วงอายุ" accentColor="#8b5cf6">
+        <GlassChart title="ช่วงอายุ" accent="#8b5cf6">
           {stats.byAgeGroup?.length > 0 ? (
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={210}>
               <PieChart>
                 <Pie data={stats.byAgeGroup} dataKey="value" nameKey="name" cx="50%" cy="50%"
-                  outerRadius={72} innerRadius={32} paddingAngle={3}
-                  labelLine={false} label={renderCustomLabel}>
+                  outerRadius={75} innerRadius={35} paddingAngle={4} labelLine={false} label={renderLabel}>
                   {stats.byAgeGroup.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '0.78rem' }} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '0.75rem' }} />
               </PieChart>
             </ResponsiveContainer>
           ) : <EmptyChart />}
-        </ChartCard>
+        </GlassChart>
 
-        <ChartCard title="ภูมิภาค" accentColor="#ec4899">
+        <GlassChart title="ภูมิภาค" accent="#ec4899">
           {stats.byRegion?.length > 0 ? (
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={stats.byRegion} barSize={22} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#fff7ed" horizontal={false} />
+            <ResponsiveContainer width="100%" height={210}>
+              <BarChart data={stats.byRegion} barSize={16} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={80} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(234,88,12,0.04)' }} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={75} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(234,88,12,0.05)' }} />
                 <Bar dataKey="value" radius={[0, 6, 6, 0]}>
                   {stats.byRegion.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           ) : <EmptyChart />}
-        </ChartCard>
+        </GlassChart>
       </div>
     </div>
   );
 }
 
-function ChartCard({ title, accentColor, children }) {
+function GlassChart({ title, accent, children }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-1 h-5 rounded-full" style={{ background: `linear-gradient(180deg,${accentColor},${accentColor}88)` }} />
-        <span className="font-bold text-orange-950 text-sm">{title}</span>
+    <div className="bg-white rounded-3xl border border-orange-100/80 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+      <div className="px-5 pt-4 pb-3 flex items-center gap-2 border-b border-gray-50">
+        <div className="w-2 h-2 rounded-full" style={{ background: accent, boxShadow: `0 0 6px ${accent}` }} />
+        <span className="font-bold text-gray-800 text-sm">{title}</span>
       </div>
-      {children}
+      <div className="p-4">{children}</div>
     </div>
   );
 }
 
 function EmptyChart() {
   return (
-    <div className="h-52 flex flex-col items-center justify-center gap-2">
-      <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center">
-        <TrendingUp size={20} className="text-orange-200" />
+    <div className="h-48 flex flex-col items-center justify-center gap-2">
+      <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center">
+        <TrendingUp size={18} className="text-orange-200" />
       </div>
-      <p className="text-slate-400 text-xs">ยังไม่มีข้อมูล</p>
+      <p className="text-gray-300 text-xs">ยังไม่มีข้อมูล</p>
     </div>
   );
 }
