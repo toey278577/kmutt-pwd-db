@@ -111,25 +111,27 @@ export default function ReportPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-5 rounded-2xl overflow-hidden relative shadow-md border border-orange-100"
-        style={{ background: 'linear-gradient(135deg,#fff7ed 0%,#ffedd5 60%,#fed7aa 100%)' }}>
-        <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
-          style={{ background: 'linear-gradient(180deg,#ea580c,#fb923c)' }} />
-        <div className="relative px-8 py-4 flex items-center justify-between">
+      <div className="mb-5 relative overflow-hidden rounded-3xl"
+        style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
+        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-20 blur-2xl"
+          style={{ background: 'radial-gradient(circle,#fb923c,transparent)' }} />
+        <div className="absolute inset-0 opacity-5"
+          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+        <div className="relative px-6 py-5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-md"
-              style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
-              <Printer size={20} color="white" />
+            <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
+              <Printer size={22} color="white" />
             </div>
             <div>
-              <h1 className="text-xl font-extrabold text-orange-950">ออกรายงาน / Report</h1>
-              <p className="text-xs text-orange-400 font-semibold mt-0.5">เลือกประเภทรายงานแล้วกด พิมพ์ / บันทึก PDF</p>
+              <p className="text-orange-300/70 text-xs font-bold tracking-[0.12em] uppercase mb-0.5">รายงาน</p>
+              <h1 className="text-xl font-black text-white leading-tight">ออกรายงาน / Report</h1>
+              <p className="text-orange-200/50 text-xs mt-0.5">เลือกประเภทรายงานแล้วกด พิมพ์ / บันทึก PDF</p>
             </div>
           </div>
           <button
             onClick={handlePrint}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg active:scale-95 transition-all"
-            style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold text-white active:scale-95 transition-all flex-shrink-0 border border-white/20"
+            style={{ background: 'rgba(234,88,12,0.4)', boxShadow: '0 0 20px rgba(234,88,12,0.3)' }}>
             <Printer size={16} /> พิมพ์ / บันทึก PDF
           </button>
         </div>

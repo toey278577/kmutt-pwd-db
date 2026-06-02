@@ -4,10 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import { getPersons, getTraining } from '../api';
 
 const TYPE = {
-  TRAIN: { cls: 'badge-warning',  label: 'อบรม' },
-  LEARN: { cls: 'badge-info',     label: 'เรียนรู้' },
-  EARN:  { cls: 'badge-success',  label: 'ฝึกงาน' },
+  TRAIN: { bg: 'bg-amber-100 text-amber-700 border-amber-200',   label: 'อบรม' },
+  LEARN: { bg: 'bg-cyan-100 text-cyan-700 border-cyan-200',      label: 'เรียนรู้' },
+  EARN:  { bg: 'bg-emerald-100 text-emerald-700 border-emerald-200', label: 'ฝึกงาน' },
 };
+
+const AVATAR_COLORS = [
+  'from-orange-500 to-red-500', 'from-cyan-500 to-blue-500',
+  'from-emerald-500 to-teal-500', 'from-violet-500 to-purple-500',
+  'from-pink-500 to-rose-500',
+];
 
 const fmtDate = (iso) => {
   if (!iso) return null;
@@ -48,88 +54,89 @@ export default function TrainingList() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-96">
-      <span className="loading loading-spinner loading-lg text-primary" />
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-10 h-10 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+        <span className="text-orange-400 text-sm">กำลังโหลด...</span>
+      </div>
     </div>
   );
 
   return (
-    <div>
-      <div className="mb-7 rounded-2xl overflow-hidden relative shadow-md border border-orange-100"
-        style={{ background: 'linear-gradient(135deg,#fff7ed 0%,#ffedd5 60%,#fed7aa 100%)' }}>
-        <div className="absolute -right-10 -top-10 w-52 h-52 rounded-full opacity-20"
-          style={{ background: 'radial-gradient(circle,#ea580c,transparent)' }} />
-        <div className="absolute right-28 -bottom-8 w-32 h-32 rounded-full opacity-10"
-          style={{ background: '#c2410c' }} />
-        <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
-          style={{ background: 'linear-gradient(180deg,#ea580c,#fb923c)' }} />
-        <div className="relative px-8 py-6 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-3xl"
+        style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
+        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-20 blur-2xl"
+          style={{ background: 'radial-gradient(circle,#fb923c,transparent)' }} />
+        <div className="absolute inset-0 opacity-5"
+          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+        <div className="relative px-6 py-5 flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
             <GraduationCap size={22} color="white" />
           </div>
           <div>
-            <div className="flex items-center gap-2 mb-0.5">
-              <div className="h-px w-5 bg-orange-400 rounded-full" />
-              <span className="text-xs font-bold text-orange-400 uppercase tracking-widest">ภาพรวม</span>
-            </div>
-            <h1 className="text-2xl font-extrabold text-orange-950 leading-tight">การอบรม & ฝึกงาน</h1>
-            <p className="text-sm text-orange-400 font-semibold mt-0.5">{rows.length} รายการในระบบ</p>
+            <p className="text-orange-300/70 text-xs font-bold tracking-[0.12em] uppercase mb-0.5">ภาพรวม</p>
+            <h1 className="text-xl font-black text-white leading-tight">การอบรม & ฝึกงาน</h1>
+            <p className="text-orange-200/50 text-xs mt-0.5">
+              <span className="text-orange-300 font-bold">{rows.length}</span> รายการในระบบ
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden overflow-x-auto">
-        <table className="table table-zebra w-full">
-          <thead>
-            <tr className="bg-orange-50 text-orange-600 text-xs uppercase tracking-wider">
-              <th>ชื่อ</th>
-              <th>หลักสูตร</th>
-              <th>หน่วยงาน</th>
-              <th>รูปแบบ</th>
-              <th>ช่วงเวลา</th>
-              <th>ทักษะที่ได้</th>
-              <th>ผลประเมิน</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 && (
-              <tr>
-                <td colSpan={7} className="text-center py-14 text-gray-400">
-                  <GraduationCap size={40} className="mx-auto mb-2 text-gray-200" />
-                  ไม่มีข้อมูลการอบรม
-                </td>
+      {/* Table */}
+      <div className="bg-white rounded-3xl border border-orange-100/80 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm" style={{ minWidth: '720px' }}>
+            <thead>
+              <tr style={{ background: 'linear-gradient(135deg,#431407,#7c2d12)' }}>
+                {['ชื่อ', 'หลักสูตร', 'หน่วยงาน', 'รูปแบบ', 'ช่วงเวลา', 'ทักษะที่ได้', 'ผลประเมิน'].map(h => (
+                  <th key={h} className="px-4 py-3.5 text-left text-xs font-bold text-orange-200/70 uppercase tracking-wide">{h}</th>
+                ))}
               </tr>
-            )}
-            {rows.map((t) => {
-              const tp = TYPE[t.trainingType];
-              return (
-                <tr key={t.id} className="hover:bg-orange-50/40 transition-colors">
-                  <td>
-                    <button
-                      onClick={() => navigate(`/persons/${t.personId}`)}
-                      className="flex items-center gap-2.5 hover:underline text-left"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 text-xs font-bold flex items-center justify-center flex-shrink-0">
-                        {t.personName?.slice(0, 2)}
+            </thead>
+            <tbody>
+              {rows.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="text-center py-16 text-gray-300">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-16 h-16 rounded-3xl bg-orange-50 flex items-center justify-center">
+                        <GraduationCap size={28} className="text-orange-200" />
                       </div>
-                      <span className="font-semibold text-orange-950 text-sm">{t.personName}</span>
-                    </button>
+                      <p className="text-sm font-medium">ไม่มีข้อมูลการอบรม</p>
+                    </div>
                   </td>
-                  <td className="font-semibold text-orange-950 text-sm">{t.courseName}</td>
-                  <td className="text-sm text-gray-600">{t.organizer || '—'}</td>
-                  <td>
-                    {tp
-                      ? <span className={`badge badge-sm font-semibold ${tp.cls}`}>{tp.label}</span>
-                      : <span className="text-gray-300">—</span>}
-                  </td>
-                  <td><DateRange start={t.startDate} end={t.endDate} /></td>
-                  <td className="text-sm text-gray-600 max-w-xs truncate">{t.skillsGained || '—'}</td>
-                  <td className="text-sm text-gray-600">{t.evaluationResult || '—'}</td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              )}
+              {rows.map((t, i) => {
+                const tp = TYPE[t.trainingType];
+                return (
+                  <tr key={t.id} className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors">
+                    <td className="px-4 py-3.5">
+                      <button onClick={() => navigate(`/persons/${t.personId}`)}
+                        className="flex items-center gap-2.5 text-left group">
+                        <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${AVATAR_COLORS[i % 5]} text-white text-xs font-black flex items-center justify-center flex-shrink-0`}>
+                          {t.personName?.slice(0, 2)}
+                        </div>
+                        <span className="font-semibold text-gray-800 text-sm group-hover:text-orange-600 transition-colors">{t.personName}</span>
+                      </button>
+                    </td>
+                    <td className="px-4 py-3.5 font-semibold text-gray-800 max-w-[160px] truncate">{t.courseName}</td>
+                    <td className="px-4 py-3.5 text-gray-500 text-sm">{t.organizer || '—'}</td>
+                    <td className="px-4 py-3.5">
+                      {tp
+                        ? <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${tp.bg}`}>{tp.label}</span>
+                        : <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="px-4 py-3.5"><DateRange start={t.startDate} end={t.endDate} /></td>
+                    <td className="px-4 py-3.5 text-gray-400 text-xs max-w-[140px] truncate">{t.skillsGained || '—'}</td>
+                    <td className="px-4 py-3.5 text-gray-500 text-sm">{t.evaluationResult || '—'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

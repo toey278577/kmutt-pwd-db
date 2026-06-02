@@ -4,7 +4,14 @@ import { getOrganizations, createOrganization, updateOrganization, deleteOrganiz
 import { useAuth } from '../context/AuthContext';
 
 const emptyForm = { orgName: '', businessType: '', address: '', contactName: '', phone: '', email: '', note: '' };
-const COLORS = ['bg-orange-100 text-orange-600', 'bg-cyan-100 text-cyan-600', 'bg-emerald-100 text-emerald-600', 'bg-amber-100 text-amber-600', 'bg-purple-100 text-purple-600', 'bg-pink-100 text-pink-600'];
+const AVATAR_GRADIENTS = [
+  'from-orange-500 to-red-500', 'from-cyan-500 to-blue-500',
+  'from-emerald-500 to-teal-500', 'from-violet-500 to-purple-500',
+  'from-pink-500 to-rose-500', 'from-amber-500 to-orange-500',
+];
+
+const inputCls = 'w-full rounded-2xl border border-gray-100 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 transition-all';
+const labelCls = 'block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide';
 
 export default function OrganizationList() {
   const { canEdit } = useAuth();
@@ -23,129 +30,136 @@ export default function OrganizationList() {
   };
 
   const handleSave = async () => {
+    if (!form.orgName.trim()) return alert('กรุณากรอกชื่อองค์กร');
     try {
       if (editId) await updateOrganization(editId, form);
       else await createOrganization(form);
-      modalRef.current?.close(); load();
+      modalRef.current?.close();
+      load();
     } catch (err) { alert(err.response?.data?.error || 'เกิดข้อผิดพลาด'); }
   };
 
   const handleDelete = async (id) => {
     if (!confirm('ยืนยันลบ?')) return;
-    await deleteOrganization(id); load();
+    await deleteOrganization(id);
+    load();
   };
 
   return (
-    <div>
-      <div className="mb-7 rounded-2xl overflow-hidden relative shadow-md border border-orange-100"
-        style={{ background: 'linear-gradient(135deg,#fff7ed 0%,#ffedd5 60%,#fed7aa 100%)' }}>
-        <div className="absolute -right-10 -top-10 w-52 h-52 rounded-full opacity-20"
-          style={{ background: 'radial-gradient(circle,#ea580c,transparent)' }} />
-        <div className="absolute right-28 -bottom-8 w-32 h-32 rounded-full opacity-10"
-          style={{ background: '#c2410c' }} />
-        <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
-          style={{ background: 'linear-gradient(180deg,#ea580c,#fb923c)' }} />
-        <div className="relative px-8 py-6 flex items-center justify-between gap-6">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-3xl"
+        style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
+        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-20 blur-2xl"
+          style={{ background: 'radial-gradient(circle,#fb923c,transparent)' }} />
+        <div className="absolute inset-0 opacity-5"
+          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+        <div className="relative px-6 py-5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
+            <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
               <Building2 size={22} color="white" />
             </div>
             <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <div className="h-px w-5 bg-orange-400 rounded-full" />
-                <span className="text-xs font-bold text-orange-400 uppercase tracking-widest">ฐานข้อมูล</span>
-              </div>
-              <h1 className="text-2xl font-extrabold text-orange-950 leading-tight">สถานประกอบการ</h1>
-              <p className="text-sm text-orange-400 font-semibold mt-0.5">{orgs.length} แห่งในระบบ</p>
+              <p className="text-orange-300/70 text-xs font-bold tracking-[0.12em] uppercase mb-0.5">ฐานข้อมูล</p>
+              <h1 className="text-xl font-black text-white leading-tight">สถานประกอบการ</h1>
+              <p className="text-orange-200/50 text-xs mt-0.5">
+                <span className="text-orange-300 font-bold">{orgs.length}</span> แห่งในระบบ
+              </p>
             </div>
           </div>
           {canEdit && (
             <button
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg active:scale-95 transition-all flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold text-white active:scale-95 transition-all flex-shrink-0 border border-white/20"
+              style={{ background: 'rgba(234,88,12,0.4)', boxShadow: '0 0 20px rgba(234,88,12,0.3)' }}
               onClick={() => openModal()}>
-              <Plus size={16} /> เพิ่มองค์กร
+              <Plus size={15} /> เพิ่มองค์กร
             </button>
           )}
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+      {/* Table */}
+      <div className="bg-white rounded-3xl border border-orange-100/80 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-        <table className="table table-zebra w-full" style={{ minWidth: '640px' }}>
-          <thead>
-            <tr className="bg-orange-50 text-orange-600 text-xs uppercase tracking-wider">
-              <th className="w-10">#</th>
-              <th style={{ minWidth: '180px' }}>ชื่อองค์กร</th>
-              <th style={{ minWidth: '120px' }}>ประเภทธุรกิจ</th>
-              <th style={{ minWidth: '110px' }}>ผู้ติดต่อ</th>
-              <th style={{ minWidth: '140px' }}>เบอร์โทร / Email</th>
-              <th className="text-center" style={{ minWidth: '80px' }}>จัดการ</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orgs.length === 0 && (
-              <tr>
-                <td colSpan={6} className="text-center py-14 text-gray-400">
-                  <Building2 size={40} className="mx-auto mb-2 text-gray-200" />
-                  ไม่พบข้อมูล
-                </td>
+          <table className="w-full text-sm" style={{ minWidth: '640px' }}>
+            <thead>
+              <tr style={{ background: 'linear-gradient(135deg,#431407,#7c2d12)' }}>
+                {['#', 'ชื่อองค์กร', 'ประเภทธุรกิจ', 'ผู้ติดต่อ', 'เบอร์โทร / Email', 'จัดการ'].map((h, i) => (
+                  <th key={h} className={`px-4 py-3.5 text-left text-xs font-bold text-orange-200/70 uppercase tracking-wide ${i === 0 ? 'w-10' : ''} ${i === 5 ? 'text-center' : ''}`}>{h}</th>
+                ))}
               </tr>
-            )}
-            {orgs.map((o, i) => (
-              <tr key={o.id} className="hover:bg-orange-50/40 transition-colors">
-                <td className="text-gray-400 text-xs">{i + 1}</td>
-                <td>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black flex-shrink-0 ${COLORS[i % COLORS.length]}`}>
-                      {o.orgName.slice(0, 2)}
+            </thead>
+            <tbody>
+              {orgs.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="text-center py-16 text-gray-300">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-16 h-16 rounded-3xl bg-orange-50 flex items-center justify-center">
+                        <Building2 size={28} className="text-orange-200" />
+                      </div>
+                      <p className="text-sm font-medium">ไม่พบข้อมูล</p>
                     </div>
-                    <span className="font-semibold text-orange-950 text-sm">{o.orgName}</span>
-                  </div>
-                </td>
-                <td>
-                  {o.businessType
-                    ? <span className="badge badge-sm bg-orange-50 text-orange-600 border-0 font-medium">{o.businessType}</span>
-                    : <span className="text-gray-300">—</span>}
-                </td>
-                <td className="text-sm text-gray-600">{o.contactName || '—'}</td>
-                <td>
-                  <p className="text-sm text-gray-700">{o.phone || ''}</p>
-                  <p className="text-xs text-gray-400">{o.email || ''}</p>
-                </td>
-                <td>
-                  {canEdit && (
-                    <div className="flex items-center justify-center gap-1">
-                      <button className="btn btn-ghost btn-xs text-amber-500 hover:bg-amber-50" onClick={() => openModal(o)}>
-                        <Pencil size={14} />
-                      </button>
-                      <button className="btn btn-ghost btn-xs text-red-500 hover:bg-red-50" onClick={() => handleDelete(o.id)}>
-                        <Trash2 size={14} />
-                      </button>
+                  </td>
+                </tr>
+              )}
+              {orgs.map((o, i) => (
+                <tr key={o.id} className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors">
+                  <td className="px-4 py-3.5 text-gray-300 text-xs font-mono">{i + 1}</td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-9 h-9 rounded-2xl bg-gradient-to-br ${AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]} text-white text-xs font-black flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                        {o.orgName.slice(0, 2)}
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-800 text-sm leading-none">{o.orgName}</p>
+                        {o.address && <p className="text-gray-400 text-xs mt-0.5 truncate max-w-[160px]">{o.address}</p>}
+                      </div>
                     </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    {o.businessType
+                      ? <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-orange-50 text-orange-600 border border-orange-100">{o.businessType}</span>
+                      : <span className="text-gray-300">—</span>}
+                  </td>
+                  <td className="px-4 py-3.5 text-gray-600 text-sm">{o.contactName || '—'}</td>
+                  <td className="px-4 py-3.5">
+                    <p className="text-gray-700 text-sm">{o.phone || '—'}</p>
+                    {o.email && <p className="text-gray-400 text-xs mt-0.5">{o.email}</p>}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    {canEdit && (
+                      <div className="flex items-center justify-center gap-1">
+                        <button className="w-7 h-7 rounded-xl flex items-center justify-center text-amber-400 hover:bg-amber-50 hover:text-amber-600 transition-all" onClick={() => openModal(o)}>
+                          <Pencil size={14} />
+                        </button>
+                        <button className="w-7 h-7 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-50 hover:text-red-600 transition-all" onClick={() => handleDelete(o.id)}>
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
+      {/* Modal */}
       <dialog ref={modalRef} className="modal">
-        <div className="modal-box max-w-md p-0 overflow-hidden bg-white shadow-2xl">
-          {/* Header */}
-          <div className="px-6 py-5 flex items-center gap-3" style={{ background: 'linear-gradient(135deg,#431407 0%,#c2410c 100%)' }}>
-            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
-              <Building2 size={20} color="#fff" />
+        <div className="modal-box max-w-md p-0 overflow-hidden bg-white shadow-2xl rounded-3xl">
+          <div className="relative px-6 py-5 flex items-center gap-4 overflow-hidden"
+            style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
+            <div className="absolute inset-0 opacity-5"
+              style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
+            <div className="relative w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
+              <Building2 size={18} color="#fff" />
             </div>
-            <div>
-              <h3 className="text-white font-bold text-base leading-tight">{editId ? 'แก้ไของค์กร' : 'เพิ่มองค์กรใหม่'}</h3>
-              <p className="text-orange-300/80 text-xs mt-0.5">กรุณากรอกข้อมูลให้ครบถ้วน</p>
+            <div className="relative">
+              <h3 className="text-white font-black text-base leading-tight">{editId ? 'แก้ไของค์กร' : 'เพิ่มองค์กรใหม่'}</h3>
+              <p className="text-orange-200/60 text-xs mt-0.5">กรุณากรอกข้อมูลให้ครบถ้วน</p>
             </div>
           </div>
-          {/* Body */}
           <div className="p-5 grid grid-cols-2 gap-3">
             {[
               { label: 'ชื่อองค์กร *', key: 'orgName', col2: true },
@@ -155,31 +169,27 @@ export default function OrganizationList() {
               { label: 'Email', key: 'email' },
             ].map(({ label, key, col2 }) => (
               <div key={key} className={col2 ? 'col-span-2' : ''}>
-                <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">{label}</label>
-                <input
-                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
-                  value={form[key]}
-                  onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                />
+                <label className={labelCls}>{label}</label>
+                <input className={inputCls} value={form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })} />
               </div>
             ))}
             <div className="col-span-2">
-              <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">ที่อยู่</label>
-              <textarea
-                className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all resize-none"
-                rows={2} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+              <label className={labelCls}>ที่อยู่</label>
+              <textarea className={inputCls + ' resize-none'} rows={2}
+                value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
             </div>
             <div className="col-span-2">
-              <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">หมายเหตุ</label>
-              <textarea
-                className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all resize-none"
-                rows={2} value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
+              <label className={labelCls}>หมายเหตุ</label>
+              <textarea className={inputCls + ' resize-none'} rows={2}
+                value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
             </div>
           </div>
-          {/* Footer */}
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
-            <button className="px-5 py-2 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors" onClick={() => modalRef.current?.close()}>ยกเลิก</button>
-            <button className="px-6 py-2 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg active:scale-95 transition-all" style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }} onClick={handleSave}>บันทึก</button>
+          <div className="px-6 py-4 bg-gray-50/80 border-t border-gray-100 flex justify-end gap-2">
+            <button className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-all"
+              onClick={() => modalRef.current?.close()}>ยกเลิก</button>
+            <button className="px-6 py-2.5 rounded-2xl text-sm font-bold text-white active:scale-95 transition-all"
+              style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', boxShadow: '0 4px 15px rgba(234,88,12,0.3)' }}
+              onClick={handleSave}>บันทึก</button>
           </div>
         </div>
         <form method="dialog" className="modal-backdrop"><button>close</button></form>
