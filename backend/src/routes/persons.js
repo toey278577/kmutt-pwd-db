@@ -116,28 +116,37 @@ router.post('/', async (req, res) => {
   try {
     const {
       birthDate, maritalStatus, gender, lifeStatus,
+      thaiId, phone, email, address, province, nationality, religion, educationLevel,
       mobile, landmark, houseNo, moo, building, floor, soi, road, subDistrict, district, postalCode,
-      ...rest
+      fullName,
     } = req.body;
-    const person = await prisma.person.create({
-      data: {
-        ...rest,
-        birthDate: toDate(birthDate),
-        maritalStatus: toMarital(maritalStatus),
-        gender, lifeStatus,
-        mobile: mobile || null,
-        landmark: landmark || null,
-        houseNo: houseNo || null,
-        moo: moo || null,
-        building: building || null,
-        floor: floor || null,
-        soi: soi || null,
-        road: road || null,
-        subDistrict: subDistrict || null,
-        district: district || null,
-        postalCode: postalCode || null,
-      },
-    });
+    const data = {
+      fullName,
+      phone: phone || null,
+      email: email || null,
+      address: address || null,
+      province: province || null,
+      nationality: nationality || null,
+      religion: religion || null,
+      educationLevel: educationLevel || null,
+      birthDate: toDate(birthDate),
+      maritalStatus: toMarital(maritalStatus),
+      gender, lifeStatus,
+      mobile: mobile || null,
+      landmark: landmark || null,
+      houseNo: houseNo || null,
+      moo: moo || null,
+      building: building || null,
+      floor: floor || null,
+      soi: soi || null,
+      road: road || null,
+      subDistrict: subDistrict || null,
+      district: district || null,
+      postalCode: postalCode || null,
+    };
+    // thaiId เป็น unique field — ถ้า empty string ให้ไม่บันทึก
+    if (thaiId && thaiId.trim() !== '') data.thaiId = thaiId.trim();
+    const person = await prisma.person.create({ data });
     res.status(201).json(person);
   } catch (err) {
     return handlePrismaError(err, res);
