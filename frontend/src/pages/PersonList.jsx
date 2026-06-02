@@ -9,6 +9,17 @@ const GENDER_BADGE = { MALE: 'bg-sky-100 text-sky-600 border-sky-200', FEMALE: '
 
 const PREFIXES = ['นาย', 'นาง', 'นางสาว', 'เด็กชาย', 'เด็กหญิง'];
 
+const EDUCATION_OPTS = [
+  'ต่ำกว่าประถมศึกษา',
+  'ประถมศึกษา',
+  'มัธยมศึกษาตอนต้น',
+  'มัธยมศึกษาตอนปลายหรือเทียบเท่า',
+  'อนุปริญญา / ปวส.',
+  'ปริญญาตรี',
+  'ปริญญาโทขึ้นไป',
+  'อื่นๆ',
+];
+
 const splitPrefix = (fullName = '') => {
   for (const p of PREFIXES) {
     if (fullName.startsWith(p)) return { prefix: p, nameOnly: fullName.slice(p.length).trim() };
@@ -18,7 +29,11 @@ const splitPrefix = (fullName = '') => {
 
 const emptyForm = {
   fullName: '', thaiId: '', gender: 'MALE', birthDate: '',
-  phone: '', email: '', address: '', province: '',
+  phone: '', mobile: '', email: '', landmark: '',
+  houseNo: '', moo: '', building: '', floor: '',
+  soi: '', road: '', subDistrict: '', district: '',
+  province: '', postalCode: '',
+  address: '',
   nationality: 'ไทย', religion: 'พุทธ', maritalStatus: 'SINGLE',
   educationLevel: '', lifeStatus: 'ALIVE',
 };
@@ -70,10 +85,17 @@ export default function PersonList() {
   const handleSave = async () => {
     if (!nameOnly.trim()) return alert('กรุณากรอกชื่อ-นามสกุล');
     const fullName = `${prefix}${prefix ? ' ' : ''}${nameOnly.trim()}`;
-    const { thaiId, gender, birthDate, phone, email, address, province,
-            nationality, religion, maritalStatus, educationLevel, lifeStatus } = form;
-    const payload = { fullName, thaiId, gender, birthDate, phone, email, address, province,
-                      nationality, religion, maritalStatus, educationLevel, lifeStatus };
+    const payload = {
+      fullName,
+      thaiId: form.thaiId, gender: form.gender, birthDate: form.birthDate,
+      phone: form.phone, mobile: form.mobile, email: form.email, landmark: form.landmark,
+      houseNo: form.houseNo, moo: form.moo, building: form.building, floor: form.floor,
+      soi: form.soi, road: form.road, subDistrict: form.subDistrict, district: form.district,
+      province: form.province, postalCode: form.postalCode,
+      address: form.address,
+      nationality: form.nationality, religion: form.religion,
+      maritalStatus: form.maritalStatus, educationLevel: form.educationLevel, lifeStatus: form.lifeStatus,
+    };
     if (!payload.birthDate) delete payload.birthDate;
     if (!payload.thaiId) delete payload.thaiId;
     if (!editId && !disabilityTypeId) return alert('กรุณาเลือกประเภทความพิการ');
@@ -274,7 +296,7 @@ export default function PersonList() {
 
       {/* Modal */}
       <dialog ref={modalRef} className="modal">
-        <div className="modal-box max-w-2xl p-0 overflow-hidden bg-white shadow-2xl">
+        <div className="modal-box max-w-3xl p-0 overflow-hidden bg-white shadow-2xl">
           {/* Header */}
           <div className="px-6 py-5 flex items-center gap-3" style={{ background: 'linear-gradient(135deg,#431407 0%,#c2410c 100%)' }}>
             <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
@@ -282,16 +304,14 @@ export default function PersonList() {
             </div>
             <div>
               <h3 className="text-white font-bold text-base leading-tight">{editId ? 'แก้ไขข้อมูลคนพิการ' : 'เพิ่มข้อมูลคนพิการใหม่'}</h3>
-              <p className="text-orange-300/80 text-xs mt-0.5">กรุณากรอกข้อมูลให้ครบถ้วน</p>
+              <p className="text-orange-300/80 text-xs mt-0.5">กรุณากรอกข้อมูลให้ครบถ้วนตามแบบฟอร์ม กกจ.พก.1</p>
             </div>
           </div>
           {/* Body */}
-          <div className="p-6 max-h-[65vh] overflow-y-auto space-y-5">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-1 h-4 rounded-full bg-orange-500" />
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">ข้อมูลส่วนตัว</p>
-              </div>
+          <div className="p-6 max-h-[70vh] overflow-y-auto space-y-6">
+
+            {/* ส่วนที่ 1: ข้อมูลส่วนตัว */}
+            <Section label="ข้อมูลส่วนตัว">
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2">
                   <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">ชื่อ-นามสกุล *</label>
@@ -316,16 +336,20 @@ export default function PersonList() {
                     />
                   </div>
                 </div>
-                <FormField label="เลขบัตรประชาชน" value={form.thaiId} onChange={(v) => setForm({ ...form, thaiId: v })} numericOnly maxLength={13} />
+                <FormField label="เลขบัตรประชาชน / บัตรคนพิการ" value={form.thaiId} onChange={(v) => setForm({ ...form, thaiId: v })} numericOnly maxLength={13} />
                 <ThaiDateField label="วันเกิด" value={form.birthDate} onChange={(v) => setForm({ ...form, birthDate: v })} />
                 <SelectField label="เพศ" value={form.gender} onChange={(v) => setForm({ ...form, gender: v })}
                   options={[['MALE','ชาย'],['FEMALE','หญิง'],['OTHER','อื่นๆ']]} />
                 <MaritalField value={form.maritalStatus} onChange={(v) => setForm({ ...form, maritalStatus: v })} />
                 <FormField label="สัญชาติ" value={form.nationality} onChange={(v) => setForm({ ...form, nationality: v })} />
                 <FormField label="ศาสนา" value={form.religion} onChange={(v) => setForm({ ...form, religion: v })} />
-                <FormField label="ระดับการศึกษา" value={form.educationLevel} onChange={(v) => setForm({ ...form, educationLevel: v })} />
+                <div className="col-span-2">
+                  <EducationField value={form.educationLevel} onChange={(v) => setForm({ ...form, educationLevel: v })} />
+                </div>
                 <SelectField label="สถานะ" value={form.lifeStatus} onChange={(v) => setForm({ ...form, lifeStatus: v })}
                   options={[['ALIVE','มีชีวิต'],['DECEASED','เสียชีวิต']]} />
+
+                {/* ประเภทความพิการ */}
                 <div className="col-span-2">
                   <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">
                     ประเภทความพิการ {!editId && <span className="text-red-400">*</span>}
@@ -361,24 +385,47 @@ export default function PersonList() {
                   </div>
                 </div>
               </div>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-1 h-4 rounded-full bg-orange-500" />
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">ข้อมูลติดต่อ</p>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <FormField label="เบอร์โทร" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} numericOnly maxLength={10} />
-                <FormField label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
-                <FormField label="จังหวัด" value={form.province} onChange={(v) => setForm({ ...form, province: v })} />
+            </Section>
+
+            {/* ส่วนที่ 2: ที่อยู่ปัจจุบัน */}
+            <Section label="ที่อยู่ปัจจุบัน">
+              <div className="grid grid-cols-4 gap-3">
+                <FormField label="เลขที่" value={form.houseNo} onChange={(v) => setForm({ ...form, houseNo: v })} />
+                <FormField label="หมู่ที่" value={form.moo} onChange={(v) => setForm({ ...form, moo: v })} />
                 <div className="col-span-2">
-                  <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">ที่อยู่</label>
-                  <textarea
-                    className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all resize-none"
-                    rows={2} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+                  <FormField label="ชื่ออาคาร / หมู่บ้าน" value={form.building} onChange={(v) => setForm({ ...form, building: v })} />
+                </div>
+                <FormField label="ชั้นที่" value={form.floor} onChange={(v) => setForm({ ...form, floor: v })} />
+                <div className="col-span-2">
+                  <FormField label="ซอย" value={form.soi} onChange={(v) => setForm({ ...form, soi: v })} />
+                </div>
+                <div className="col-span-1">
+                  <FormField label="ถนน" value={form.road} onChange={(v) => setForm({ ...form, road: v })} />
+                </div>
+                <div className="col-span-2">
+                  <FormField label="แขวง / ตำบล" value={form.subDistrict} onChange={(v) => setForm({ ...form, subDistrict: v })} />
+                </div>
+                <div className="col-span-2">
+                  <FormField label="เขต / อำเภอ" value={form.district} onChange={(v) => setForm({ ...form, district: v })} />
+                </div>
+                <div className="col-span-2">
+                  <FormField label="จังหวัด" value={form.province} onChange={(v) => setForm({ ...form, province: v })} />
+                </div>
+                <div className="col-span-2">
+                  <FormField label="รหัสไปรษณีย์" value={form.postalCode} onChange={(v) => setForm({ ...form, postalCode: v })} numericOnly maxLength={5} />
                 </div>
               </div>
-            </div>
+            </Section>
+
+            {/* ส่วนที่ 3: ข้อมูลติดต่อ */}
+            <Section label="ข้อมูลติดต่อ">
+              <div className="grid grid-cols-2 gap-3">
+                <FormField label="โทรศัพท์บ้าน" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} numericOnly maxLength={10} />
+                <FormField label="มือถือ" value={form.mobile} onChange={(v) => setForm({ ...form, mobile: v })} numericOnly maxLength={10} />
+                <FormField label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
+                <FormField label="สถานที่ใกล้เคียง" value={form.landmark} onChange={(v) => setForm({ ...form, landmark: v })} />
+              </div>
+            </Section>
           </div>
           {/* Footer */}
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
@@ -388,6 +435,18 @@ export default function PersonList() {
         </div>
         <form method="dialog" className="modal-backdrop"><button>close</button></form>
       </dialog>
+    </div>
+  );
+}
+
+function Section({ label, children }) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-1 h-4 rounded-full bg-orange-500" />
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{label}</p>
+      </div>
+      {children}
     </div>
   );
 }
@@ -429,6 +488,36 @@ function SelectField({ label, value = '', onChange, options }) {
         </select>
         <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
       </div>
+    </div>
+  );
+}
+
+function EducationField({ value = '', onChange }) {
+  const isOther = value && !EDUCATION_OPTS.slice(0, -1).includes(value);
+  const selectVal = isOther ? 'อื่นๆ' : (value || '');
+  return (
+    <div>
+      <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">ระดับการศึกษา</label>
+      <div className="relative mb-2">
+        <select
+          className="w-full appearance-none rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all cursor-pointer pr-9"
+          value={selectVal}
+          onChange={(e) => onChange(e.target.value === 'อื่นๆ' ? 'อื่นๆ' : e.target.value)}
+        >
+          <option value="">— เลือกระดับการศึกษา —</option>
+          {EDUCATION_OPTS.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+      </div>
+      {selectVal === 'อื่นๆ' && (
+        <input
+          type="text"
+          placeholder="ระบุระดับการศึกษา..."
+          className="w-full rounded-xl border border-orange-300 px-3.5 py-2.5 text-sm text-gray-800 bg-orange-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
+          value={isOther ? value : ''}
+          onChange={(e) => onChange(e.target.value || 'อื่นๆ')}
+        />
+      )}
     </div>
   );
 }

@@ -107,9 +107,29 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { birthDate, maritalStatus, gender, lifeStatus, ...rest } = req.body;
+    const {
+      birthDate, maritalStatus, gender, lifeStatus,
+      mobile, landmark, houseNo, moo, building, floor, soi, road, subDistrict, district, postalCode,
+      ...rest
+    } = req.body;
     const person = await prisma.person.create({
-      data: { ...rest, birthDate: toDate(birthDate), maritalStatus: toMarital(maritalStatus), gender, lifeStatus },
+      data: {
+        ...rest,
+        birthDate: toDate(birthDate),
+        maritalStatus: toMarital(maritalStatus),
+        gender, lifeStatus,
+        mobile: mobile || null,
+        landmark: landmark || null,
+        houseNo: houseNo || null,
+        moo: moo || null,
+        building: building || null,
+        floor: floor || null,
+        soi: soi || null,
+        road: road || null,
+        subDistrict: subDistrict || null,
+        district: district || null,
+        postalCode: postalCode || null,
+      },
     });
     res.status(201).json(person);
   } catch (err) {
@@ -119,10 +139,18 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const { fullName, thaiId, phone, email, address, province, nationality, religion, educationLevel,
-            birthDate, maritalStatus, gender, lifeStatus } = req.body;
-    const data = { fullName, phone, email, address, province, nationality, religion, educationLevel,
-                   birthDate: toDate(birthDate), maritalStatus: toMarital(maritalStatus), gender, lifeStatus };
+    const {
+      fullName, thaiId, phone, mobile, email, landmark,
+      houseNo, moo, building, floor, soi, road, subDistrict, district, province, postalCode,
+      address, nationality, religion, educationLevel, birthDate, maritalStatus, gender, lifeStatus,
+    } = req.body;
+    const data = {
+      fullName, phone, mobile: mobile || null, email, landmark: landmark || null,
+      houseNo: houseNo || null, moo: moo || null, building: building || null, floor: floor || null,
+      soi: soi || null, road: road || null, subDistrict: subDistrict || null, district: district || null,
+      province, postalCode: postalCode || null, address, nationality, religion, educationLevel,
+      birthDate: toDate(birthDate), maritalStatus: toMarital(maritalStatus), gender, lifeStatus,
+    };
     if (thaiId) data.thaiId = thaiId;
     const person = await prisma.person.update({
       where: { id: parseInt(req.params.id) },

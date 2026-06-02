@@ -13,9 +13,20 @@ model Person {
   gender           Gender
   birthDate        DateTime? @map("birth_date") @db.Date
   phone            String?  @db.VarChar(20)
+  mobile           String?  @db.VarChar(20)
   email            String?  @db.VarChar(255)
-  address          String?  @db.Text
+  landmark         String?  @db.VarChar(255)
+  houseNo          String?  @map("house_no") @db.VarChar(20)
+  moo              String?  @db.VarChar(20)
+  building         String?  @db.VarChar(100)
+  floor            String?  @db.VarChar(20)
+  soi              String?  @db.VarChar(100)
+  road             String?  @db.VarChar(100)
+  subDistrict      String?  @map("sub_district") @db.VarChar(100)
+  district         String?  @db.VarChar(100)
   province         String?  @db.VarChar(100)
+  postalCode       String?  @map("postal_code") @db.VarChar(10)
+  address          String?  @db.Text
   nationality      String?  @db.VarChar(100)
   religion         String?  @db.VarChar(100)
   maritalStatus    MaritalStatus? @map("marital_status")

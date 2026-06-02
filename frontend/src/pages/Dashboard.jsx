@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { getDashboardStats } from '../api';
 
-const COLORS = ['#ea580c', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+const COLORS = ['#ea580c', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b', '#f97316'];
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
 const EMP_LABELS = { EMPLOYED: 'มีงานทำ', UNEMPLOYED: 'ว่างงาน', STUDYING: 'ศึกษาต่อ' };
 
@@ -22,6 +22,19 @@ const CustomTooltip = ({ active, payload }) => {
     <div className="bg-orange-950 text-white px-3 py-2 rounded-xl text-xs shadow-xl">
       <b>{payload[0].name}</b>: {payload[0].value}
     </div>
+  );
+};
+
+const RADIAN = Math.PI / 180;
+const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+  if (percent < 0.05) return null;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  return (
+    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight="bold">
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
   );
 };
 
@@ -91,19 +104,15 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Gender */}
-        <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-1 h-5 rounded-full" style={{ background: 'linear-gradient(180deg,#ea580c,#fb923c)' }} />
-            <span className="font-bold text-orange-950 text-sm">แยกตามเพศ</span>
-          </div>
+      {/* Charts Row 1: เพศ / ประเภทความพิการ / สถานะงาน */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+        <ChartCard title="แยกตามเพศ" accentColor="#ea580c">
           {genderData.length > 0 ? (
             <ResponsiveContainer width="100%" height={210}>
               <PieChart>
                 <Pie data={genderData} dataKey="value" nameKey="name" cx="50%" cy="50%"
-                  outerRadius={72} innerRadius={32} paddingAngle={3}>
+                  outerRadius={72} innerRadius={32} paddingAngle={3}
+                  labelLine={false} label={renderCustomLabel}>
                   {genderData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
@@ -111,19 +120,15 @@ export default function Dashboard() {
               </PieChart>
             </ResponsiveContainer>
           ) : <EmptyChart />}
-        </div>
+        </ChartCard>
 
-        {/* Disability Type */}
-        <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-1 h-5 rounded-full" style={{ background: 'linear-gradient(180deg,#06b6d4,#0284c7)' }} />
-            <span className="font-bold text-orange-950 text-sm">ประเภทความพิการ</span>
-          </div>
+        <ChartCard title="ประเภทความพิการ" accentColor="#06b6d4">
           {stats.byDisabilityType.length > 0 ? (
             <ResponsiveContainer width="100%" height={210}>
               <PieChart>
                 <Pie data={stats.byDisabilityType} dataKey="value" nameKey="name" cx="50%" cy="50%"
-                  outerRadius={72} innerRadius={32} paddingAngle={3}>
+                  outerRadius={72} innerRadius={32} paddingAngle={3}
+                  labelLine={false} label={renderCustomLabel}>
                   {stats.byDisabilityType.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
@@ -131,14 +136,9 @@ export default function Dashboard() {
               </PieChart>
             </ResponsiveContainer>
           ) : <EmptyChart />}
-        </div>
+        </ChartCard>
 
-        {/* Employment */}
-        <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-1 h-5 rounded-full" style={{ background: 'linear-gradient(180deg,#10b981,#059669)' }} />
-            <span className="font-bold text-orange-950 text-sm">สถานะการมีงานทำ</span>
-          </div>
+        <ChartCard title="สถานะการมีงานทำ" accentColor="#10b981">
           {empData.length > 0 ? (
             <ResponsiveContainer width="100%" height={210}>
               <BarChart data={empData} barSize={28}>
@@ -152,8 +152,71 @@ export default function Dashboard() {
               </BarChart>
             </ResponsiveContainer>
           ) : <EmptyChart />}
-        </div>
+        </ChartCard>
       </div>
+
+      {/* Charts Row 2: วุฒิ / ช่วงอายุ / ภูมิภาค */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <ChartCard title="วุฒิการศึกษา" accentColor="#f59e0b">
+          {stats.byEducation?.length > 0 ? (
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie data={stats.byEducation} dataKey="value" nameKey="name" cx="50%" cy="50%"
+                  outerRadius={72} innerRadius={32} paddingAngle={3}
+                  labelLine={false} label={renderCustomLabel}>
+                  {stats.byEducation.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '0.70rem' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : <EmptyChart />}
+        </ChartCard>
+
+        <ChartCard title="ช่วงอายุ" accentColor="#8b5cf6">
+          {stats.byAgeGroup?.length > 0 ? (
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie data={stats.byAgeGroup} dataKey="value" nameKey="name" cx="50%" cy="50%"
+                  outerRadius={72} innerRadius={32} paddingAngle={3}
+                  labelLine={false} label={renderCustomLabel}>
+                  {stats.byAgeGroup.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '0.78rem' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : <EmptyChart />}
+        </ChartCard>
+
+        <ChartCard title="ภูมิภาค" accentColor="#ec4899">
+          {stats.byRegion?.length > 0 ? (
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={stats.byRegion} barSize={22} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="#fff7ed" horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={80} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(234,88,12,0.04)' }} />
+                <Bar dataKey="value" radius={[0, 6, 6, 0]}>
+                  {stats.byRegion.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : <EmptyChart />}
+        </ChartCard>
+      </div>
+    </div>
+  );
+}
+
+function ChartCard({ title, accentColor, children }) {
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-1 h-5 rounded-full" style={{ background: `linear-gradient(180deg,${accentColor},${accentColor}88)` }} />
+        <span className="font-bold text-orange-950 text-sm">{title}</span>
+      </div>
+      {children}
     </div>
   );
 }

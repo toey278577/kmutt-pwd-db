@@ -165,15 +165,32 @@ export default function PersonDetail() {
             ['วันเกิด', person.birthDate ? `${fmtDate(person.birthDate)} (${age} ปี)` : null],
             ['สัญชาติ', person.nationality],
             ['ศาสนา', person.religion],
-            ['สถานภาพ', MARITAL_LABELS[person.maritalStatus]],
+            ['สถานภาพ', MARITAL_LABELS[person.maritalStatus] || person.maritalStatus],
             ['ระดับการศึกษา', person.educationLevel],
           ]} />
           <InfoCard title="ข้อมูลติดต่อ" items={[
-            ['เบอร์โทร', person.phone],
+            ['โทรศัพท์', person.phone],
+            ['มือถือ', person.mobile],
             ['Email', person.email],
-            ['จังหวัด', person.province],
-            ['ที่อยู่', person.address],
+            ['สถานที่ใกล้เคียง', person.landmark],
           ]} />
+          <div className="md:col-span-2 bg-white rounded-2xl shadow-sm border border-orange-100 p-5">
+            <p className="font-bold text-orange-950 text-sm mb-3">ที่อยู่ปัจจุบัน</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2">
+              {[
+                ['เลขที่', person.houseNo], ['หมู่ที่', person.moo],
+                ['ชื่ออาคาร', person.building], ['ชั้นที่', person.floor],
+                ['ซอย', person.soi], ['ถนน', person.road],
+                ['แขวง/ตำบล', person.subDistrict], ['เขต/อำเภอ', person.district],
+                ['จังหวัด', person.province], ['รหัสไปรษณีย์', person.postalCode],
+              ].map(([label, val]) => (
+                <div key={label}>
+                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-0.5">{label}</p>
+                  <p className="text-sm text-orange-950 font-medium">{val || <span className="text-gray-200">—</span>}</p>
+                </div>
+              ))}
+            </div>
+          </div>
           <div className="md:col-span-2 bg-white rounded-2xl shadow-sm border border-orange-100 p-5">
             <div className="flex items-center justify-between mb-3">
               <p className="font-bold text-orange-950 text-sm">ข้อมูลความพิการ</p>
