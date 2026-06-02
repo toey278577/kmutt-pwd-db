@@ -69,7 +69,9 @@ export default function PersonList() {
     setPhotoBase64('');
     if (person) {
       const { prefix: p, nameOnly: n } = splitPrefix(person.fullName || '');
-      setForm({ ...emptyForm, ...person, birthDate: person.birthDate?.slice(0, 10) || '' });
+      // แปลง null → '' ทุก field ก่อน spread เพื่อป้องกัน controlled input error
+      const cleaned = Object.fromEntries(Object.entries(person).map(([k, v]) => [k, v === null ? '' : v]));
+      setForm({ ...emptyForm, ...cleaned, birthDate: person.birthDate?.slice(0, 10) || '' });
       setPrefix(p || 'นาย');
       setNameOnly(n);
       setEditId(person.id);
@@ -78,7 +80,7 @@ export default function PersonList() {
       getPersonPhotos(person.id).then(r => {
         const profile = r.data.find(p => p.photoType === 'profile');
         if (profile?.filePath) setPhotoBase64(profile.filePath);
-      });
+      }).catch(() => {});
     } else {
       setForm(emptyForm);
       setPrefix('นาย');
@@ -510,7 +512,8 @@ function Section({ label, children }) {
   );
 }
 
-function FormField({ label, value = '', onChange, type = 'text', maxLength, numericOnly }) {
+function FormField({ label, value, onChange, type = 'text', maxLength, numericOnly }) {
+  const safeVal = value ?? '';
   const handleChange = (e) => {
     let v = e.target.value;
     if (numericOnly) v = v.replace(/\D/g, '');
@@ -520,27 +523,27 @@ function FormField({ label, value = '', onChange, type = 'text', maxLength, nume
   return (
     <div>
       <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">
-        {label}{maxLength && <span className="ml-1 font-normal text-gray-300">({value.length}/{maxLength})</span>}
+        {label}{maxLength && <span className="ml-1 font-normal text-gray-300">({safeVal.length}/{maxLength})</span>}
       </label>
       <input
         type={type}
         inputMode={numericOnly ? 'numeric' : undefined}
         className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
-        value={value}
+        value={safeVal}
         onChange={handleChange}
       />
     </div>
   );
 }
 
-function SelectField({ label, value = '', onChange, options }) {
+function SelectField({ label, value, onChange, options }) {
   return (
     <div>
       <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">{label}</label>
       <div className="relative">
         <select
           className="w-full appearance-none rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all cursor-pointer pr-9"
-          value={value}
+          value={value ?? ''}
           onChange={(e) => onChange(e.target.value)}
         >
           {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}

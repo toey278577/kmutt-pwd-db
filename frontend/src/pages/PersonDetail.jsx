@@ -85,7 +85,7 @@ export default function PersonDetail() {
     getPersonPhotos(id).then((r) => {
       const p = r.data.find(x => x.photoType === 'profile');
       setProfilePhoto(p || null);
-    });
+    }).catch(() => {});
   };
 
   const handlePhotoChange = async (e) => {
