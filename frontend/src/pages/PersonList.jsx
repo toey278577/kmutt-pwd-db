@@ -110,7 +110,7 @@ export default function PersonList() {
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) return alert('รูปต้องมีขนาดไม่เกิน 2MB');
+    if (file.size > 5 * 1024 * 1024) return alert('รูปต้องมีขนาดไม่เกิน 5MB\nแนะนำ: JPG/PNG ขนาด 300×300 ถึง 600×600 px');
     const reader = new FileReader();
     reader.onload = (ev) => setPhotoBase64(ev.target.result);
     reader.readAsDataURL(file);
@@ -384,7 +384,8 @@ export default function PersonList() {
                       <X size={13} /> ลบรูป
                     </button>
                   )}
-                  <p className="text-xs text-gray-400">รองรับ JPG, PNG ขนาดไม่เกิน 2MB</p>
+                  <p className="text-xs text-gray-400">JPG/PNG ไม่เกิน 5MB</p>
+                  <p className="text-xs text-gray-300">แนะนำ 300×300 px ขึ้นไป</p>
                 </div>
                 <input
                   ref={photoInputRef}

@@ -91,7 +91,7 @@ export default function PersonDetail() {
   const handlePhotoChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) return alert('รูปต้องมีขนาดไม่เกิน 2MB');
+    if (file.size > 5 * 1024 * 1024) return alert('รูปต้องมีขนาดไม่เกิน 5MB');
     const reader = new FileReader();
     reader.onload = async (ev) => {
       try {
