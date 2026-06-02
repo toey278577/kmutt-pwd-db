@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Printer, FileText, Award, Building2, Users, ChevronDown, X } from 'lucide-react';
-import { getPersons, getTraining, getOrganizations } from '../api';
+import { getPersons, getOrganizations } from '../api';
 
 const fmtDate = (iso) => {
   if (!iso) return '—';

@@ -9,6 +9,13 @@ const toMarital = (val) => {
   if (!val || String(val).trim() === '') return null;
   return MARITAL_ENUMS.includes(val) ? val : 'OTHER';
 };
+const handlePrismaError = (err, res) => {
+  if (err.code === 'P2002') {
+    const field = err.meta?.target?.join(', ') || 'ข้อมูล';
+    return res.status(400).json({ error: `${field} นี้มีอยู่ในระบบแล้ว (ซ้ำ)` });
+  }
+  res.status(400).json({ error: err.message });
+};
 
 router.get('/disability-types', async (req, res) => {
   try {
@@ -133,7 +140,7 @@ router.post('/', async (req, res) => {
     });
     res.status(201).json(person);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return handlePrismaError(err, res);
   }
 });
 
@@ -158,7 +165,7 @@ router.put('/:id', async (req, res) => {
     });
     res.json(person);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return handlePrismaError(err, res);
   }
 });
 
