@@ -144,8 +144,10 @@ router.post('/', async (req, res) => {
       district: district || null,
       postalCode: postalCode || null,
     };
-    // thaiId เป็น unique field — ถ้า empty string ให้ไม่บันทึก
-    if (thaiId && thaiId.trim() !== '') data.thaiId = thaiId.trim();
+    if (!thaiId || thaiId.trim().length !== 13) {
+      return res.status(400).json({ error: 'กรุณากรอกเลขบัตรประชาชน / บัตรคนพิการ ให้ครบ 13 หลัก' });
+    }
+    data.thaiId = thaiId.trim();
     const person = await prisma.person.create({ data });
     res.status(201).json(person);
   } catch (err) {

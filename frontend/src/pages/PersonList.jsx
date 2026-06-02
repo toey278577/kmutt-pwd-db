@@ -103,6 +103,7 @@ export default function PersonList() {
 
   const handleSave = async () => {
     if (!nameOnly.trim()) return alert('กรุณากรอกชื่อ-นามสกุล');
+    if (!form.thaiId || form.thaiId.length !== 13) return alert('กรุณากรอกเลขบัตรประชาชน / บัตรคนพิการ ให้ครบ 13 หลัก');
     const fullName = `${prefix}${prefix ? ' ' : ''}${nameOnly.trim()}`;
     const payload = {
       fullName,
@@ -397,7 +398,7 @@ export default function PersonList() {
                     />
                   </div>
                 </div>
-                <FormField label="เลขบัตรประชาชน / บัตรคนพิการ" value={form.thaiId} onChange={(v) => setForm({ ...form, thaiId: v })} numericOnly maxLength={13} />
+                <FormField label="เลขบัตรประชาชน / บัตรคนพิการ *" value={form.thaiId} onChange={(v) => setForm({ ...form, thaiId: v })} numericOnly maxLength={13} />
                 <ThaiDateField label="วันเกิด" value={form.birthDate} onChange={(v) => setForm({ ...form, birthDate: v })} />
                 <SelectField label="เพศ" value={form.gender} onChange={(v) => setForm({ ...form, gender: v })}
                   options={[['MALE','ชาย'],['FEMALE','หญิง'],['OTHER','อื่นๆ']]} />
