@@ -54,6 +54,8 @@ export default function PersonList() {
   const [nameOnly, setNameOnly] = useState('');
   const [photoBase64, setPhotoBase64] = useState('');
   const photoInputRef = useRef(null);
+  const [errors, setErrors] = useState({});
+  const formBodyRef = useRef(null);
 
   const PAGE_SIZE = 10;
   const totalPages = Math.ceil(persons.length / PAGE_SIZE);
@@ -89,7 +91,20 @@ export default function PersonList() {
       setEditPersonDisabilities([]);
     }
     setDisabilityTypeId('');
+    setErrors({});
     modalRef.current?.showModal();
+  };
+
+  const validate = () => {
+    const e = {};
+    if (!nameOnly.trim()) e.nameOnly = 'กรุณากรอกชื่อ-นามสกุล';
+    if (!form.thaiId || form.thaiId.length !== 13) e.thaiId = 'กรุณากรอกเลขบัตร 13 หลัก';
+    if (!form.birthDate) e.birthDate = 'กรุณากรอกวันเกิด';
+    if (!form.educationLevel) e.educationLevel = 'กรุณาเลือกระดับการศึกษา';
+    if (!form.province) e.province = 'กรุณากรอกจังหวัด';
+    if (!form.phone && !form.mobile) e.contact = 'กรุณากรอกเบอร์โทรศัพท์หรือมือถืออย่างน้อย 1 ช่อง';
+    if (!editId && !disabilityTypeId && editPersonDisabilities.length === 0) e.disability = 'กรุณาเลือกประเภทความพิการ';
+    return e;
   };
 
   const handlePhotoChange = (e) => {
@@ -102,8 +117,13 @@ export default function PersonList() {
   };
 
   const handleSave = async () => {
-    if (!nameOnly.trim()) return alert('กรุณากรอกชื่อ-นามสกุล');
-    if (!form.thaiId || form.thaiId.length !== 13) return alert('กรุณากรอกเลขบัตรประชาชน / บัตรคนพิการ ให้ครบ 13 หลัก');
+    const e = validate();
+    if (Object.keys(e).length > 0) {
+      setErrors(e);
+      formBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    setErrors({});
     const fullName = `${prefix}${prefix ? ' ' : ''}${nameOnly.trim()}`;
     const payload = {
       fullName,
@@ -117,8 +137,6 @@ export default function PersonList() {
       maritalStatus: form.maritalStatus, educationLevel: form.educationLevel, lifeStatus: form.lifeStatus,
     };
     if (!payload.birthDate) delete payload.birthDate;
-    if (!payload.thaiId) delete payload.thaiId;
-    if (!editId && !disabilityTypeId) return alert('กรุณาเลือกประเภทความพิการ');
     try {
       let personId = editId;
       if (editId) {
@@ -329,7 +347,22 @@ export default function PersonList() {
             </div>
           </div>
           {/* Body */}
-          <div className="p-6 max-h-[70vh] overflow-y-auto space-y-6">
+          <div ref={formBodyRef} className="p-6 max-h-[70vh] overflow-y-auto space-y-6">
+
+            {/* Error Summary */}
+            {Object.keys(errors).length > 0 && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                <p className="text-sm font-bold text-red-600 mb-1.5">กรุณากรอกข้อมูลที่ยังขาดอยู่ ({Object.keys(errors).length} รายการ)</p>
+                <ul className="space-y-0.5">
+                  {Object.values(errors).map((msg, i) => (
+                    <li key={i} className="text-sm text-red-500 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
+                      {msg}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* รูปถ่าย */}
             <Section label="รูปถ่าย 1 นิ้ว">
@@ -376,7 +409,9 @@ export default function PersonList() {
             <Section label="ข้อมูลส่วนตัว">
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2">
-                  <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">ชื่อ-นามสกุล *</label>
+                  <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">
+                    ชื่อ-นามสกุล <span className="text-red-500">*</span>
+                  </label>
                   <div className="flex gap-2">
                     <div className="relative flex-shrink-0">
                       <select
@@ -392,21 +427,25 @@ export default function PersonList() {
                     <input
                       type="text"
                       placeholder="ชื่อ นามสกุล"
-                      className="flex-1 rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
+                      className={`flex-1 rounded-xl border px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 transition-all ${errors.nameOnly ? 'border-red-400 bg-red-50 focus:ring-red-300/40' : 'border-gray-200 focus:ring-orange-400/40 focus:border-orange-400'}`}
                       value={nameOnly}
-                      onChange={(e) => setNameOnly(e.target.value)}
+                      onChange={(e) => { setNameOnly(e.target.value); if (errors.nameOnly) setErrors(p => ({...p, nameOnly: ''})); }}
                     />
                   </div>
+                  {errors.nameOnly && <p className="text-xs text-red-500 mt-1">{errors.nameOnly}</p>}
                 </div>
-                <FormField label="เลขบัตรประชาชน / บัตรคนพิการ *" value={form.thaiId} onChange={(v) => setForm({ ...form, thaiId: v })} numericOnly maxLength={13} />
-                <ThaiDateField label="วันเกิด" value={form.birthDate} onChange={(v) => setForm({ ...form, birthDate: v })} />
+                <FormField label="เลขบัตรประชาชน / บัตรคนพิการ" required value={form.thaiId} error={errors.thaiId}
+                  onChange={(v) => { setForm({ ...form, thaiId: v }); if (errors.thaiId) setErrors(p => ({...p, thaiId: ''})); }} numericOnly maxLength={13} />
+                <ThaiDateField label="วันเกิด" required value={form.birthDate} error={errors.birthDate}
+                  onChange={(v) => { setForm({ ...form, birthDate: v }); if (errors.birthDate) setErrors(p => ({...p, birthDate: ''})); }} />
                 <SelectField label="เพศ" value={form.gender} onChange={(v) => setForm({ ...form, gender: v })}
                   options={[['MALE','ชาย'],['FEMALE','หญิง'],['OTHER','อื่นๆ']]} />
                 <MaritalField value={form.maritalStatus} onChange={(v) => setForm({ ...form, maritalStatus: v })} />
                 <FormField label="สัญชาติ" value={form.nationality} onChange={(v) => setForm({ ...form, nationality: v })} />
                 <FormField label="ศาสนา" value={form.religion} onChange={(v) => setForm({ ...form, religion: v })} />
                 <div className="col-span-2">
-                  <EducationField value={form.educationLevel} onChange={(v) => setForm({ ...form, educationLevel: v })} />
+                  <EducationField required value={form.educationLevel} error={errors.educationLevel}
+                    onChange={(v) => { setForm({ ...form, educationLevel: v }); if (errors.educationLevel) setErrors(p => ({...p, educationLevel: ''})); }} />
                 </div>
                 <SelectField label="สถานะ" value={form.lifeStatus} onChange={(v) => setForm({ ...form, lifeStatus: v })}
                   options={[['ALIVE','มีชีวิต'],['DECEASED','เสียชีวิต']]} />
@@ -434,9 +473,9 @@ export default function PersonList() {
                   )}
                   <div className="relative">
                     <select
-                      className="w-full appearance-none rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all cursor-pointer pr-9"
+                      className={`w-full appearance-none rounded-xl border px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 transition-all cursor-pointer pr-9 ${errors.disability ? 'border-red-400 bg-red-50 focus:ring-red-300/40' : 'border-gray-200 focus:ring-orange-400/40 focus:border-orange-400'}`}
                       value={disabilityTypeId}
-                      onChange={(e) => setDisabilityTypeId(e.target.value)}
+                      onChange={(e) => { setDisabilityTypeId(e.target.value); if (errors.disability) setErrors(p => ({...p, disability: ''})); }}
                     >
                       <option value="">— {editId ? 'เพิ่มประเภทความพิการ' : 'เลือกประเภทความพิการ'} —</option>
                       {disabilityTypes.map((t) => (
@@ -445,6 +484,7 @@ export default function PersonList() {
                     </select>
                     <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                   </div>
+                  {errors.disability && <p className="text-xs text-red-500 mt-1">{errors.disability}</p>}
                 </div>
               </div>
             </Section>
@@ -471,7 +511,8 @@ export default function PersonList() {
                   <FormField label="เขต / อำเภอ" value={form.district} onChange={(v) => setForm({ ...form, district: v })} />
                 </div>
                 <div className="col-span-2">
-                  <FormField label="จังหวัด" value={form.province} onChange={(v) => setForm({ ...form, province: v })} />
+                  <FormField label="จังหวัด" required value={form.province} error={errors.province}
+                    onChange={(v) => { setForm({ ...form, province: v }); if (errors.province) setErrors(p => ({...p, province: ''})); }} />
                 </div>
                 <div className="col-span-2">
                   <FormField label="รหัสไปรษณีย์" value={form.postalCode} onChange={(v) => setForm({ ...form, postalCode: v })} numericOnly maxLength={5} />
@@ -481,9 +522,16 @@ export default function PersonList() {
 
             {/* ส่วนที่ 3: ข้อมูลติดต่อ */}
             <Section label="ข้อมูลติดต่อ">
+              {errors.contact && (
+                <p className="text-xs text-red-500 -mt-2 mb-1 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" /> {errors.contact}
+                </p>
+              )}
               <div className="grid grid-cols-2 gap-3">
-                <FormField label="โทรศัพท์บ้าน" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} numericOnly maxLength={10} />
-                <FormField label="มือถือ" value={form.mobile} onChange={(v) => setForm({ ...form, mobile: v })} numericOnly maxLength={10} />
+                <FormField label="โทรศัพท์บ้าน" value={form.phone} error={errors.contact && !form.phone && !form.mobile ? ' ' : ''}
+                  onChange={(v) => { setForm({ ...form, phone: v }); if (errors.contact) setErrors(p => ({...p, contact: ''})); }} numericOnly maxLength={10} />
+                <FormField label="มือถือ" required value={form.mobile} error={errors.contact && !form.phone && !form.mobile ? ' ' : ''}
+                  onChange={(v) => { setForm({ ...form, mobile: v }); if (errors.contact) setErrors(p => ({...p, contact: ''})); }} numericOnly maxLength={10} />
                 <FormField label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
                 <FormField label="สถานที่ใกล้เคียง" value={form.landmark} onChange={(v) => setForm({ ...form, landmark: v })} />
               </div>
@@ -513,8 +561,9 @@ function Section({ label, children }) {
   );
 }
 
-function FormField({ label, value, onChange, type = 'text', maxLength, numericOnly }) {
+function FormField({ label, value, onChange, type = 'text', maxLength, numericOnly, required, error }) {
   const safeVal = value ?? '';
+  const hasError = error && error.trim() !== '';
   const handleChange = (e) => {
     let v = e.target.value;
     if (numericOnly) v = v.replace(/\D/g, '');
@@ -524,15 +573,18 @@ function FormField({ label, value, onChange, type = 'text', maxLength, numericOn
   return (
     <div>
       <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">
-        {label}{maxLength && <span className="ml-1 font-normal text-gray-300">({safeVal.length}/{maxLength})</span>}
+        {label}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {maxLength && <span className="ml-1 font-normal text-gray-300">({safeVal.length}/{maxLength})</span>}
       </label>
       <input
         type={type}
         inputMode={numericOnly ? 'numeric' : undefined}
-        className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
+        className={`w-full rounded-xl border px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 transition-all ${hasError ? 'border-red-400 bg-red-50 focus:ring-red-300/40' : 'border-gray-200 focus:ring-orange-400/40 focus:border-orange-400'}`}
         value={safeVal}
         onChange={handleChange}
       />
+      {hasError && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );
 }
@@ -555,15 +607,18 @@ function SelectField({ label, value, onChange, options }) {
   );
 }
 
-function EducationField({ value = '', onChange }) {
+function EducationField({ value = '', onChange, required, error }) {
+  const hasError = error && error.trim() !== '';
   const isOther = value && !EDUCATION_OPTS.slice(0, -1).includes(value);
   const selectVal = isOther ? 'อื่นๆ' : (value || '');
   return (
     <div>
-      <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">ระดับการศึกษา</label>
+      <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">
+        ระดับการศึกษา{required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
       <div className="relative mb-2">
         <select
-          className="w-full appearance-none rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all cursor-pointer pr-9"
+          className={`w-full appearance-none rounded-xl border px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 transition-all cursor-pointer pr-9 ${hasError ? 'border-red-400 bg-red-50 focus:ring-red-300/40' : 'border-gray-200 focus:ring-orange-400/40 focus:border-orange-400'}`}
           value={selectVal}
           onChange={(e) => onChange(e.target.value === 'อื่นๆ' ? 'อื่นๆ' : e.target.value)}
         >
@@ -581,11 +636,13 @@ function EducationField({ value = '', onChange }) {
           onChange={(e) => onChange(e.target.value || 'อื่นๆ')}
         />
       )}
+      {hasError && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );
 }
 
-function ThaiDateField({ label, value = '', onChange }) {
+function ThaiDateField({ label, value = '', onChange, required, error }) {
+  const hasError = error && error.trim() !== '';
   const toDisplay = (iso) => {
     if (!iso) return '';
     const [y, m, d] = iso.split('-');
@@ -594,21 +651,27 @@ function ThaiDateField({ label, value = '', onChange }) {
   };
   const [display, setDisplay] = useState(() => toDisplay(value));
   useEffect(() => { setDisplay(toDisplay(value)); }, [value]);
-  const handleChange = (e) => {
+  const todayTH = new Date().getFullYear() + 543;
+  const handleChangeWithValidation = (e) => {
     const raw = e.target.value.replace(/\D/g, '').slice(0, 8);
     let fmt = raw.length <= 2 ? raw : raw.length <= 4 ? `${raw.slice(0,2)}/${raw.slice(2)}` : `${raw.slice(0,2)}/${raw.slice(2,4)}/${raw.slice(4)}`;
     setDisplay(fmt);
     if (raw.length === 8) {
-      const yAD = parseInt(raw.slice(4, 8)) - 543;
+      const yearTH = parseInt(raw.slice(4, 8));
+      if (yearTH >= todayTH) { setDisplay(''); return; } // ปีต้องเป็นอดีต
+      const yAD = yearTH - 543;
       onChange(`${yAD}-${raw.slice(2,4)}-${raw.slice(0,2)}`);
     } else if (raw.length === 0) onChange('');
   };
   return (
     <div>
-      <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">{label}</label>
-      <input type="text" placeholder="วว/ดด/ปปปป (พ.ศ.)" maxLength={10}
-        className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
-        value={display} onChange={handleChange} />
+      <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">
+        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
+      <input type="text" placeholder="วว/ดด/ปปปป (พ.ศ.) — ต้องเป็นอดีต" maxLength={10}
+        className={`w-full rounded-xl border px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 transition-all ${hasError ? 'border-red-400 bg-red-50 focus:ring-red-300/40' : 'border-gray-200 focus:ring-orange-400/40 focus:border-orange-400'}`}
+        value={display} onChange={handleChangeWithValidation} />
+      {hasError && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );
 }
