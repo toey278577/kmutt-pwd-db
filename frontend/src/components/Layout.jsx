@@ -58,7 +58,7 @@ export default function Layout({ children }) {
 
       {/* ── Sidebar ── */}
       <aside
-        className={`fixed md:relative inset-y-0 left-0 z-50 w-64 flex-shrink-0 flex flex-col
+        className={`fixed md:sticky md:top-0 md:h-screen inset-y-0 left-0 z-50 w-64 flex-shrink-0 flex flex-col
           transition-transform duration-300 ease-in-out
           ${open ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
         style={{ background: 'linear-gradient(160deg,#431407 0%,#9a3412 60%,#431407 100%)' }}
