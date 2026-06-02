@@ -71,3 +71,7 @@ export const updateOrganization = (id, data) => api.put(`/organizations/${id}`, 
 export const deleteOrganization = (id) => api.delete(`/organizations/${id}`);
 
 export const getDashboardStats = () => api.get('/dashboard/stats');
+
+export const getPersonPhotos = (id) => api.get(`/persons/${id}/photos`);
+export const uploadPersonPhoto = (id, data) => api.post(`/persons/${id}/photos`, data);
+export const deletePersonPhoto = (id, pid) => api.delete(`/persons/${id}/photos/${pid}`);

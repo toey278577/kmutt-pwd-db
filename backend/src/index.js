@@ -13,6 +13,7 @@ const organizationsRouter = require('./routes/organizations');
 const dashboardRouter = require('./routes/dashboard');
 const usersRouter = require('./routes/users');
 const personorgRouter = require('./routes/personorg');
+const photosRouter = require('./routes/photos');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -32,6 +33,7 @@ app.use('/api/persons', authenticate, workexpRouter);
 app.use('/api/persons', authenticate, followupRouter);
 app.use('/api/persons', authenticate, skillsRouter);
 app.use('/api/persons', authenticate, personorgRouter);
+app.use('/api/persons', authenticate, photosRouter);
 app.use('/api/organizations', authenticate, organizationsRouter);
 app.use('/api/dashboard', authenticate, dashboardRouter);
 app.use('/api/users', usersRouter);

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown, Users } from 'lucide-react';
-import { getPersons, createPerson, updatePerson, deletePerson, getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo } from '../api';
+import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown, Users, Camera, X } from 'lucide-react';
+import { getPersons, createPerson, updatePerson, deletePerson, getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo, getPersonPhotos, uploadPersonPhoto } from '../api';
 import { useAuth } from '../context/AuthContext';
 
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
@@ -52,6 +52,8 @@ export default function PersonList() {
   const [editPersonDisabilities, setEditPersonDisabilities] = useState([]);
   const [prefix, setPrefix] = useState('นาย');
   const [nameOnly, setNameOnly] = useState('');
+  const [photoBase64, setPhotoBase64] = useState('');
+  const photoInputRef = useRef(null);
 
   const PAGE_SIZE = 10;
   const totalPages = Math.ceil(persons.length / PAGE_SIZE);
@@ -64,6 +66,7 @@ export default function PersonList() {
   }, []);
 
   const openModal = (person = null) => {
+    setPhotoBase64('');
     if (person) {
       const { prefix: p, nameOnly: n } = splitPrefix(person.fullName || '');
       setForm({ ...emptyForm, ...person, birthDate: person.birthDate?.slice(0, 10) || '' });
@@ -71,6 +74,11 @@ export default function PersonList() {
       setNameOnly(n);
       setEditId(person.id);
       setEditPersonDisabilities(person.disabilityInfos || []);
+      // โหลดรูปเดิม
+      getPersonPhotos(person.id).then(r => {
+        const profile = r.data.find(p => p.photoType === 'profile');
+        if (profile?.filePath) setPhotoBase64(profile.filePath);
+      });
     } else {
       setForm(emptyForm);
       setPrefix('นาย');
@@ -80,6 +88,15 @@ export default function PersonList() {
     }
     setDisabilityTypeId('');
     modalRef.current?.showModal();
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) return alert('รูปต้องมีขนาดไม่เกิน 2MB');
+    const reader = new FileReader();
+    reader.onload = (ev) => setPhotoBase64(ev.target.result);
+    reader.readAsDataURL(file);
   };
 
   const handleSave = async () => {
@@ -100,16 +117,17 @@ export default function PersonList() {
     if (!payload.thaiId) delete payload.thaiId;
     if (!editId && !disabilityTypeId) return alert('กรุณาเลือกประเภทความพิการ');
     try {
+      let personId = editId;
       if (editId) {
         await updatePerson(editId, payload);
-        if (disabilityTypeId) {
-          await createDisabilityInfo(editId, { disabilityTypeId });
-        }
+        if (disabilityTypeId) await createDisabilityInfo(editId, { disabilityTypeId });
       } else {
         const created = await createPerson(payload);
-        if (disabilityTypeId) {
-          await createDisabilityInfo(created.data.id, { disabilityTypeId });
-        }
+        personId = created.data.id;
+        if (disabilityTypeId) await createDisabilityInfo(personId, { disabilityTypeId });
+      }
+      if (photoBase64) {
+        await uploadPersonPhoto(personId, { filePath: photoBase64, photoType: 'profile' });
       }
       modalRef.current?.close();
       load(search);
@@ -309,6 +327,47 @@ export default function PersonList() {
           </div>
           {/* Body */}
           <div className="p-6 max-h-[70vh] overflow-y-auto space-y-6">
+
+            {/* รูปถ่าย */}
+            <Section label="รูปถ่าย 1 นิ้ว">
+              <div className="flex items-center gap-5">
+                <div
+                  className="w-24 h-28 rounded-xl border-2 border-dashed border-orange-300 bg-orange-50 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-orange-500 transition-colors flex-shrink-0"
+                  onClick={() => photoInputRef.current?.click()}>
+                  {photoBase64
+                    ? <img src={photoBase64} alt="รูปถ่าย" className="w-full h-full object-cover" />
+                    : <>
+                        <Camera size={24} className="text-orange-300 mb-1" />
+                        <span className="text-xs text-orange-400 text-center leading-tight">คลิกเพื่อ<br/>อัปโหลดรูป</span>
+                      </>
+                  }
+                </div>
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={() => photoInputRef.current?.click()}
+                    className="px-4 py-2 rounded-xl border border-orange-300 text-orange-600 text-sm font-semibold hover:bg-orange-50 transition-colors">
+                    เลือกรูปภาพ
+                  </button>
+                  {photoBase64 && (
+                    <button
+                      type="button"
+                      onClick={() => { setPhotoBase64(''); if (photoInputRef.current) photoInputRef.current.value = ''; }}
+                      className="px-4 py-2 rounded-xl border border-red-200 text-red-400 text-sm font-semibold hover:bg-red-50 transition-colors flex items-center gap-1">
+                      <X size={13} /> ลบรูป
+                    </button>
+                  )}
+                  <p className="text-xs text-gray-400">รองรับ JPG, PNG ขนาดไม่เกิน 2MB</p>
+                </div>
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handlePhotoChange}
+                />
+              </div>
+            </Section>
 
             {/* ส่วนที่ 1: ข้อมูลส่วนตัว */}
             <Section label="ข้อมูลส่วนตัว">

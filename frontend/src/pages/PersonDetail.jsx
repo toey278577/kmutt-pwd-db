@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, GraduationCap, Briefcase, Star, Target, ChevronDown, Building2, Accessibility } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, GraduationCap, Briefcase, Star, Target, ChevronDown, Building2, Accessibility, Camera } from 'lucide-react';
 import {
   getPerson, getTraining, createTraining, deleteTraining,
   getWorkExp, createWorkExp, deleteWorkExp,
@@ -9,6 +9,7 @@ import {
   getPersonOrgs, createPersonOrg, deletePersonOrg,
   getOrganizations,
   getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo,
+  getPersonPhotos, uploadPersonPhoto, deletePersonPhoto,
 } from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -69,6 +70,8 @@ export default function PersonDetail() {
   const [disabilityTypes, setDisabilityTypes] = useState([]);
   const [dialogType, setDialogType] = useState('');
   const [form, setForm] = useState({});
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const photoInputRef = useRef(null);
 
   const reloadAll = () => {
     getPerson(id).then((r) => setPerson(r.data));
@@ -79,6 +82,33 @@ export default function PersonDetail() {
     getPersonOrgs(id).then((r) => setPersonOrgs(r.data));
     getOrganizations().then((r) => setOrgs(r.data));
     getDisabilityTypes().then((r) => setDisabilityTypes(r.data));
+    getPersonPhotos(id).then((r) => {
+      const p = r.data.find(x => x.photoType === 'profile');
+      setProfilePhoto(p || null);
+    });
+  };
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) return alert('รูปต้องมีขนาดไม่เกิน 2MB');
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      try {
+        await uploadPersonPhoto(id, { filePath: ev.target.result, photoType: 'profile' });
+        getPersonPhotos(id).then(r => {
+          const p = r.data.find(x => x.photoType === 'profile');
+          setProfilePhoto(p || null);
+        });
+      } catch { alert('อัปโหลดรูปไม่สำเร็จ'); }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDeletePhoto = async () => {
+    if (!profilePhoto) return;
+    await deletePersonPhoto(id, profilePhoto.id);
+    setProfilePhoto(null);
   };
 
   useEffect(() => { reloadAll(); }, [id]);
@@ -129,9 +159,32 @@ export default function PersonDetail() {
 
       {/* Profile Header */}
       <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-5 mb-5 flex items-center gap-4">
-        <div className="w-14 h-14 rounded-xl text-white text-lg font-black flex items-center justify-center flex-shrink-0"
-          style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)' }}>
-          {person.fullName?.slice(0, 2).toUpperCase()}
+        {/* รูปภาพ */}
+        <div className="relative flex-shrink-0 group">
+          <div className="w-16 h-20 rounded-xl overflow-hidden border-2 border-orange-200 flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)' }}>
+            {profilePhoto?.filePath
+              ? <img src={profilePhoto.filePath} alt="รูปถ่าย" className="w-full h-full object-cover" />
+              : <div className="w-full h-full flex items-center justify-center text-white text-lg font-black">
+                  {person.fullName?.slice(0, 2).toUpperCase()}
+                </div>
+            }
+          </div>
+          {canEdit && (
+            <button
+              onClick={() => photoInputRef.current?.click()}
+              className="absolute inset-0 rounded-xl bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <Camera size={16} color="white" />
+            </button>
+          )}
+          {canEdit && profilePhoto && (
+            <button
+              onClick={handleDeletePhoto}
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition-colors">
+              <Trash2 size={10} />
+            </button>
+          )}
+          <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handlePhotoChange} />
         </div>
         <div className="flex-1">
           <h1 className="text-xl font-extrabold text-orange-950">{person.fullName}</h1>
@@ -139,6 +192,7 @@ export default function PersonDetail() {
             {GENDER_LABELS[person.gender]} · {person.province || 'ไม่ระบุจังหวัด'}
             {age !== null && <> · <span className="font-semibold text-orange-600">{age} ปี</span></>}
           </p>
+          {canEdit && <p className="text-xs text-orange-300 mt-1">hover ที่รูปเพื่อเปลี่ยน</p>}
         </div>
         <span className={`badge badge-lg font-semibold ${person.lifeStatus === 'ALIVE' ? 'badge-success' : 'badge-ghost'}`}>
           {person.lifeStatus === 'ALIVE' ? 'มีชีวิต' : 'เสียชีวิต'}

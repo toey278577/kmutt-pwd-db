@@ -52,7 +52,7 @@ model PersonPhoto {
   photoType   String?  @map("photo_type") @db.VarChar(50)
   photoDate   DateTime? @map("photo_date") @db.Date
   description String?  @db.Text
-  filePath    String?  @map("file_path") @db.VarChar(500)
+  filePath    String?  @map("file_path") @db.Text
 
   person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
 
