@@ -32,13 +32,21 @@ export default function Layout({ children }) {
     <div className="flex min-h-screen bg-orange-50/50">
 
       {/* ── Mobile top bar ── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center gap-3 px-4 h-14 shadow-lg"
-        style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 100%)' }}>
-        <button onClick={() => setOpen(true)} className="text-white/70 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition-all">
-          <Menu size={20} />
-        </button>
-        <img src="/logo-icon.png" alt="KMUTT" className="h-7 w-7 object-contain rounded-lg bg-white/10 p-0.5 flex-shrink-0" />
-        <span className="text-white font-bold text-sm truncate">ระบบฐานข้อมูลคนพิการ มจธ.</span>
+      <div className="md:hidden fixed top-0 left-0 right-0 z-30 shadow-lg"
+        style={{
+          background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 100%)',
+          paddingTop: 'max(14px, env(safe-area-inset-top))',
+          paddingBottom: '10px',
+          paddingLeft: '16px',
+          paddingRight: '16px',
+        }}>
+        <div className="flex items-center gap-3 h-10">
+          <button onClick={() => setOpen(true)} className="text-white/70 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition-all active:scale-90">
+            <Menu size={22} />
+          </button>
+          <img src="/logo-icon.png" alt="KMUTT" className="h-7 w-7 object-contain rounded-lg bg-white/10 p-0.5 flex-shrink-0" />
+          <span className="text-white font-bold text-sm truncate">ระบบฐานข้อมูลคนพิการ มจธ.</span>
+        </div>
       </div>
 
       {/* ── Backdrop ── */}
@@ -124,7 +132,7 @@ export default function Layout({ children }) {
         </nav>
 
         {/* ── User Card ── */}
-        <div className="relative p-3 border-t border-white/5">
+        <div className="relative p-3 border-t border-white/5" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
           <div className="flex items-center gap-3 px-3 py-3 rounded-2xl"
             style={{ background: 'rgba(255,255,255,0.04)', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)' }}>
             {/* Avatar */}
@@ -147,8 +155,9 @@ export default function Layout({ children }) {
 
       {/* ── Main ── */}
       <main className="flex-1 overflow-auto min-h-screen">
-        <div className="md:hidden" style={{ height: '56px' }} />
-        <div className="p-4 md:p-7">
+        {/* Spacer = 10px paddingBottom + 40px (h-10) + safe-area-top */}
+        <div className="md:hidden" style={{ height: 'calc(50px + max(14px, env(safe-area-inset-top)))' }} />
+        <div className="p-4 md:p-7" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
           {children}
         </div>
       </main>
