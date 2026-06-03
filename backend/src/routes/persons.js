@@ -83,7 +83,12 @@ router.get('/', async (req, res) => {
 
     const persons = await prisma.person.findMany({
       where,
-      include: { disabilityInfos: { include: { disabilityType: true } } },
+      select: {
+        id: true, fullName: true, thaiId: true, gender: true,
+        birthDate: true, phone: true, mobile: true, province: true,
+        educationLevel: true, lifeStatus: true, createdAt: true,
+        disabilityInfos: { select: { id: true, disabilityType: { select: { typeName: true } } } },
+      },
       orderBy: { createdAt: 'desc' },
     });
     res.json(persons);

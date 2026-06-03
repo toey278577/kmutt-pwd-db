@@ -72,6 +72,9 @@ export const deleteOrganization = (id) => api.delete(`/organizations/${id}`);
 
 export const getDashboardStats = () => api.get('/dashboard/stats');
 
+export const getAllTraining = () => api.get('/data/training-all');
+export const getAllFollowUp = () => api.get('/data/followup-all');
+
 export const getPersonPhotos = (id) => api.get(`/persons/${id}/photos`);
 export const uploadPersonPhoto = (id, data) => api.post(`/persons/${id}/photos`, data);
 export const deletePersonPhoto = (id, pid) => api.delete(`/persons/${id}/photos/${pid}`);

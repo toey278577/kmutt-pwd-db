@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getPersons, getFollowUp } from '../api';
+import { getAllFollowUp } from '../api';
 
 const EMP = {
   EMPLOYED:   { bg: 'bg-emerald-100 text-emerald-700 border-emerald-200', label: 'มีงานทำ' },
@@ -27,11 +27,8 @@ export default function FollowUpList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getPersons().then(async (r) => {
-      const results = await Promise.all(
-        r.data.map((p) => getFollowUp(p.id).then((fu) => fu.data.map((f) => ({ ...f, personName: p.fullName, personId: p.id }))))
-      );
-      setRows(results.flat().sort((a, b) => new Date(b.followUpDate) - new Date(a.followUpDate)));
+    getAllFollowUp().then(r => {
+      setRows(r.data);
       setLoading(false);
     });
   }, []);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getPersons, getTraining } from '../api';
+import { getAllTraining } from '../api';
 
 const TYPE = {
   TRAIN: { bg: 'bg-amber-100 text-amber-700 border-amber-200',   label: 'อบรม' },
@@ -39,15 +39,8 @@ export default function TrainingList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getPersons().then(async (r) => {
-      const results = await Promise.all(
-        r.data.map((p) =>
-          getTraining(p.id).then((tr) =>
-            tr.data.map((t) => ({ ...t, personName: p.fullName, personId: p.id }))
-          )
-        )
-      );
-      setRows(results.flat().sort((a, b) => new Date(b.startDate || 0) - new Date(a.startDate || 0)));
+    getAllTraining().then(r => {
+      setRows(r.data);
       setLoading(false);
     });
   }, []);

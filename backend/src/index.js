@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const compression = require('compression');
 require('dotenv').config();
 
 const { authenticate } = require('./middleware/auth');
@@ -14,6 +15,7 @@ const dashboardRouter = require('./routes/dashboard');
 const usersRouter = require('./routes/users');
 const personorgRouter = require('./routes/personorg');
 const photosRouter = require('./routes/photos');
+const aggregateRouter = require('./routes/aggregate');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,6 +24,7 @@ const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',')
   : ['http://localhost:5173', 'http://localhost:5174', 'https://kmutt-pwd-db.vercel.app'];
 
+app.use(compression());
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
@@ -35,6 +38,7 @@ app.use('/api/persons', authenticate, followupRouter);
 app.use('/api/persons', authenticate, skillsRouter);
 app.use('/api/persons', authenticate, personorgRouter);
 app.use('/api/persons', authenticate, photosRouter);
+app.use('/api/data', authenticate, aggregateRouter);
 app.use('/api/organizations', authenticate, organizationsRouter);
 app.use('/api/dashboard', authenticate, dashboardRouter);
 app.use('/api/users', usersRouter);
