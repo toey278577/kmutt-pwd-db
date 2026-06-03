@@ -68,7 +68,8 @@ export default function Layout({ children }) {
         </div>
 
         {/* ── Logo ── */}
-        <div className="relative px-4 pt-5 pb-4 flex items-center gap-3 border-b border-white/5">
+        <div className="relative px-4 pb-4 flex items-center gap-3 border-b border-white/5"
+          style={{ paddingTop: 'max(20px, env(safe-area-inset-top))' }}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-lg flex-shrink-0">
               <img src="/logo-icon.png" alt="KMUTT" className="h-8 w-8 object-contain" />
