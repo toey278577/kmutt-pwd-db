@@ -546,8 +546,10 @@ const CONTENT = {
 export default function Help() {
   const [active, setActive] = useState('intro');
 
+  const activeSection = sections.find(s => s.id === active);
+
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="flex flex-col">
       {/* Header */}
       <div className="mb-4 relative overflow-hidden rounded-3xl flex-shrink-0"
         style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
@@ -565,8 +567,39 @@ export default function Help() {
         </div>
       </div>
 
-      {/* Body */}
-      <div className="flex-1 min-h-0 flex gap-4">
+      {/* ── Mobile layout ── */}
+      <div className="md:hidden flex flex-col gap-3">
+        {/* Horizontal scroll nav */}
+        <div className="overflow-x-auto bg-white rounded-2xl border border-orange-100 shadow-sm">
+          <div className="flex gap-1 px-2 py-2 min-w-max">
+            {sections.map(({ id, label, icon: Icon }) => (
+              <button key={id} onClick={() => setActive(id)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all
+                  ${active === id ? 'text-white shadow-sm' : 'text-gray-400 hover:text-gray-700 hover:bg-orange-50'}`}
+                style={active === id ? { background: 'linear-gradient(135deg,#ea580c,#c2410c)' } : {}}>
+                <Icon size={12} />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Active section label */}
+        {activeSection && (
+          <div className="flex items-center gap-2 px-1">
+            <activeSection.icon size={14} className="text-orange-500" />
+            <span className="text-sm font-bold text-gray-700">{activeSection.label}</span>
+          </div>
+        )}
+
+        {/* Content full width */}
+        <div className="bg-white rounded-2xl border border-orange-100 shadow-sm p-4 pb-8">
+          {CONTENT[active]}
+        </div>
+      </div>
+
+      {/* ── Desktop layout (unchanged) ── */}
+      <div className="hidden md:flex flex-1 min-h-0 gap-4" style={{ height: 'calc(100vh - 56px - 140px)' }}>
         {/* Left nav */}
         <div className="w-52 flex-shrink-0 bg-white rounded-3xl border border-orange-100 overflow-auto py-3 shadow-sm">
           {sections.map(({ id, label, icon: Icon }) => (
