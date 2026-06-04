@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, Shield, Eye, BookOpen, Printer, Menu, X, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, Shield, Eye, BookOpen, Printer, Menu, X, ChevronRight, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const menu = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/' },
@@ -21,6 +22,7 @@ export default function Layout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout, isAdmin } = useAuth();
+  const { dark, toggle } = useTheme();
   const [open, setOpen] = useState(false);
 
   const handleLogout = () => { logout(); navigate('/login', { replace: true }); };
@@ -45,7 +47,11 @@ export default function Layout({ children }) {
             <Menu size={22} />
           </button>
           <img src="/logo-icon.png" alt="KMUTT" className="h-7 w-7 object-contain rounded-lg bg-white/10 p-0.5 flex-shrink-0" />
-          <span className="text-white font-bold text-sm truncate">ระบบฐานข้อมูลคนพิการ มจธ.</span>
+          <span className="text-white font-bold text-sm truncate flex-1">ระบบฐานข้อมูลคนพิการ มจธ.</span>
+          <button onClick={toggle} title={dark ? 'Light mode' : 'Dark mode'}
+            className="text-white/60 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition-all active:scale-90 flex-shrink-0">
+            {dark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
         </div>
       </div>
 
@@ -131,6 +137,24 @@ export default function Layout({ children }) {
             </>
           )}
         </nav>
+
+        {/* ── Theme Toggle ── */}
+        <div className="relative px-4 py-2.5 border-t border-white/5 flex items-center justify-between">
+          <span className="text-orange-200/40 text-[10px] font-bold tracking-widest uppercase">
+            {dark ? 'Dark Mode' : 'Light Mode'}
+          </span>
+          <button onClick={toggle} title={dark ? 'เปลี่ยนเป็น Light' : 'เปลี่ยนเป็น Dark'}
+            className="relative w-11 h-6 rounded-full transition-all duration-300 flex-shrink-0"
+            style={{ background: dark ? 'rgba(234,88,12,0.35)' : 'rgba(255,255,255,0.12)', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1)' }}>
+            <span className={`absolute top-0.5 w-5 h-5 rounded-full transition-all duration-300 flex items-center justify-center
+              ${dark ? 'bg-orange-400' : 'bg-white/80'}`}
+              style={{ left: dark ? '22px' : '2px' }}>
+              {dark
+                ? <Moon size={10} className="text-orange-950" />
+                : <Sun size={10} className="text-orange-600" />}
+            </span>
+          </button>
+        </div>
 
         {/* ── User Card ── */}
         <div className="relative p-3 border-t border-white/5" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>

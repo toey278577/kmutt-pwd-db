@@ -34,6 +34,67 @@ body {
 ::-webkit-scrollbar-thumb { background: #fed7aa; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #fb923c; }
 
+/* ─── Dark Mode ─── */
+html.dark body {
+  background-color: #0f0805;
+  color: #fde8d0;
+}
+
+html.dark ::-webkit-scrollbar-track { background: #1a0c06; }
+html.dark ::-webkit-scrollbar-thumb { background: #7c2d12; }
+html.dark ::-webkit-scrollbar-thumb:hover { background: #c2410c; }
+
+@media not print {
+  /* Cards & backgrounds */
+  html.dark main .bg-white              { background-color: #1f1109 !important; }
+  html.dark main [class*="bg-orange-50"]{ background-color: #1a0c06 !important; }
+  html.dark main .bg-gray-50            { background-color: #1a0d06 !important; }
+  html.dark main .bg-gray-100           { background-color: #260e05 !important; }
+  html.dark main .bg-gray-900           { background-color: #0a0503 !important; }
+  html.dark main [class*="bg-amber-50"] { background-color: #1a0c06 !important; }
+
+  /* Borders */
+  html.dark main .border-orange-100,
+  html.dark main .border-orange-200     { border-color: #431407 !important; }
+  html.dark main .border-gray-50,
+  html.dark main .border-gray-100,
+  html.dark main .border-gray-200       { border-color: #431407 !important; }
+  html.dark main .border-gray-300       { border-color: #5c1e0a !important; }
+
+  /* Text */
+  html.dark main .text-gray-900,
+  html.dark main .text-gray-800,
+  html.dark main .text-gray-700,
+  html.dark main .text-orange-950       { color: #fde8d0 !important; }
+  html.dark main .text-gray-600,
+  html.dark main .text-gray-500         { color: #d97706 !important; }
+  html.dark main .text-gray-400         { color: #92400e !important; }
+  html.dark main .text-amber-700        { color: #fbbf24 !important; }
+  html.dark main .text-orange-800       { color: #fb923c !important; }
+  html.dark main .divide-gray-50        { border-color: #431407 !important; }
+  html.dark main .divide-y              { border-color: #431407 !important; }
+
+  /* Inputs & forms */
+  html.dark main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]) {
+    background-color: #1a0c06 !important;
+    border-color: #431407 !important;
+    color: #fde8d0 !important;
+  }
+  html.dark main input::placeholder     { color: #7c2d12 !important; }
+  html.dark main select                 { background-color: #1a0c06 !important; border-color: #431407 !important; color: #fde8d0 !important; }
+  html.dark main textarea               { background-color: #1a0c06 !important; border-color: #431407 !important; color: #fde8d0 !important; }
+
+  /* Tables */
+  html.dark main tr.bg-white            { background-color: #1f1109 !important; }
+  html.dark main tr.bg-gray-50          { background-color: #1a0d06 !important; }
+  html.dark main td, html.dark main th  { color: #fde8d0 !important; }
+  html.dark main .bg-gray-100 th        { color: #f97316 !important; }
+
+  /* Dividers */
+  html.dark main .border-b              { border-color: #431407 !important; }
+  html.dark main .border-t              { border-color: #431407 !important; }
+}
+
 @page { margin: 0; }
 
 @media print {
