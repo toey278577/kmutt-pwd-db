@@ -21,6 +21,7 @@ api.interceptors.response.use(
   }
 );
 
+export const getHealth = () => api.get('/health');
 export const login = (data) => api.post('/auth/login', data);
 export const getMe = () => api.get('/auth/me');
 

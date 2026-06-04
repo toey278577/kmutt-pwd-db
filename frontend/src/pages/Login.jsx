@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, LogIn, CheckCircle2, XCircle, Shield } from 'lucide-react';
-import { login } from '../api';
+import { login, getHealth } from '../api';
 import { useAuth } from '../context/AuthContext';
 
 /* ── Toast ── */
@@ -36,6 +36,14 @@ export default function Login() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
+  const [serverReady, setServerReady] = useState(false);
+
+  // Pre-warm Render.com backend ทันทีที่ page load
+  useEffect(() => {
+    getHealth()
+      .then(() => setServerReady(true))
+      .catch(() => setServerReady(true)); // ถ้า error ก็ถือว่าพยายามแล้ว
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -198,6 +206,14 @@ export default function Login() {
             ระบบสำหรับเจ้าหน้าที่เท่านั้น<br />
             กรุณาติดต่อผู้ดูแลระบบหากลืมรหัสผ่าน
           </p>
+
+          {/* Server warm-up indicator */}
+          {!serverReady && (
+            <div className="flex items-center justify-center gap-2 mt-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-orange-400/60 animate-pulse" />
+              <p className="text-xs text-white/20">กำลังเชื่อมต่อเซิร์ฟเวอร์...</p>
+            </div>
+          )}
 
           {/* Mobile credit */}
           <p className="lg:hidden text-center text-xs text-white/10 mt-2">
