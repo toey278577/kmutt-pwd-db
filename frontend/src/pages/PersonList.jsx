@@ -200,20 +200,18 @@ export default function PersonList() {
 
       {/* Search */}
       <div className="mb-4 flex-shrink-0">
-        <div className="flex items-center bg-white rounded-2xl border border-orange-100 shadow-sm overflow-hidden transition-all duration-200 focus-within:border-orange-400 focus-within:shadow-[0_0_0_3px_rgba(234,88,12,0.12)]">
+        <div className="flex items-center gap-2 bg-white rounded-2xl border border-orange-100 shadow-sm px-3 py-2.5 transition-all duration-200 focus-within:border-orange-400 focus-within:shadow-[0_0_0_3px_rgba(234,88,12,0.12)]">
           {/* Icon */}
-          <div className="pl-4 pr-3 flex-shrink-0">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
-              <Search size={14} color="white" />
-            </div>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
+            <Search size={14} color="white" />
           </div>
 
           {/* Input */}
           <input
             type="text"
             placeholder="ค้นหาชื่อ-นามสกุล หรือเลขบัตรประชาชน..."
-            className="flex-1 py-3.5 text-sm bg-transparent outline-none text-gray-700 placeholder:text-gray-300 min-w-0"
+            className="flex-1 text-sm bg-transparent outline-none text-gray-700 placeholder:text-gray-300 min-w-0"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && load(search)}
@@ -222,17 +220,14 @@ export default function PersonList() {
           {/* Clear */}
           {search && (
             <button onClick={() => { setSearch(''); load(''); }}
-              className="p-2 mx-1 rounded-lg text-gray-300 hover:text-orange-500 hover:bg-orange-50 transition-all flex-shrink-0">
-              <X size={14} />
+              className="p-1.5 rounded-lg text-gray-300 hover:text-orange-500 hover:bg-orange-50 transition-all flex-shrink-0">
+              <X size={13} />
             </button>
           )}
 
-          {/* Divider */}
-          <div className="w-px h-6 bg-orange-100 flex-shrink-0 mx-1" />
-
-          {/* Search button */}
+          {/* Search button — float inside, not flush to edge */}
           <button onClick={() => load(search)}
-            className="px-5 py-3.5 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 flex-shrink-0"
+            className="px-4 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 flex-shrink-0"
             style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
             ค้นหา
           </button>
