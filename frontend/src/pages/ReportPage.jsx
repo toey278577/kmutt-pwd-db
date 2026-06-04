@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Printer, FileText, Award, Building2, Users, ChevronDown, X } from 'lucide-react';
 import { getPersons, getOrganizations } from '../api';
 
@@ -128,7 +128,7 @@ export default function ReportPage() {
             <div>
               <p className="text-orange-300/70 text-xs font-bold tracking-[0.12em] uppercase mb-0.5">รายงาน</p>
               <h1 className="text-xl font-black text-white leading-tight">ออกรายงาน / Report</h1>
-              <p className="text-orange-200/50 text-xs mt-0.5">เลือกประเภทรายงานแล้วกด พิมพ์ / บันทึก PDF</p>
+              <p className="text-orange-200/50 text-xs mt-0.5">กด "พิมพ์ / บันทึก PDF" → เปลี่ยน Destination เป็น "Save as PDF" → กด Save</p>
             </div>
           </div>
           <button
