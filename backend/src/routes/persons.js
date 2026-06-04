@@ -70,7 +70,7 @@ router.delete('/:id/disability/:did', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const { search, province, gender } = req.query;
+    const { search, province, gender, withPhotos } = req.query;
     const where = {};
     if (search) {
       where.OR = [
@@ -81,14 +81,18 @@ router.get('/', async (req, res) => {
     if (province) where.province = province;
     if (gender) where.gender = gender;
 
+    const select = {
+      id: true, fullName: true, thaiId: true, gender: true,
+      birthDate: true, phone: true, mobile: true, province: true,
+      educationLevel: true, lifeStatus: true, createdAt: true,
+      disabilityInfos: { select: { id: true, disabilityType: { select: { typeName: true } } } },
+    };
+    if (withPhotos === 'true') {
+      select.photos = { select: { filePath: true }, take: 1 };
+    }
     const persons = await prisma.person.findMany({
       where,
-      select: {
-        id: true, fullName: true, thaiId: true, gender: true,
-        birthDate: true, phone: true, mobile: true, province: true,
-        educationLevel: true, lifeStatus: true, createdAt: true,
-        disabilityInfos: { select: { id: true, disabilityType: { select: { typeName: true } } } },
-      },
+      select,
       orderBy: { createdAt: 'desc' },
     });
     res.json(persons);

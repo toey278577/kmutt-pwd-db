@@ -43,10 +43,13 @@ export default function ReportPage() {
 
   // Certificate settings
   const [certForm, setCertForm] = useState({
-    courseName: 'โครงการฝึกอบรม-ฝึกงานคนพิการ เพื่อเตรียมความพร้อมเข้าสู่สถานประกอบการ',
+    certType: 'entered',
+    courseName: 'การฝึกอบรม-ฝึกงานคนพิการ เพื่อเตรียมความพร้อมเข้าทำงานในสถานประกอบการ',
+    courseSub: 'เจ้าหน้าที่ประจำสำนักงาน',
     batch: '',
     startDate: '',
     endDate: '',
+    duration: '',
     signName: 'รศ.ดร.สุวิทย์ แซ่เตีย',
     signTitle: 'อธิการบดีมหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี',
   });
@@ -64,7 +67,7 @@ export default function ReportPage() {
   const [selectedOrgIds, setSelectedOrgIds] = useState([]);
 
   useEffect(() => {
-    Promise.all([getPersons(), getOrganizations()])
+    Promise.all([getPersons({ withPhotos: 'true' }), getOrganizations()])
       .then(([pRes, oRes]) => {
         setPersons(pRes.data);
         setOrgs(oRes.data);
@@ -111,7 +114,7 @@ export default function ReportPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-5 relative overflow-hidden rounded-3xl"
+      <div className="mb-5 relative overflow-hidden rounded-3xl no-print"
         style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
         <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-20 blur-2xl"
           style={{ background: 'radial-gradient(circle,#fb923c,transparent)' }} />
@@ -164,10 +167,40 @@ export default function ReportPage() {
         {activeType === 'certificate' && (
           <div className="bg-white rounded-2xl border border-orange-100 p-5 mb-5 shadow-sm">
             <p className="font-bold text-orange-950 text-sm mb-4">ตั้งค่าใบ Certificate</p>
+
+            {/* ประเภท Certificate */}
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-gray-400 mb-2">ประเภทใบ Certificate</label>
+              <div className="flex gap-3 flex-wrap">
+                {[
+                  { value: 'entered', label: 'ได้เข้าร่วมโครงการ' },
+                  { value: 'passed', label: 'ได้ผ่านโครงการ' },
+                ].map(opt => (
+                  <label key={opt.value}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 cursor-pointer transition-all select-none ${
+                      certForm.certType === opt.value
+                        ? 'border-orange-400 bg-orange-50 text-orange-700 font-bold'
+                        : 'border-gray-200 text-gray-500 hover:border-orange-200'
+                    }`}>
+                    <input type="radio" name="certType" value={opt.value}
+                      checked={certForm.certType === opt.value}
+                      onChange={() => setCertForm({...certForm, certType: opt.value})}
+                      className="hidden" />
+                    <span className={`w-3 h-3 rounded-full border-2 flex-shrink-0 ${certForm.certType === opt.value ? 'border-orange-500 bg-orange-500' : 'border-gray-300'}`} />
+                    <span className="text-sm">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="col-span-2">
-                <label className="block text-xs font-bold text-gray-400 mb-1">ชื่อหลักสูตร</label>
+                <label className="block text-xs font-bold text-gray-400 mb-1">ชื่อโครงการ (หลัก)</label>
                 <input className={inputCls} value={certForm.courseName} onChange={e => setCertForm({...certForm, courseName: e.target.value})} />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-bold text-gray-400 mb-1">ชื่อหลักสูตร (ย่อย)</label>
+                <input className={inputCls} placeholder="เช่น เจ้าหน้าที่ประจำสำนักงาน" value={certForm.courseSub} onChange={e => setCertForm({...certForm, courseSub: e.target.value})} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 mb-1">รุ่นที่</label>
@@ -179,17 +212,21 @@ export default function ReportPage() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 mb-1">วันที่เริ่มอบรม</label>
-                <input className={inputCls} placeholder="เช่น 1 มกราคม" value={certForm.startDate} onChange={e => setCertForm({...certForm, startDate: e.target.value})} />
+                <input className={inputCls} placeholder="เช่น ๑ พฤษภาคม พ.ศ. ๒๕๖๘" value={certForm.startDate} onChange={e => setCertForm({...certForm, startDate: e.target.value})} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 mb-1">วันที่สิ้นสุด</label>
-                <input className={inputCls} placeholder="เช่น 31 มกราคม 2568" value={certForm.endDate} onChange={e => setCertForm({...certForm, endDate: e.target.value})} />
+                <input className={inputCls} placeholder="เช่น ๓๐ ตุลาคม พ.ศ. ๒๕๖๘" value={certForm.endDate} onChange={e => setCertForm({...certForm, endDate: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 mb-1">รวมระยะเวลา</label>
+                <input className={inputCls} placeholder="เช่น ๖ เดือน" value={certForm.duration} onChange={e => setCertForm({...certForm, duration: e.target.value})} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 mb-1">ชื่อผู้ลงนาม</label>
                 <input className={inputCls} value={certForm.signName} onChange={e => setCertForm({...certForm, signName: e.target.value})} />
               </div>
-              <div>
+              <div className="col-span-2">
                 <label className="block text-xs font-bold text-gray-400 mb-1">ตำแหน่งผู้ลงนาม</label>
                 <input className={inputCls} value={certForm.signTitle} onChange={e => setCertForm({...certForm, signTitle: e.target.value})} />
               </div>
@@ -354,7 +391,10 @@ export default function ReportPage() {
                       <tr key={p.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="border border-gray-300 px-2 py-2 text-center align-middle">{i + 1}</td>
                         <td className="border border-gray-300 px-1 py-1 text-center align-middle">
-                          <div className="w-10 h-12 bg-gray-100 border border-gray-200 rounded mx-auto flex items-center justify-center text-gray-300 text-xs">รูป</div>
+                          {p.photos?.[0]?.filePath
+                            ? <img src={p.photos[0].filePath} alt={p.fullName} className="w-10 h-12 object-cover rounded mx-auto" />
+                            : <div className="w-10 h-12 bg-gray-100 border border-gray-200 rounded mx-auto flex items-center justify-center text-gray-300 text-[9px]">ไม่มีรูป</div>
+                          }
                         </td>
                         <td className="border border-gray-300 px-2 py-2 align-middle">{p.fullName}</td>
                         <td className="border border-gray-300 px-2 py-2 text-center align-middle">—</td>
@@ -478,11 +518,8 @@ export default function ReportPage() {
       <style>{`
         @media print {
           .no-print { display: none !important; }
-          .print-area { border: none !important; box-shadow: none !important; }
+          .print-area { border: none !important; box-shadow: none !important; border-radius: 0 !important; }
           .page-break { page-break-before: always; }
-          body { background: white !important; }
-          aside, nav, header { display: none !important; }
-          main { padding: 0 !important; }
         }
       `}</style>
     </div>
@@ -528,36 +565,63 @@ function PersonSelector({ persons, selected, onToggle, onAll, onClear }) {
 }
 
 function CertificateTemplate({ person, certForm }) {
+  const certText = certForm.certType === 'passed' ? 'ได้ผ่านโครงการ' : 'ได้เข้าร่วมโครงการ';
+
   return (
-    <div className="max-w-2xl mx-auto border-4 border-double border-gray-800 p-8 text-center font-serif"
-      style={{ minHeight: '400px' }}>
-      <div className="flex justify-center items-center gap-6 mb-4">
-        <img src="/logo.jpg" alt="KMUTT" className="h-16 object-contain" onError={e => { e.target.style.display='none'; }} />
+    <div className="max-w-2xl mx-auto text-center py-10 px-14"
+      style={{ fontFamily: 'Sarabun, serif', minHeight: '500px' }}>
+
+      {/* Logo */}
+      <div className="flex justify-center mb-5">
+        <img src="/logo.jpg" alt="KMUTT" className="h-24 w-24 object-contain"
+          onError={e => { e.target.style.display = 'none'; }} />
       </div>
-      <p className="text-lg font-bold mb-1">มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</p>
-      <p className="text-sm mb-4">วุฒิบัตรนี้ให้ไว้เพื่อแสดงว่า</p>
 
-      <div className="border-b-2 border-gray-800 mx-16 mb-2" />
-      <p className="text-xl font-bold mb-1">{person.fullName}</p>
-      <p className="text-sm mb-4">ได้สำเร็จการอบรม/ฝึกงาน</p>
+      {/* University */}
+      <p className="text-xl font-black mb-1">มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</p>
+      <p className="text-sm mb-6">วุฒิบัตรฉบับนี้ให้ไว้เพื่อแสดงว่า</p>
 
-      <p className="text-sm font-semibold mb-1">
-        {certForm.courseName}
-      </p>
+      {/* Person name */}
+      <p className="text-2xl font-black mb-3">{person.fullName}</p>
+
+      {/* Certificate type */}
+      <p className="text-base mb-3">{certText}</p>
+
+      {/* Course name */}
+      <p className="text-base font-bold mb-1">{certForm.courseName}</p>
+
+      {/* Sub course */}
+      {certForm.courseSub && (
+        <p className="text-sm mb-3">หลักสูตร "{certForm.courseSub}"</p>
+      )}
+
+      {/* Batch / year */}
       {certForm.batch && (
-        <p className="text-sm mb-1">หลักสูตร "เจ้าหน้าที่ที่ประจำสำนักงาน" รุ่นที่ {certForm.batch} ประจำปี {certForm.year || ''}</p>
-      )}
-      {(certForm.startDate || certForm.endDate) && (
-        <p className="text-sm mb-4">
-          ในวันที่ {certForm.startDate} ถึงวันที่ {certForm.endDate}
-        </p>
+        <p className="text-sm mb-2">รุ่นที่ {certForm.batch}{certForm.year ? ` ประจำปี พ.ศ. ${certForm.year}` : ''}</p>
       )}
 
-      <div className="mt-8 flex justify-center">
+      {/* Date range */}
+      {(certForm.startDate || certForm.endDate) && (
+        <p className="text-sm mb-1">วันที่ {certForm.startDate} ถึงวันที่ {certForm.endDate}</p>
+      )}
+
+      {/* Duration */}
+      {certForm.duration && (
+        <p className="text-sm mb-1">รวมระยะเวลา {certForm.duration} และมีสัมฤทธิ์ผลตามเกณฑ์ของหลักสูตร</p>
+      )}
+
+      {/* Issued date */}
+      {certForm.endDate && (
+        <p className="text-sm mb-8">ให้ไว้ ณ วันที่ {certForm.endDate}</p>
+      )}
+
+      {/* Signature */}
+      <div className="mt-6 flex justify-center">
         <div className="text-center">
-          <div className="border-b border-gray-600 w-48 mb-1 mx-auto" />
-          <p className="text-sm font-semibold">({certForm.signName})</p>
-          <p className="text-xs text-gray-600">{certForm.signTitle}</p>
+          <div className="h-12" />
+          <div className="border-b border-gray-700 w-56 mb-1 mx-auto" />
+          <p className="text-sm">({certForm.signName})</p>
+          <p className="text-xs text-gray-600 mt-0.5">{certForm.signTitle}</p>
         </div>
       </div>
     </div>

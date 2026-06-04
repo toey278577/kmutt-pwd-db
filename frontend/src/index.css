@@ -33,3 +33,11 @@ body {
 ::-webkit-scrollbar-track { background: #fff7ed; }
 ::-webkit-scrollbar-thumb { background: #fed7aa; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #fb923c; }
+
+@media print {
+  body { background: white !important; }
+  .print-hide { display: none !important; }
+  aside { display: none !important; }
+  main { padding: 0 !important; margin: 0 !important; }
+  @page { margin: 10mm; }
+}

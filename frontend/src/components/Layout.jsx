@@ -32,7 +32,7 @@ export default function Layout({ children }) {
     <div className="flex min-h-screen bg-orange-50/50">
 
       {/* ── Mobile top bar ── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-30 shadow-lg"
+      <div className="md:hidden fixed top-0 left-0 right-0 z-30 shadow-lg print-hide"
         style={{
           background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 100%)',
           paddingTop: 'max(14px, env(safe-area-inset-top))',
@@ -157,7 +157,7 @@ export default function Layout({ children }) {
       {/* ── Main ── */}
       <main className="flex-1 overflow-auto min-h-screen">
         {/* Spacer = 10px paddingBottom + 40px (h-10) + safe-area-top */}
-        <div className="md:hidden" style={{ height: 'calc(50px + max(14px, env(safe-area-inset-top)))' }} />
+        <div className="md:hidden print-hide" style={{ height: 'calc(50px + max(14px, env(safe-area-inset-top)))' }} />
         <div className="p-4 md:p-7" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
           {children}
         </div>
