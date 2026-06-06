@@ -374,7 +374,7 @@ export default function ReportPage() {
                     <th className="border border-gray-300 px-2 py-1.5 text-center">ประเภทความพิการ</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center">วุฒิการศึกษา</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center">ทักษะด้านคอมพิวเตอร์</th>
-                    <th className="border border-gray-300 px-2 py-1.5 text-center">สายตาความพิการ</th>
+                    <th className="border border-gray-300 px-2 py-1.5 text-center">สาเหตุความพิการ</th>
                   </tr>
                 </thead>
                 <tbody>
