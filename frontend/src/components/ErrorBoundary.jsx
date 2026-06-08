@@ -18,20 +18,21 @@ export function ReconnectingBanner() {
 
   if (!show) return null;
   return (
-    <div className="fixed top-5 left-1/2 z-[9999] -translate-x-1/2 animate-bounce-in"
-      style={{ filter: 'drop-shadow(0 0 20px rgba(234,88,12,0.8)) drop-shadow(0 4px 16px rgba(0,0,0,0.5))' }}>
-      <div className="flex items-center gap-3 px-6 py-4 rounded-2xl"
+    <div className="fixed top-5 left-1/2 z-[9999] -translate-x-1/2 animate-bounce-in">
+      {/* glow pulse ด้านหลัง */}
+      <div className="absolute inset-0 rounded-2xl animate-pulse"
+        style={{ background: 'linear-gradient(135deg,#fbbf24,#f97316)', filter: 'blur(12px)', opacity: 0.9 }} />
+      <div className="relative flex items-center gap-3 px-6 py-4 rounded-2xl"
         style={{
-          background: 'linear-gradient(135deg,#ea580c 0%,#f97316 50%,#fb923c 100%)',
-          boxShadow: '0 0 0 2px rgba(255,255,255,0.25), 0 12px 40px rgba(234,88,12,0.5)',
+          background: 'linear-gradient(135deg,#fde68a 0%,#fbbf24 40%,#f97316 100%)',
+          boxShadow: '0 0 0 2px #fff, 0 0 32px rgba(251,191,36,0.9), 0 8px 24px rgba(0,0,0,0.25)',
         }}>
-        {/* spinner ขาวบน background ส้ม */}
-        <div className="w-5 h-5 rounded-full border-[3px] border-white/30 border-t-white animate-spin flex-shrink-0" />
+        <div className="w-5 h-5 rounded-full border-[3px] border-orange-900/30 border-t-orange-900 animate-spin flex-shrink-0" />
         <div>
-          <p className="text-white font-black text-sm leading-tight tracking-wide drop-shadow-sm">
+          <p className="font-black text-sm leading-tight tracking-wide" style={{ color: '#431407' }}>
             กำลังเชื่อมต่อเซิร์ฟเวอร์...
           </p>
-          <p className="text-white/80 text-xs font-semibold mt-0.5">รอสักครู่ ระบบกำลังตื่น</p>
+          <p className="text-xs font-semibold mt-0.5" style={{ color: '#7c2d12' }}>รอสักครู่ ระบบกำลังตื่น</p>
         </div>
       </div>
     </div>
