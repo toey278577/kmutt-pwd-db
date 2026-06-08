@@ -52,7 +52,11 @@ export default function Login() {
     try {
       const res = await login(form);
       setToast({ type: 'success', message: `ยินดีต้อนรับ ${res.data.user?.name || ''}` });
-      setTimeout(() => { loginSuccess(res.data); navigate('/', { replace: true }); }, 400);
+      // ถ้า server ยังไม่ ready → รอให้ health check เสร็จก่อน (max 8s) แล้วค่อย navigate
+      const waitReady = serverReady
+        ? Promise.resolve()
+        : getHealth().catch(() => {}).then(() => new Promise(r => setTimeout(r, 300)));
+      waitReady.then(() => { loginSuccess(res.data); navigate('/', { replace: true }); });
     } catch (err) {
       setToast({ type: 'error', message: err.response?.data?.error || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
     } finally {

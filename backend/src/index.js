@@ -4,6 +4,7 @@ const compression = require('compression');
 require('dotenv').config();
 
 const { authenticate } = require('./middleware/auth');
+const prisma = require('./prismaClient');
 const authRouter = require('./routes/auth');
 const personsRouter = require('./routes/persons');
 const trainingRouter = require('./routes/training');
@@ -43,8 +44,13 @@ app.use('/api/organizations', authenticate, organizationsRouter);
 app.use('/api/dashboard', authenticate, dashboardRouter);
 app.use('/api/users', usersRouter);
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
+app.get('/api/health', async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;   // ยืนยันว่า DB พร้อมด้วย ไม่ใช่แค่ server ตื่น
+    res.json({ status: 'ok' });
+  } catch {
+    res.status(503).json({ status: 'db_not_ready' });
+  }
 });
 
 app.listen(PORT, () => {
