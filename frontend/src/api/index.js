@@ -12,6 +12,22 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// singleton rewarm — กัน spawn ซ้ำซ้อนเมื่อหลาย request fail พร้อมกัน
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+let _rewarmPromise = null;
+
+function rewarm() {
+  if (_rewarmPromise) return _rewarmPromise;
+  window.dispatchEvent(new CustomEvent('api:reconnecting'));
+  _rewarmPromise = axios.get(BASE_URL + '/health', { timeout: 30000 })
+    .catch(() => {})
+    .finally(() => {
+      _rewarmPromise = null;
+      window.dispatchEvent(new CustomEvent('api:reconnected'));
+    });
+  return _rewarmPromise;
+}
+
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
@@ -22,15 +38,10 @@ api.interceptors.response.use(
       window.location.href = '/login';
       return Promise.reject(err);
     }
-    // network error / timeout → retry once after warming up server
-    const isNetworkOrTimeout = !err.response && !err.config?._retried;
-    if (isNetworkOrTimeout) {
-      window.dispatchEvent(new CustomEvent('api:reconnecting'));
+    // network error / timeout → rewarm (singleton) แล้ว retry ครั้งเดียว
+    if (!err.response && !err.config?._retried) {
       err.config._retried = true;
-      try {
-        await axios.get((import.meta.env.VITE_API_URL || 'http://localhost:5000/api') + '/health', { timeout: 35000 });
-      } catch {}
-      window.dispatchEvent(new CustomEvent('api:reconnected'));
+      await rewarm();
       return api.request(err.config);
     }
     return Promise.reject(err);
