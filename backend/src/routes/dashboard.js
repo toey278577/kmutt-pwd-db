@@ -51,9 +51,16 @@ function getAgeGroup(birthDate) {
   return '46 ปีขึ้นไป';
 }
 
+let statsCache = null;
+let statsCacheAt = 0;
+const STATS_TTL = 60_000; // 60 วิ
+
 router.get('/stats', async (req, res) => {
+  if (statsCache && Date.now() - statsCacheAt < STATS_TTL) {
+    return res.json(statsCache);
+  }
   try {
-    const [totalPersons, byGender, byDisabilityType, byEmployment, totalOrgs, totalTraining, allPersons] =
+    const [totalPersons, byGender, byDisabilityType, byEmployment, totalOrgs, totalTraining, allPersons, disabilityTypes] =
       await Promise.all([
         prisma.person.count(),
         prisma.person.groupBy({ by: ['gender'], _count: true }),
@@ -62,9 +69,8 @@ router.get('/stats', async (req, res) => {
         prisma.organization.count(),
         prisma.trainingRecord.count(),
         prisma.person.findMany({ select: { birthDate: true, educationLevel: true, province: true } }),
+        prisma.disabilityType.findMany(),
       ]);
-
-    const disabilityTypes = await prisma.disabilityType.findMany();
     const typeMap = Object.fromEntries(disabilityTypes.map((t) => [t.id, t.typeName]));
 
     // วุฒิการศึกษา
@@ -99,7 +105,7 @@ router.get('/stats', async (req, res) => {
       .sort((a, b) => b[1] - a[1])
       .map(([name, value]) => ({ name, value }));
 
-    res.json({
+    const result = {
       totalPersons,
       totalOrgs,
       totalTraining,
@@ -115,7 +121,10 @@ router.get('/stats', async (req, res) => {
       byEducation,
       byAgeGroup,
       byRegion,
-    });
+    };
+    statsCache = result;
+    statsCacheAt = Date.now();
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

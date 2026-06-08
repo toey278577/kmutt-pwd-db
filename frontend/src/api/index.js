@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { cached, invalidate, invalidatePrefix } from '../utils/apiCache';
 
 const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api' });
 
@@ -30,13 +31,18 @@ export const createUser = (data) => api.post('/users', data);
 export const updateUser = (id, data) => api.put(`/users/${id}`, data);
 export const deleteUser = (id) => api.delete(`/users/${id}`);
 
-export const getPersons = (params) => api.get('/persons', { params });
-export const getPerson = (id) => api.get(`/persons/${id}`);
-export const createPerson = (data) => api.post('/persons', data);
-export const updatePerson = (id, data) => api.put(`/persons/${id}`, data);
-export const deletePerson = (id) => api.delete(`/persons/${id}`);
+// persons list: cache 20 วิ (key แยกตาม params), invalidate เมื่อ mutate
+export const getPersons = (params) => {
+  const key = 'persons:' + JSON.stringify(params || {});
+  return cached(key, () => api.get('/persons', { params }), 20_000);
+};
+export const getPerson = (id) => cached(`person:${id}`, () => api.get(`/persons/${id}`), 20_000);
+export const createPerson = (data) => api.post('/persons', data).then(r => { invalidatePrefix('persons:'); return r; });
+export const updatePerson = (id, data) => api.put(`/persons/${id}`, data).then(r => { invalidatePrefix('persons:'); invalidate(`person:${id}`); return r; });
+export const deletePerson = (id) => api.delete(`/persons/${id}`).then(r => { invalidatePrefix('persons:'); invalidate(`person:${id}`); return r; });
 
-export const getDisabilityTypes = () => api.get('/persons/disability-types');
+// disability types ไม่เปลี่ยนตลอด session — cache ไว้เลย
+export const getDisabilityTypes = () => cached('disability-types', () => api.get('/persons/disability-types'), 10 * 60_000);
 export const getDisabilityInfos = (id) => api.get(`/persons/${id}/disability`);
 export const createDisabilityInfo = (id, data) => api.post(`/persons/${id}/disability`, data);
 export const deleteDisabilityInfo = (id, did) => api.delete(`/persons/${id}/disability/${did}`);
@@ -65,13 +71,15 @@ export const createPersonOrg = (id, data) => api.post(`/persons/${id}/personorg`
 export const updatePersonOrg = (id, pid, data) => api.put(`/persons/${id}/personorg/${pid}`, data);
 export const deletePersonOrg = (id, pid) => api.delete(`/persons/${id}/personorg/${pid}`);
 
-export const getOrganizations = () => api.get('/organizations');
+// organizations: cache 30 วิ, invalidate เมื่อ mutate
+export const getOrganizations = () => cached('organizations', () => api.get('/organizations'), 30_000);
 export const getOrganization = (id) => api.get(`/organizations/${id}`);
-export const createOrganization = (data) => api.post('/organizations', data);
-export const updateOrganization = (id, data) => api.put(`/organizations/${id}`, data);
-export const deleteOrganization = (id) => api.delete(`/organizations/${id}`);
+export const createOrganization = (data) => api.post('/organizations', data).then(r => { invalidate('organizations'); return r; });
+export const updateOrganization = (id, data) => api.put(`/organizations/${id}`, data).then(r => { invalidate('organizations'); return r; });
+export const deleteOrganization = (id) => api.delete(`/organizations/${id}`).then(r => { invalidate('organizations'); return r; });
 
-export const getDashboardStats = () => api.get('/dashboard/stats');
+// dashboard: cache 60 วิ (server ก็ cache แล้ว, frontend cache ลด round-trip)
+export const getDashboardStats = () => cached('dashboard-stats', () => api.get('/dashboard/stats'), 60_000);
 
 export const getAllTraining = () => api.get('/data/training-all');
 export const getAllFollowUp = () => api.get('/data/followup-all');
