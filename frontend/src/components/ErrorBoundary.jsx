@@ -19,24 +19,19 @@ export function ReconnectingBanner() {
   if (!show) return null;
   return (
     <div className="fixed top-5 left-1/2 z-[9999] -translate-x-1/2 animate-bounce-in"
-      style={{ filter: 'drop-shadow(0 0 24px rgba(234,88,12,0.55))' }}>
-      <div className="flex items-center gap-3.5 px-5 py-3.5 rounded-2xl"
+      style={{ filter: 'drop-shadow(0 0 20px rgba(234,88,12,0.8)) drop-shadow(0 4px 16px rgba(0,0,0,0.5))' }}>
+      <div className="flex items-center gap-3 px-6 py-4 rounded-2xl"
         style={{
-          background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 100%)',
-          boxShadow: '0 0 0 1px rgba(234,88,12,0.45), 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)',
+          background: 'linear-gradient(135deg,#ea580c 0%,#f97316 50%,#fb923c 100%)',
+          boxShadow: '0 0 0 2px rgba(255,255,255,0.25), 0 12px 40px rgba(234,88,12,0.5)',
         }}>
-        {/* spinner ส้มลุก */}
-        <div className="relative flex-shrink-0">
-          <div className="w-7 h-7 rounded-full border-2 border-orange-900 border-t-orange-400 animate-spin" />
-          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-orange-600/40 animate-spin"
-            style={{ animationDuration: '0.6s' }} />
-        </div>
+        {/* spinner ขาวบน background ส้ม */}
+        <div className="w-5 h-5 rounded-full border-[3px] border-white/30 border-t-white animate-spin flex-shrink-0" />
         <div>
-          <p className="text-sm font-black tracking-wide leading-tight"
-            style={{ background: 'linear-gradient(90deg,#fb923c,#fbbf24)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            กำลังเชื่อมต่อเซิร์ฟเวอร์
+          <p className="text-white font-black text-sm leading-tight tracking-wide drop-shadow-sm">
+            กำลังเชื่อมต่อเซิร์ฟเวอร์...
           </p>
-          <p className="text-orange-300/70 text-xs font-medium mt-0.5 tracking-wide">รอสักครู่ ระบบกำลังตื่น...</p>
+          <p className="text-white/80 text-xs font-semibold mt-0.5">รอสักครู่ ระบบกำลังตื่น</p>
         </div>
       </div>
     </div>
