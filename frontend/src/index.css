@@ -93,6 +93,29 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #c2410c; }
   /* Dividers */
   html.dark main .border-b              { border-color: #431407 !important; }
   html.dark main .border-t              { border-color: #431407 !important; }
+
+  /* Dashboard chart cards */
+  html.dark main .chart-card {
+    border: 1px solid #431407 !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4) !important;
+  }
+  html.dark main .chart-card-header {
+    border-bottom: 1px solid #431407 !important;
+  }
+  /* Shadows — เปลี่ยนจาก white glow → dark shadow */
+  html.dark main .shadow-sm,
+  html.dark main .shadow               { box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important; }
+  html.dark main .shadow-md            { box-shadow: 0 4px 16px rgba(0,0,0,0.6) !important; }
+
+  /* Recharts — grid lines & axis text ในโหมดมืด */
+  html.dark main .recharts-cartesian-grid line  { stroke: #431407 !important; }
+  html.dark main .recharts-text tspan           { fill: #a16207 !important; }
+  html.dark main .recharts-legend-item-text     { color: #d97706 !important; fill: #d97706 !important; }
+  html.dark main .recharts-tooltip-wrapper .recharts-default-tooltip {
+    background: #1f1109 !important;
+    border-color: #431407 !important;
+    color: #fde8d0 !important;
+  }
 }
 
 @page { margin: 0; }

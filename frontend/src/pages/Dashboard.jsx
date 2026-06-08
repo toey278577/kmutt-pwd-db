@@ -212,9 +212,9 @@ export default function Dashboard() {
 
 function GlassChart({ title, accent, children }) {
   return (
-    <div className="bg-white rounded-3xl border border-orange-100/80 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-      <div className="px-5 pt-4 pb-3 flex items-center gap-2 border-b border-gray-50">
-        <div className="w-2 h-2 rounded-full" style={{ background: accent, boxShadow: `0 0 6px ${accent}` }} />
+    <div className="bg-white rounded-3xl overflow-hidden chart-card">
+      <div className="px-5 pt-4 pb-3 flex items-center gap-2 chart-card-header">
+        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: accent, boxShadow: `0 0 6px ${accent}` }} />
         <span className="font-bold text-gray-800 text-sm">{title}</span>
       </div>
       <div className="p-4">{children}</div>
