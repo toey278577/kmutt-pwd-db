@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
+import ErrorBoundary, { ReconnectingBanner } from './components/ErrorBoundary';
 
 // Lazy load ทุก page — โหลดเฉพาะหน้าที่ผู้ใช้เปิด
 const Dashboard        = lazy(() => import('./pages/Dashboard'));
@@ -68,12 +69,15 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <ThemeProvider>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <ThemeProvider>
+          <AuthProvider>
+            <ReconnectingBanner />
+            <AppRoutes />
+          </AuthProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }

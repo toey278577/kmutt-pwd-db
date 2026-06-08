@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Users, Building2, GraduationCap, TrendingUp, ArrowUpRight } from 'lucide-react';
 import {
   PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar,
@@ -36,7 +36,22 @@ const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) =>
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
-  useEffect(() => { getDashboardStats().then(r => setStats(r.data)); }, []);
+  const [error, setError] = useState(false);
+
+  const load = useCallback(() => {
+    setError(false);
+    getDashboardStats().then(r => setStats(r.data)).catch(() => setError(true));
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  if (error) return (
+    <div className="flex flex-col items-center justify-center h-96 gap-4">
+      <p className="text-gray-500 text-sm">โหลดข้อมูลไม่สำเร็จ</p>
+      <button onClick={load} className="px-4 py-2 rounded-xl text-white text-sm font-bold"
+        style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>ลองใหม่</button>
+    </div>
+  );
 
   if (!stats) return (
     <div className="flex items-center justify-center h-96">

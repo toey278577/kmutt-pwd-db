@@ -55,16 +55,22 @@ export default function PersonList() {
   const [photoBase64, setPhotoBase64] = useState('');
   const photoInputRef = useRef(null);
   const [errors, setErrors] = useState({});
+  const [loadError, setLoadError] = useState(false);
   const formBodyRef = useRef(null);
 
   const PAGE_SIZE = 10;
   const totalPages = Math.ceil(persons.length / PAGE_SIZE);
   const paged = persons.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const load = (q = '') => getPersons(q ? { search: q } : {}).then((r) => { setPersons(r.data); setPage(1); });
+  const load = (q = '') => {
+    setLoadError(false);
+    return getPersons(q ? { search: q } : {})
+      .then((r) => { setPersons(r.data); setPage(1); })
+      .catch(() => setLoadError(true));
+  };
   useEffect(() => {
     load();
-    getDisabilityTypes().then((r) => setDisabilityTypes(r.data));
+    getDisabilityTypes().then((r) => setDisabilityTypes(r.data)).catch(() => {});
   }, []);
 
   const openModal = (person = null) => {
@@ -246,7 +252,18 @@ export default function PersonList() {
               </tr>
             </thead>
             <tbody>
-              {persons.length === 0 && (
+              {loadError && (
+                <tr>
+                  <td colSpan={8} className="text-center py-16">
+                    <div className="flex flex-col items-center gap-3">
+                      <p className="text-sm text-gray-400">โหลดข้อมูลไม่สำเร็จ</p>
+                      <button onClick={() => load(search)} className="px-4 py-2 rounded-xl text-white text-sm font-bold"
+                        style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>ลองใหม่</button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {!loadError && persons.length === 0 && (
                 <tr>
                   <td colSpan={8} className="text-center py-16 text-gray-300">
                     <div className="flex flex-col items-center gap-3">

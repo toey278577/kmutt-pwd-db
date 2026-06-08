@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { getHealth } from '../api';
 
 const AuthContext = createContext(null);
 
@@ -7,6 +8,11 @@ export function AuthProvider({ children }) {
     try { return JSON.parse(sessionStorage.getItem('user')); } catch { return null; }
   });
   const [token, setToken] = useState(() => sessionStorage.getItem('token'));
+
+  // ถ้า user กลับมาด้วย session เดิม → ping เพื่อ warm backend ทันที
+  useEffect(() => {
+    if (token) getHealth().catch(() => {});
+  }, []);
 
   const loginSuccess = (data) => {
     sessionStorage.setItem('token', data.token);

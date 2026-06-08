@@ -1,7 +1,10 @@
 import axios from 'axios';
 import { cached, invalidate, invalidatePrefix } from '../utils/apiCache';
 
-const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api' });
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  timeout: 20000,
+});
 
 api.interceptors.request.use((config) => {
   const token = sessionStorage.getItem('token');
@@ -11,12 +14,24 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (res) => res,
-  (err) => {
+  async (err) => {
     const isLoginEndpoint = err.config?.url?.includes('/auth/login');
     if (err.response?.status === 401 && !isLoginEndpoint) {
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('user');
       window.location.href = '/login';
+      return Promise.reject(err);
+    }
+    // network error / timeout → retry once after warming up server
+    const isNetworkOrTimeout = !err.response && !err.config?._retried;
+    if (isNetworkOrTimeout) {
+      window.dispatchEvent(new CustomEvent('api:reconnecting'));
+      err.config._retried = true;
+      try {
+        await axios.get((import.meta.env.VITE_API_URL || 'http://localhost:5000/api') + '/health', { timeout: 35000 });
+      } catch {}
+      window.dispatchEvent(new CustomEvent('api:reconnected'));
+      return api.request(err.config);
     }
     return Promise.reject(err);
   }
