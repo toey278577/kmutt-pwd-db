@@ -573,7 +573,7 @@ function CertificateTemplate({ person, certForm }) {
 
       {/* Logo */}
       <div className="flex justify-center mb-5">
-        <img src="/logo.jpg" alt="KMUTT" className="h-24 w-24 object-contain"
+        <img src="/logo-kmutt-round.jpg" alt="KMUTT" className="h-24 w-24 object-contain"
           onError={e => { e.target.style.display = 'none'; }} />
       </div>
 
