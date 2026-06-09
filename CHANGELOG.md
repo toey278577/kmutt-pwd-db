@@ -39,6 +39,28 @@
 
 ---
 
+## 9 มิถุนายน 2568
+
+### แก้ไขและปรับปรุง
+- **แก้คำผิด** `สายตาความพิการ` → `สาเหตุความพิการ` ในรายงาน + Help page
+- **Performance** — เพิ่ม in-memory cache (frontend + backend), axios timeout 20s, singleton rewarm interceptor
+- **Backend always-awake** — GitHub Actions cron ping `/api/health` ทุก 10 นาที
+- **ErrorBoundary + ReconnectingBanner** — แสดง banner เหลือง-ส้มเมื่อเชื่อมต่อใหม่
+- **Post-login stuck fix** — health endpoint ตรวจสอบ DB (`SELECT 1`) ก่อน navigate
+- **Dark mode** — แก้ขอบขาวบน chart cards, ลาก Recharts grid/axis สี dark ด้วย CSS
+- **Print fix** — `* { color: black !important }` ใน `@media print` แก้ตัวหนังสือสีเทาเวลาพิมพ์
+- **Certificate logo** — เปลี่ยนเป็น `logo_kmutt_กลม.jpg` (โลโก้วงกลม)
+- **จัดโครงสร้างไฟล์** — ลบไฟล์ Vite template เดิม (`App.css`, `assets/`), ย้าย PDF + logo เข้า `docs/`
+
+### คำสั่งที่ใช้
+```bash
+# รัน frontend / backend
+cd frontend && npm run dev
+cd backend && npm run dev
+```
+
+---
+
 ## 28 พฤษภาคม 2568
 
 ### ฟีเจอร์ใหม่
