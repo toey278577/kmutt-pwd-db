@@ -121,7 +121,8 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #c2410c; }
 @page { margin: 0; }
 
 @media print {
-  body { background: white !important; }
+  body { background: white !important; color: black !important; }
+  * { color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .print-hide { display: none !important; }
   aside { display: none !important; }
   main { padding: 0 !important; margin: 0 !important; }
