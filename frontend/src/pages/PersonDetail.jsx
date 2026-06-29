@@ -507,13 +507,13 @@ export default function PersonDetail() {
                     <p className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wide">Soft Skills (0–5 คะแนน)</p>
                     <div className="grid grid-cols-2 gap-3">
                       {[
-                        { key: 'softSkillComm',  label: 'การสื่อสาร',          color: 'orange' },
-                        { key: 'softSkillTime',  label: 'การบริหารเวลา',       color: 'purple' },
-                        { key: 'softSkillMotiv', label: 'การจูงใจตนเอง',       color: 'pink' },
-                        { key: 'softSkillDuty',  label: 'การทำงานตามหน้าที่',  color: 'cyan' },
-                      ].map(({ key, label, color }) => (
-                        <div key={key} className={`rounded-xl p-3.5 border bg-${color}-50 border-${color}-100`}>
-                          <p className={`text-xs font-semibold text-${color}-600 mb-2`}>{label}</p>
+                        { key: 'softSkillComm',  label: 'การสื่อสาร',          card: 'bg-orange-50 border-orange-100', text: 'text-orange-600' },
+                        { key: 'softSkillTime',  label: 'การบริหารเวลา',       card: 'bg-violet-50 border-violet-100', text: 'text-violet-600' },
+                        { key: 'softSkillMotiv', label: 'การจูงใจตนเอง',       card: 'bg-pink-50 border-pink-100',     text: 'text-pink-600' },
+                        { key: 'softSkillDuty',  label: 'การทำงานตามหน้าที่',  card: 'bg-cyan-50 border-cyan-100',     text: 'text-cyan-600' },
+                      ].map(({ key, label, card, text }) => (
+                        <div key={key} className={`rounded-xl p-3.5 border ${card}`}>
+                          <p className={`text-xs font-semibold ${text} mb-2`}>{label}</p>
                           <input type="number" min="0" max="5" step="0.5" placeholder="0–5"
                             className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/40 bg-white"
                             value={assessForm[key]}
@@ -582,6 +582,17 @@ export default function PersonDetail() {
                           </div>
                         )}
                       </div>
+                      {/* ส่วนต่าง Pre→Post (พัฒนาการ) */}
+                      {a.preTestScore != null && a.postTestScore != null && (() => {
+                        const diff = a.postTestScore - a.preTestScore;
+                        const up = diff >= 0;
+                        return (
+                          <div className={`mt-3 flex items-center gap-2 text-xs font-bold px-3 py-2 rounded-lg ${up ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'}`}>
+                            {up ? <TrendingUp size={14} /> : <TrendingUp size={14} className="rotate-180" />}
+                            พัฒนาการ {up ? '+' : ''}{diff} คะแนน (Pre {a.preTestScore} → Post {a.postTestScore})
+                          </div>
+                        );
+                      })()}
                       {softCount > 0 && (
                         <div className="mt-3 grid grid-cols-2 gap-2">
                           {[

@@ -1,9 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 @plugin "daisyui" {
   themes: light;
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
 
 :root {
   --font-sans: 'Sarabun', sans-serif;
@@ -52,6 +51,12 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #c2410c; }
   html.dark main .bg-gray-100           { background-color: #260e05 !important; }
   html.dark main .bg-gray-900           { background-color: #0a0503 !important; }
   html.dark main [class*="bg-amber-50"] { background-color: #1a0c06 !important; }
+  /* การ์ดสีพาสเทล (Pre/Post test, Soft Skills, สถานะรุ่น) → พื้นเข้มเข้ากับธีม */
+  html.dark main [class*="bg-blue-50"],
+  html.dark main [class*="bg-emerald-50"],
+  html.dark main [class*="bg-violet-50"],
+  html.dark main [class*="bg-pink-50"],
+  html.dark main [class*="bg-cyan-50"]  { background-color: #1a0c06 !important; }
 
   /* Borders */
   html.dark main .border-orange-100,
@@ -60,6 +65,11 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #c2410c; }
   html.dark main .border-gray-100,
   html.dark main .border-gray-200       { border-color: #431407 !important; }
   html.dark main .border-gray-300       { border-color: #5c1e0a !important; }
+  html.dark main [class*="border-blue-1"],
+  html.dark main [class*="border-emerald-1"],
+  html.dark main [class*="border-violet-1"],
+  html.dark main [class*="border-pink-1"],
+  html.dark main [class*="border-cyan-1"] { border-color: #431407 !important; }
 
   /* Text */
   html.dark main .text-gray-900,

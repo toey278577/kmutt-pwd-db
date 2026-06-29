@@ -51,15 +51,36 @@
 - **Filter แยกรุ่น** — ในหน้าออกรายงาน สามารถ filter รายชื่อตามรุ่นได้
 - **Dashboard Status รุ่น** — แสดงรายการรุ่นทั้งหมด + สถานะ บน Dashboard พร้อมลิงก์ไปจัดการรุ่น
 - **แก้รูปไม่แสดงตอนพิมพ์** — เพิ่ม `print-color-adjust: exact` ให้รูปถ่ายแสดงครบทุกหน้าเวลาพิมพ์/บันทึก PDF
+- **ผูกคนพิการกับรุ่น (Batch Enrollment)** — เพิ่ม `batchId` ใน Person, เลือกรุ่นได้ในฟอร์มเพิ่ม/แก้ไขคนพิการ
+- **รายชื่อแยกรุ่นใช้ได้จริง** — ปุ่มกรองรุ่นในหน้ารายชื่อคนพิการ + หน้ารายงาน (เดิม filter รายงานกดแล้วไม่ทำงาน), แท็บประเมินเลือกรุ่นที่คนสังกัดให้อัตโนมัติ
+- **พัฒนาการ Pre→Post** — ประวัติประเมินแสดงส่วนต่างคะแนน (เพิ่มขึ้น/ลดลงกี่คะแนน) พร้อมไอคอน
+
+### แก้ไข / เสถียรภาพ
+- **Validation คะแนนฝั่ง backend** — Pre/Post จำกัด 0–100, Soft Skills 0–5, ค่าที่ไม่ใช่ตัวเลข → null กันข้อมูลเพี้ยน
+- **แก้ dev script** — `npx prisma generate --no-engine` ใช้ไม่ได้กับ Prisma 7 (server ไม่ start) → ตัด `--no-engine` ออก
+- **แก้บั๊ก Tailwind dynamic class** — การ์ด Soft Skills ใช้ `bg-${color}-50` ที่ JIT ไม่ generate → เปลี่ยนเป็น static class
+- **Dark mode หน้าใหม่** — เพิ่ม override การ์ดสีพาสเทล (blue/emerald/violet/pink/cyan) ให้เข้าธีมมืด
+- **UI ลื่นขึ้น** — BatchPage reload แบบ silent (ไม่ขึ้น spinner กระพริบตอนแก้ข้อมูล)
+- **Build สะอาด** — ย้าย `@import` ฟอนต์ขึ้นบนสุด แก้ CSS warning ตอน build
+
+### การทดสอบ
+- ทดสอบ backend API ครบ 15 เคส (batch CRUD, person+batch filter, assessment upsert, cascade delete) — ผ่านทั้งหมด
+- ทดสอบ validation/clamp คะแนน 5 เคส (999→100, 99→5, -50→0, "abc"→null, 75→75) — ผ่านทั้งหมด
+- frontend build ผ่าน ไม่มี error/warning
 
 ### คำสั่งที่ใช้
 ```bash
-# migrate database (เพิ่ม training_batches + person_assessments)
+# migrate database (รอบนี้เพิ่ม 2 migration)
 cd backend && npx prisma migrate dev --name add_training_batch_assessment
+cd backend && npx prisma migrate dev --name add_person_batch_enrollment
+npx prisma generate   # สำคัญ: migrate dev ในโปรเจกต์นี้ไม่ได้ regenerate client อัตโนมัติ
 
 # รัน frontend / backend
 cd frontend && npm run dev
 cd backend && npm run dev
+
+# build ตรวจสอบ
+cd frontend && npm run build
 ```
 
 ---
