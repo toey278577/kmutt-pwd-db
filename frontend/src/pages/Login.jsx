@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, LogIn, CheckCircle2, XCircle, Shield } from 'lucide-react';
+import { Eye, EyeOff, LogIn, CheckCircle2, XCircle, Mail, Lock, Users, BarChart3, FileText } from 'lucide-react';
 import { login, getHealth } from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -13,18 +13,18 @@ function Toast({ type, message, onClose }) {
 
   const ok = type === 'success';
   return (
-    <div className={`fixed top-6 left-1/2 z-50 flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border backdrop-blur-sm
-      transition-all duration-300
-      ${ok ? 'bg-emerald-900/90 border-emerald-500/30 text-white' : 'bg-red-900/90 border-red-500/30 text-white'}`}
+    <div className={`fixed top-6 left-1/2 z-50 flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border backdrop-blur-md
+      animate-[toastIn_.3s_ease-out]
+      ${ok ? 'bg-emerald-600/95 border-emerald-400/30 text-white' : 'bg-red-600/95 border-red-400/30 text-white'}`}
       style={{ transform: 'translateX(-50%)', minWidth: '300px' }}>
-      <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${ok ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
-        {ok ? <CheckCircle2 size={20} className="text-emerald-400" /> : <XCircle size={20} className="text-red-400" />}
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${ok ? 'bg-white/20' : 'bg-white/20'}`}>
+        {ok ? <CheckCircle2 size={20} className="text-white" /> : <XCircle size={20} className="text-white" />}
       </div>
       <div className="flex-1">
         <p className="text-sm font-bold">{ok ? 'เข้าสู่ระบบสำเร็จ' : 'เข้าสู่ระบบไม่สำเร็จ'}</p>
-        <p className="text-xs opacity-60 mt-0.5">{message}</p>
+        <p className="text-xs opacity-70 mt-0.5">{message}</p>
       </div>
-      <button onClick={onClose} className="opacity-40 hover:opacity-80 transition-opacity text-lg leading-none ml-1">✕</button>
+      <button onClick={onClose} className="opacity-50 hover:opacity-90 transition-opacity text-lg leading-none ml-1">✕</button>
     </div>
   );
 }
@@ -65,125 +65,127 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex" style={{ background: 'linear-gradient(135deg,#0c0400 0%,#1c0a00 40%,#431407 100%)' }}>
+    <div className="min-h-screen flex bg-orange-50/40 overflow-hidden">
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
 
-      {/* ── Left Hero (desktop only) ── */}
-      <div className="hidden lg:flex flex-col justify-between w-[55%] relative overflow-hidden p-12">
-        {/* Glow blobs */}
-        <div className="absolute top-0 left-0 w-96 h-96 rounded-full opacity-20 blur-3xl pointer-events-none"
-          style={{ background: 'radial-gradient(circle,#ea580c,transparent)' }} />
-        <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full opacity-15 blur-3xl pointer-events-none"
-          style={{ background: 'radial-gradient(circle,#fb923c,transparent)' }} />
-        {/* Dot grid */}
-        <div className="absolute inset-0 opacity-5 pointer-events-none"
-          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+      {/* ════════ LEFT — BRAND PANEL (desktop) ════════ */}
+      <div className="hidden lg:flex flex-col justify-between w-[52%] relative overflow-hidden p-12"
+        style={{ background: 'linear-gradient(140deg,#7c2d12 0%,#c2410c 48%,#ea580c 100%)' }}>
+
+        {/* animated floating blobs */}
+        <div className="absolute -top-20 -left-20 w-96 h-96 rounded-full opacity-30 blur-3xl pointer-events-none animate-[float1_14s_ease-in-out_infinite]"
+          style={{ background: 'radial-gradient(circle,#fbbf24,transparent 70%)' }} />
+        <div className="absolute bottom-0 -right-16 w-[28rem] h-[28rem] rounded-full opacity-25 blur-3xl pointer-events-none animate-[float2_18s_ease-in-out_infinite]"
+          style={{ background: 'radial-gradient(circle,#fb923c,transparent 70%)' }} />
+        <div className="absolute top-1/3 left-1/4 w-72 h-72 rounded-full opacity-20 blur-3xl pointer-events-none animate-[float1_20s_ease-in-out_infinite_reverse]"
+          style={{ background: 'radial-gradient(circle,#fdba74,transparent 70%)' }} />
+        {/* dot grid */}
+        <div className="absolute inset-0 opacity-[0.07] pointer-events-none"
+          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '34px 34px' }} />
 
         {/* Logo + Title */}
-        <div className="relative">
-          <div className="flex items-center gap-4 mb-12">
-            <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-sm">
-              <img src="/logo-icon.png" alt="KMUTT" className="h-10 w-10 object-contain" onError={e => { e.target.style.display='none'; }} />
+        <div className="relative z-10">
+          <div className="flex items-center gap-4 mb-14">
+            <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-2xl ring-4 ring-white/20">
+              <img src="/logo-kmutt-round.jpg" alt="KMUTT" className="h-12 w-12 object-contain rounded-full"
+                onError={e => { e.target.style.display='none'; }} />
             </div>
             <div>
-              <p className="text-orange-400 text-xs font-bold tracking-[0.2em] uppercase">KMUTT</p>
-              <p className="text-white/60 text-xs">มจธ.</p>
+              <p className="text-white text-sm font-black tracking-[0.2em] uppercase">KMUTT</p>
+              <p className="text-orange-100/70 text-xs">มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</p>
             </div>
           </div>
 
-          <h1 className="text-4xl font-black text-white leading-tight mb-4">
+          <h1 className="text-[2.7rem] font-black text-white leading-[1.1] mb-5 drop-shadow-sm">
             ระบบฐานข้อมูล<br />
             <span style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-              backgroundImage: 'linear-gradient(90deg,#fb923c,#fbbf24)' }}>
-              คนพิการ
+              backgroundImage: 'linear-gradient(90deg,#fff7ed,#fde68a)' }}>
+              คนพิการ มจธ.
             </span>
           </h1>
-          <p className="text-white/50 text-sm leading-relaxed max-w-sm">
-            โครงการฝึกอบรม-ฝึกงานคนพิการ เพื่อเตรียมความพร้อม<br />
-            เข้าสู่สถานประกอบการ มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี
+          <p className="text-white/70 text-sm leading-relaxed max-w-md">
+            โครงการฝึกอบรม-ฝึกงานคนพิการ เพื่อเตรียมความพร้อม
+            เข้าสู่สถานประกอบการอย่างมีคุณภาพและยั่งยืน
           </p>
         </div>
 
         {/* Feature chips */}
-        <div className="relative space-y-3">
+        <div className="relative z-10 space-y-3.5">
           {[
-            { icon: '👥', text: 'จัดการข้อมูลคนพิการครบวงจร' },
-            { icon: '📊', text: 'Dashboard สถิติ 6 มิติ แบบ real-time' },
-            { icon: '📄', text: 'ออกรายงาน 4 ประเภท พิมพ์/PDF ได้ทันที' },
-          ].map(({ icon, text }) => (
-            <div key={text} className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-base flex-shrink-0">
-                {icon}
+            { icon: Users, text: 'จัดการข้อมูลคนพิการครบวงจร แยกตามรุ่น' },
+            { icon: BarChart3, text: 'Dashboard สถิติแบบ real-time พร้อมประเมินทักษะ' },
+            { icon: FileText, text: 'ออกรายงาน & ใบ Certificate พิมพ์/PDF ได้ทันที' },
+          ].map(({ icon: Icon, text }) => (
+            <div key={text} className="flex items-center gap-3.5 group">
+              <div className="w-10 h-10 rounded-xl bg-white/15 border border-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:bg-white/25 transition-colors">
+                <Icon size={18} className="text-white" />
               </div>
-              <p className="text-white/60 text-sm">{text}</p>
+              <p className="text-white/85 text-sm font-medium">{text}</p>
             </div>
           ))}
-
-          <p className="text-white/20 text-xs pt-4">Developed by Suthat Srisawat · 2026</p>
+          <p className="text-white/40 text-xs pt-5">Developed by Suthat Srisawat · 2026</p>
         </div>
       </div>
 
-      {/* ── Right Form ── */}
+      {/* ════════ RIGHT — FORM PANEL ════════ */}
       <div className="flex-1 flex items-center justify-center p-6 relative">
-        {/* Right glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full opacity-10 blur-3xl pointer-events-none"
-          style={{ background: 'radial-gradient(circle,#ea580c,transparent)' }} />
+        {/* soft accent glows */}
+        <div className="absolute top-10 right-10 w-72 h-72 rounded-full opacity-30 blur-3xl pointer-events-none"
+          style={{ background: 'radial-gradient(circle,#fed7aa,transparent 70%)' }} />
+        <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-20 blur-3xl pointer-events-none"
+          style={{ background: 'radial-gradient(circle,#fdba74,transparent 70%)' }} />
 
-        <div className="w-full max-w-sm relative">
+        <div className="w-full max-w-sm relative z-10 animate-[cardIn_.5s_ease-out]">
           {/* Card */}
-          <div className="rounded-3xl overflow-hidden border border-white/10 backdrop-blur-xl shadow-2xl"
-            style={{ background: 'rgba(255,255,255,0.04)' }}>
+          <div className="rounded-[1.75rem] bg-white border border-orange-100/80 shadow-[0_20px_60px_-15px_rgba(234,88,12,0.25)] overflow-hidden">
 
-            {/* Card header */}
-            <div className="px-8 pt-8 pb-6 text-center border-b border-white/5">
-              {/* Mobile logo */}
-              <div className="lg:hidden mb-4">
-                <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mx-auto mb-3">
-                  <img src="/logo-icon.png" alt="KMUTT" className="h-12 w-12 object-contain"
-                    onError={e => { e.target.style.display='none'; }} />
-                </div>
-                <p className="text-orange-400 text-xs font-bold tracking-widest uppercase mb-1">KMUTT · มจธ.</p>
+            {/* Header */}
+            <div className="px-8 pt-8 pb-6 text-center">
+              <div className="w-[4.5rem] h-[4.5rem] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg ring-1 ring-orange-100"
+                style={{ background: 'linear-gradient(135deg,#fff7ed,#ffedd5)' }}>
+                <img src="/logo-kmutt-round.jpg" alt="KMUTT" className="h-14 w-14 object-contain rounded-full"
+                  onError={e => { e.target.style.display='none'; }} />
               </div>
-
-              <div className="hidden lg:flex w-14 h-14 rounded-2xl items-center justify-center mx-auto mb-4"
-                style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', boxShadow: '0 8px 32px rgba(234,88,12,0.4)' }}>
-                <Shield size={24} color="white" />
-              </div>
-
-              <h2 className="text-white font-black text-xl leading-tight mb-1">เข้าสู่ระบบ</h2>
-              <p className="text-white/40 text-xs">กรุณากรอกข้อมูลเพื่อเข้าใช้งาน</p>
+              <h2 className="text-gray-800 font-black text-2xl leading-tight mb-1.5">ยินดีต้อนรับ 👋</h2>
+              <p className="text-gray-400 text-sm">เข้าสู่ระบบเพื่อเริ่มใช้งาน</p>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="px-8 py-7 space-y-5">
+            <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-4">
               {/* Email */}
               <div>
-                <label className="block text-xs font-bold text-white/40 mb-2 uppercase tracking-widest">อีเมล</label>
-                <input
-                  type="email"
-                  placeholder="example@kmutt.ac.th"
-                  value={form.email}
-                  onChange={e => setForm({ ...form, email: e.target.value })}
-                  required
-                  className="w-full rounded-2xl border border-white/10 px-4 py-3 text-sm text-white placeholder:text-white/20 bg-white/5 hover:bg-white/8 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500/50 transition-all"
-                />
+                <label className="block text-xs font-bold text-gray-500 mb-1.5 ml-1">อีเมล</label>
+                <div className="relative">
+                  <Mail size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-300 pointer-events-none" />
+                  <input
+                    type="email"
+                    placeholder="example@kmutt.ac.th"
+                    value={form.email}
+                    onChange={e => setForm({ ...form, email: e.target.value })}
+                    required
+                    autoComplete="email"
+                    className="w-full rounded-2xl border border-gray-200 pl-11 pr-4 py-3 text-sm text-gray-800 placeholder:text-gray-300 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
+                  />
+                </div>
               </div>
 
               {/* Password */}
               <div>
-                <label className="block text-xs font-bold text-white/40 mb-2 uppercase tracking-widest">รหัสผ่าน</label>
+                <label className="block text-xs font-bold text-gray-500 mb-1.5 ml-1">รหัสผ่าน</label>
                 <div className="relative">
+                  <Lock size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-300 pointer-events-none" />
                   <input
                     type={showPw ? 'text' : 'password'}
                     placeholder="••••••••"
                     value={form.password}
                     onChange={e => setForm({ ...form, password: e.target.value })}
                     required
-                    className="w-full rounded-2xl border border-white/10 px-4 py-3 pr-11 text-sm text-white placeholder:text-white/20 bg-white/5 hover:bg-white/8 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500/50 transition-all"
+                    autoComplete="current-password"
+                    className="w-full rounded-2xl border border-gray-200 pl-11 pr-11 py-3 text-sm text-gray-800 placeholder:text-gray-300 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
                   />
                   <button type="button" onClick={() => setShowPw(!showPw)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors">
-                    {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-orange-500 transition-colors">
+                    {showPw ? <EyeOff size={17} /> : <Eye size={17} />}
                   </button>
                 </div>
               </div>
@@ -192,10 +194,10 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl text-sm font-bold text-white transition-all active:scale-[0.98] disabled:opacity-60 mt-1"
+                className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl text-sm font-bold text-white transition-all hover:shadow-[0_8px_30px_rgba(234,88,12,0.5)] active:scale-[0.98] disabled:opacity-60 disabled:hover:shadow-none !mt-6"
                 style={{
-                  background: loading ? '#9a3412' : 'linear-gradient(135deg,#ea580c,#c2410c)',
-                  boxShadow: loading ? 'none' : '0 4px 24px rgba(234,88,12,0.45)',
+                  background: loading ? '#9a3412' : 'linear-gradient(135deg,#f97316,#ea580c,#c2410c)',
+                  boxShadow: loading ? 'none' : '0 4px 20px rgba(234,88,12,0.4)',
                 }}>
                 {loading
                   ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />กำลังเข้าสู่ระบบ...</>
@@ -206,25 +208,32 @@ export default function Login() {
           </div>
 
           {/* Footer note */}
-          <p className="text-center text-xs text-white/20 mt-5 leading-relaxed">
-            ระบบสำหรับเจ้าหน้าที่เท่านั้น<br />
-            กรุณาติดต่อผู้ดูแลระบบหากลืมรหัสผ่าน
+          <p className="text-center text-xs text-gray-400 mt-5 leading-relaxed">
+            ระบบสำหรับเจ้าหน้าที่เท่านั้น · กรุณาติดต่อผู้ดูแลระบบหากลืมรหัสผ่าน
           </p>
 
           {/* Server warm-up indicator */}
           {!serverReady && (
             <div className="flex items-center justify-center gap-2 mt-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-orange-400/60 animate-pulse" />
-              <p className="text-xs text-white/20">กำลังเชื่อมต่อเซิร์ฟเวอร์...</p>
+              <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+              <p className="text-xs text-gray-400">กำลังเชื่อมต่อเซิร์ฟเวอร์...</p>
             </div>
           )}
 
           {/* Mobile credit */}
-          <p className="lg:hidden text-center text-xs text-white/10 mt-2">
+          <p className="lg:hidden text-center text-xs text-gray-300 mt-2">
             Developed by Suthat Srisawat · 2026
           </p>
         </div>
       </div>
+
+      {/* animations */}
+      <style>{`
+        @keyframes float1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,-20px) scale(1.08); } }
+        @keyframes float2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-25px,20px) scale(1.1); } }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastIn { from { opacity: 0; transform: translate(-50%,-12px); } to { opacity: 1; transform: translate(-50%,0); } }
+      `}</style>
     </div>
   );
 }
