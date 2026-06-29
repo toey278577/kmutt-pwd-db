@@ -39,6 +39,31 @@
 
 ---
 
+## 29 มิถุนายน 2568
+
+### ฟีเจอร์ใหม่
+- **ระบบรุ่น (Training Batch)** — หน้า "จัดการรุ่น" (`/batches`) CRUD รุ่นการฝึกอบรม ระบุรุ่นที่, ปี, วันเริ่ม-สิ้นสุด, สถานะ Active/Completed
+- **ระบบประเมินทักษะ** — Tab ที่ 7 ใน PersonDetail บันทึกผลประเมินแยกตามรุ่น ประกอบด้วย:
+  - Pre-test / Post-test (คะแนน 0–100)
+  - Soft Skills 4 ด้าน: การสื่อสาร, การบริหารเวลา, การจูงใจตนเอง, การทำงานตามหน้าที่ (0–5 คะแนน)
+  - แสดง progress bar + สรุปคะแนนรวมทุกรุ่น
+- **แบบประเมินรายวิชา (Report ใหม่)** — ตารางกรอกคะแนน 5 หัวข้อ รวม 25 คะแนน พร้อมรูปถ่ายของผู้เข้ารับการอบรม
+- **Filter แยกรุ่น** — ในหน้าออกรายงาน สามารถ filter รายชื่อตามรุ่นได้
+- **Dashboard Status รุ่น** — แสดงรายการรุ่นทั้งหมด + สถานะ บน Dashboard พร้อมลิงก์ไปจัดการรุ่น
+- **แก้รูปไม่แสดงตอนพิมพ์** — เพิ่ม `print-color-adjust: exact` ให้รูปถ่ายแสดงครบทุกหน้าเวลาพิมพ์/บันทึก PDF
+
+### คำสั่งที่ใช้
+```bash
+# migrate database (เพิ่ม training_batches + person_assessments)
+cd backend && npx prisma migrate dev --name add_training_batch_assessment
+
+# รัน frontend / backend
+cd frontend && npm run dev
+cd backend && npm run dev
+```
+
+---
+
 ## 9 มิถุนายน 2568
 
 ### แก้ไขและปรับปรุง
