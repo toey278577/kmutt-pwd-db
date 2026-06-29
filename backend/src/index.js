@@ -17,6 +17,8 @@ const usersRouter = require('./routes/users');
 const personorgRouter = require('./routes/personorg');
 const photosRouter = require('./routes/photos');
 const aggregateRouter = require('./routes/aggregate');
+const batchesRouter = require('./routes/batches');
+const assessmentsRouter = require('./routes/assessments');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -43,6 +45,8 @@ app.use('/api/data', authenticate, aggregateRouter);
 app.use('/api/organizations', authenticate, organizationsRouter);
 app.use('/api/dashboard', authenticate, dashboardRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/batches', authenticate, batchesRouter);
+app.use('/api/persons', authenticate, assessmentsRouter);
 
 app.get('/api/health', async (req, res) => {
   try {

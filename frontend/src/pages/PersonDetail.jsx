@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, GraduationCap, Briefcase, Star, Target, ChevronDown, Building2, Accessibility, Camera } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, GraduationCap, Briefcase, Star, Target, ChevronDown, Building2, Accessibility, Camera, ClipboardList, TrendingUp, Save } from 'lucide-react';
 import {
   getPerson, getTraining, createTraining, deleteTraining,
   getWorkExp, createWorkExp, deleteWorkExp,
@@ -10,6 +10,7 @@ import {
   getOrganizations,
   getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo,
   getPersonPhotos, uploadPersonPhoto, deletePersonPhoto,
+  getAssessments, saveAssessment, deleteAssessment, getBatches,
 } from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -24,7 +25,7 @@ const SKILL_COLOR = {
 };
 const ROLE_TYPE_LABELS = { INTERNSHIP: 'ฝึกงาน', EMPLOYMENT: 'จ้างงาน', OTHER: 'อื่นๆ' };
 
-const tabs = ['ข้อมูลพื้นฐาน', 'การอบรม', 'ประสบการณ์งาน', 'ทักษะ', 'ติดตามผล', 'สถานประกอบการ'];
+const tabs = ['ข้อมูลพื้นฐาน', 'การอบรม', 'ประสบการณ์งาน', 'ทักษะ', 'ติดตามผล', 'สถานประกอบการ', 'ประเมินทักษะ'];
 
 function calcAge(birthDate) {
   if (!birthDate) return null;
@@ -72,6 +73,11 @@ export default function PersonDetail() {
   const [form, setForm] = useState({});
   const [profilePhoto, setProfilePhoto] = useState(null);
   const photoInputRef = useRef(null);
+  const [assessments, setAssessments] = useState([]);
+  const [batches, setBatches] = useState([]);
+  const [assessBatchId, setAssessBatchId] = useState('');
+  const [assessForm, setAssessForm] = useState({ preTestScore: '', postTestScore: '', softSkillComm: '', softSkillTime: '', softSkillMotiv: '', softSkillDuty: '' });
+  const [assessSaving, setAssessSaving] = useState(false);
 
   const reloadAll = () => {
     getPerson(id).then((r) => setPerson(r.data));
@@ -86,6 +92,43 @@ export default function PersonDetail() {
       const p = r.data.find(x => x.photoType === 'profile');
       setProfilePhoto(p || null);
     }).catch(() => {});
+    getAssessments(id).then((r) => setAssessments(r.data)).catch(() => {});
+    getBatches().then((r) => setBatches(r.data)).catch(() => {});
+  };
+
+  const handleAssessBatchChange = (batchId) => {
+    setAssessBatchId(batchId);
+    const existing = assessments.find(a => String(a.batchId) === String(batchId));
+    if (existing) {
+      setAssessForm({
+        preTestScore: existing.preTestScore ?? '',
+        postTestScore: existing.postTestScore ?? '',
+        softSkillComm: existing.softSkillComm ?? '',
+        softSkillTime: existing.softSkillTime ?? '',
+        softSkillMotiv: existing.softSkillMotiv ?? '',
+        softSkillDuty: existing.softSkillDuty ?? '',
+      });
+    } else {
+      setAssessForm({ preTestScore: '', postTestScore: '', softSkillComm: '', softSkillTime: '', softSkillMotiv: '', softSkillDuty: '' });
+    }
+  };
+
+  const handleSaveAssessment = async () => {
+    if (!assessBatchId) return alert('กรุณาเลือกรุ่นก่อน');
+    setAssessSaving(true);
+    try {
+      await saveAssessment(id, { batchId: Number(assessBatchId), ...assessForm });
+      const r = await getAssessments(id);
+      setAssessments(r.data);
+    } catch { alert('บันทึกไม่สำเร็จ'); }
+    finally { setAssessSaving(false); }
+  };
+
+  const handleDeleteAssessment = async (aid) => {
+    if (!confirm('ลบข้อมูลประเมินนี้?')) return;
+    await deleteAssessment(id, aid).catch(() => {});
+    getAssessments(id).then(r => setAssessments(r.data));
+    if (assessBatchId) handleAssessBatchChange(assessBatchId);
   };
 
   const handlePhotoChange = async (e) => {
@@ -406,6 +449,162 @@ export default function PersonDetail() {
             </tbody>
           </table>
         </SubSection>
+      )}
+
+      {/* Tab 6: ประเมินทักษะ */}
+      {tab === 6 && (
+        <div className="space-y-5">
+          {/* เลือกรุ่น + กรอกคะแนน */}
+          <div className="bg-white rounded-2xl border border-orange-100 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-orange-50 flex items-center gap-2">
+              <ClipboardList size={16} className="text-orange-500" />
+              <p className="font-bold text-orange-950 text-sm">บันทึกผลการประเมิน</p>
+            </div>
+            <div className="p-5 space-y-4">
+              {/* เลือกรุ่น */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1.5">เลือกรุ่นการฝึกอบรม</label>
+                <select
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
+                  value={assessBatchId}
+                  onChange={e => handleAssessBatchChange(e.target.value)}>
+                  <option value="">— เลือกรุ่น —</option>
+                  {batches.map(b => (
+                    <option key={b.id} value={b.id}>รุ่นที่ {b.batchNumber} ปี พ.ศ. {b.year} {b.status === 'ACTIVE' ? '(กำลังดำเนินการ)' : ''}</option>
+                  ))}
+                </select>
+                {batches.length === 0 && (
+                  <p className="text-xs text-gray-400 mt-1.5">ยังไม่มีรุ่นในระบบ — ไปเพิ่มรุ่นที่ "จัดการรุ่น" ก่อน</p>
+                )}
+              </div>
+
+              {assessBatchId && (
+                <>
+                  {/* Pre / Post Test */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                      <p className="text-xs font-bold text-blue-600 mb-2 uppercase tracking-wide">Pre-test</p>
+                      <input type="number" min="0" max="100" placeholder="คะแนน (0-100)"
+                        className="w-full rounded-lg border border-blue-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/40 bg-white"
+                        value={assessForm.preTestScore}
+                        onChange={e => setAssessForm({...assessForm, preTestScore: e.target.value})} />
+                    </div>
+                    <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
+                      <p className="text-xs font-bold text-emerald-600 mb-2 uppercase tracking-wide">Post-test</p>
+                      <input type="number" min="0" max="100" placeholder="คะแนน (0-100)"
+                        className="w-full rounded-lg border border-emerald-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/40 bg-white"
+                        value={assessForm.postTestScore}
+                        onChange={e => setAssessForm({...assessForm, postTestScore: e.target.value})} />
+                    </div>
+                  </div>
+
+                  {/* Soft Skills 4 ด้าน */}
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wide">Soft Skills (0–5 คะแนน)</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { key: 'softSkillComm',  label: 'การสื่อสาร',          color: 'orange' },
+                        { key: 'softSkillTime',  label: 'การบริหารเวลา',       color: 'purple' },
+                        { key: 'softSkillMotiv', label: 'การจูงใจตนเอง',       color: 'pink' },
+                        { key: 'softSkillDuty',  label: 'การทำงานตามหน้าที่',  color: 'cyan' },
+                      ].map(({ key, label, color }) => (
+                        <div key={key} className={`rounded-xl p-3.5 border bg-${color}-50 border-${color}-100`}>
+                          <p className={`text-xs font-semibold text-${color}-600 mb-2`}>{label}</p>
+                          <input type="number" min="0" max="5" step="0.5" placeholder="0–5"
+                            className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/40 bg-white"
+                            value={assessForm[key]}
+                            onChange={e => setAssessForm({...assessForm, [key]: e.target.value})} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {canEdit && (
+                    <button onClick={handleSaveAssessment} disabled={assessSaving}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-60"
+                      style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
+                      <Save size={15} />
+                      {assessSaving ? 'กำลังบันทึก...' : 'บันทึกผลการประเมิน'}
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* ประวัติผลประเมินทุกรุ่น */}
+          {assessments.length > 0 && (
+            <div className="bg-white rounded-2xl border border-orange-100 shadow-sm overflow-hidden">
+              <div className="px-5 py-4 border-b border-orange-50 flex items-center gap-2">
+                <TrendingUp size={16} className="text-orange-500" />
+                <p className="font-bold text-orange-950 text-sm">ผลประเมินทุกรุ่น</p>
+              </div>
+              <div className="divide-y divide-gray-50">
+                {assessments.map(a => {
+                  const softTotal = [a.softSkillComm, a.softSkillTime, a.softSkillMotiv, a.softSkillDuty]
+                    .filter(v => v != null).reduce((s, v) => s + v, 0);
+                  const softCount = [a.softSkillComm, a.softSkillTime, a.softSkillMotiv, a.softSkillDuty].filter(v => v != null).length;
+                  return (
+                    <div key={a.id} className="px-5 py-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="font-bold text-sm text-gray-800">รุ่นที่ {a.batch?.batchNumber} ปี พ.ศ. {a.batch?.year}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{a.batch?.courseName}</p>
+                        </div>
+                        {canEdit && (
+                          <button onClick={() => handleDeleteAssessment(a.id)}
+                            className="w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-50 transition-colors">
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {a.preTestScore != null && (
+                          <div className="bg-blue-50 rounded-lg px-3 py-2 border border-blue-100">
+                            <p className="text-xs text-blue-500 font-semibold">Pre-test</p>
+                            <p className="text-lg font-black text-blue-700">{a.preTestScore}</p>
+                          </div>
+                        )}
+                        {a.postTestScore != null && (
+                          <div className="bg-emerald-50 rounded-lg px-3 py-2 border border-emerald-100">
+                            <p className="text-xs text-emerald-500 font-semibold">Post-test</p>
+                            <p className="text-lg font-black text-emerald-700">{a.postTestScore}</p>
+                          </div>
+                        )}
+                        {softCount > 0 && (
+                          <div className="bg-orange-50 rounded-lg px-3 py-2 border border-orange-100">
+                            <p className="text-xs text-orange-500 font-semibold">Soft Skills รวม</p>
+                            <p className="text-lg font-black text-orange-700">{softTotal.toFixed(1)} / {softCount * 5}</p>
+                          </div>
+                        )}
+                      </div>
+                      {softCount > 0 && (
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+                          {[
+                            { key: 'softSkillComm', label: 'สื่อสาร' },
+                            { key: 'softSkillTime', label: 'บริหารเวลา' },
+                            { key: 'softSkillMotiv', label: 'จูงใจตนเอง' },
+                            { key: 'softSkillDuty', label: 'ทำงานตามหน้าที่' },
+                          ].map(({ key, label }) => a[key] != null && (
+                            <div key={key} className="flex items-center justify-between text-xs">
+                              <span className="text-gray-500">{label}</span>
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-16 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                                  <div className="h-full rounded-full bg-orange-400" style={{ width: `${(a[key]/5)*100}%` }} />
+                                </div>
+                                <span className="font-bold text-gray-700 w-6 text-right">{a[key]}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Modal */}

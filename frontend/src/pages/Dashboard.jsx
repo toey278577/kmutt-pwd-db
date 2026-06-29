@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Users, Building2, GraduationCap, TrendingUp, ArrowUpRight } from 'lucide-react';
+import { Users, Building2, GraduationCap, TrendingUp, Layers, CheckCircle, Clock, ArrowRight } from 'lucide-react';
 import {
   PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar,
   XAxis, YAxis, ResponsiveContainer, CartesianGrid,
 } from 'recharts';
-import { getDashboardStats } from '../api';
+import { useNavigate } from 'react-router-dom';
+import { getDashboardStats, getBatches } from '../api';
 
 const COLORS = ['#ea580c', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b', '#f97316'];
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
@@ -36,11 +37,14 @@ const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) =>
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
+  const [batches, setBatches] = useState([]);
   const [error, setError] = useState(false);
+  const navigate = useNavigate();
 
   const load = useCallback(() => {
     setError(false);
     getDashboardStats().then(r => setStats(r.data)).catch(() => setError(true));
+    getBatches().then(r => setBatches(r.data)).catch(() => {});
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -108,6 +112,41 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
+
+      {/* ═══ BATCH STATUS ═══ */}
+      {batches.length > 0 && (
+        <div className="bg-white rounded-3xl border border-orange-100 shadow-sm overflow-hidden">
+          <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-orange-50">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-orange-500" style={{ boxShadow: '0 0 6px #ea580c' }} />
+              <span className="font-bold text-gray-800 text-sm">สถานะรุ่นการฝึกอบรม</span>
+            </div>
+            <button onClick={() => navigate('/batches')}
+              className="text-xs text-orange-500 font-semibold flex items-center gap-1 hover:text-orange-700 transition-colors">
+              จัดการรุ่น <ArrowRight size={12} />
+            </button>
+          </div>
+          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+            {batches.slice(0, 4).map(b => (
+              <div key={b.id} className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-gray-100 hover:border-orange-200 hover:bg-orange-50/40 transition-all">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${b.status === 'ACTIVE' ? 'bg-emerald-100' : 'bg-gray-100'}`}>
+                  {b.status === 'ACTIVE'
+                    ? <CheckCircle size={16} className="text-emerald-600" />
+                    : <Clock size={16} className="text-gray-400" />
+                  }
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-800 truncate">รุ่นที่ {b.batchNumber} ปี พ.ศ. {b.year}</p>
+                  <p className="text-xs text-gray-400 truncate">{b.courseName}</p>
+                </div>
+                <span className={`text-xs px-2.5 py-1 rounded-full font-semibold flex-shrink-0 ${b.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-500'}`}>
+                  {b.status === 'ACTIVE' ? 'กำลังดำเนินการ' : 'เสร็จสิ้น'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ═══ CHART ROW 1 ═══ */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

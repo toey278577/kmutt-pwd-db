@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Printer, FileText, Award, Building2, Users, ChevronDown, X } from 'lucide-react';
-import { getPersons, getOrganizations } from '../api';
+import { Printer, FileText, Award, Building2, Users, ChevronDown, X, Layers } from 'lucide-react';
+import { getPersons, getOrganizations, getBatches } from '../api';
 
 const fmtDate = (iso) => {
   if (!iso) return '—';
@@ -31,6 +31,7 @@ const DISABILITY_ABBR = {
 const REPORT_TYPES = [
   { id: 'list', label: 'รายชื่อคนพิการ', icon: Users, desc: 'ตารางรายชื่อพร้อมข้อมูลพื้นฐาน' },
   { id: 'behavior', label: 'แบบสังเกตพฤติกรรมรายบุคคล', icon: FileText, desc: 'ส่งให้วิทยากรก่อนการอบรม' },
+  { id: 'course_eval', label: 'แบบประเมินรายวิชา', icon: Layers, desc: 'ตารางให้คะแนน 5 หัวข้อ 25 คะแนน' },
   { id: 'certificate', label: 'ใบ Certificate', icon: Award, desc: 'ใบรับรองผลการอบรม มจธ.' },
   { id: 'company', label: 'รายงานส่งบริษัท', icon: Building2, desc: 'รายงานผลการดำเนินงาน' },
 ];
@@ -39,7 +40,16 @@ export default function ReportPage() {
   const [activeType, setActiveType] = useState('list');
   const [persons, setPersons] = useState([]);
   const [orgs, setOrgs] = useState([]);
+  const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [batchFilter, setBatchFilter] = useState('');
+
+  // แบบประเมินรายวิชา settings
+  const [courseEvalForm, setCourseEvalForm] = useState({
+    subject: '',
+    teacher: '',
+    date: '',
+  });
 
   // Certificate settings
   const [certForm, setCertForm] = useState({
@@ -67,10 +77,11 @@ export default function ReportPage() {
   const [selectedOrgIds, setSelectedOrgIds] = useState([]);
 
   useEffect(() => {
-    Promise.all([getPersons({ withPhotos: 'true' }), getOrganizations()])
-      .then(([pRes, oRes]) => {
+    Promise.all([getPersons({ withPhotos: 'true' }), getOrganizations(), getBatches()])
+      .then(([pRes, oRes, bRes]) => {
         setPersons(pRes.data);
         setOrgs(oRes.data);
+        setBatches(bRes.data);
         setLoading(false);
       });
   }, []);
@@ -163,6 +174,32 @@ export default function ReportPage() {
 
       {/* Settings Panel */}
       <div className="no-print">
+
+        {/* Course Eval Settings */}
+        {activeType === 'course_eval' && (
+          <div className="bg-white rounded-2xl border border-orange-100 p-5 mb-5 shadow-sm">
+            <p className="font-bold text-orange-950 text-sm mb-4">ตั้งค่าแบบประเมินรายวิชา</p>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="col-span-2">
+                <label className="block text-xs font-bold text-gray-400 mb-1">ชื่อรายวิชา</label>
+                <input className={inputCls} placeholder="เช่น การสื่อสารในองค์กร"
+                  value={courseEvalForm.subject} onChange={e => setCourseEvalForm({...courseEvalForm, subject: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 mb-1">ชื่ออาจารย์ผู้สอน</label>
+                <input className={inputCls} placeholder="ชื่อ-นามสกุล"
+                  value={courseEvalForm.teacher} onChange={e => setCourseEvalForm({...courseEvalForm, teacher: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 mb-1">วันที่สอน</label>
+                <input className={inputCls} placeholder="วว/ดด/ปปปป"
+                  value={courseEvalForm.date} onChange={e => setCourseEvalForm({...courseEvalForm, date: e.target.value})} />
+              </div>
+            </div>
+            <PersonSelector persons={persons} selected={selectedPersonIds} onToggle={togglePerson} onAll={selectAllPersons} onClear={clearPersons} />
+          </div>
+        )}
+
         {/* Certificate Settings */}
         {activeType === 'certificate' && (
           <div className="bg-white rounded-2xl border border-orange-100 p-5 mb-5 shadow-sm">
@@ -290,9 +327,32 @@ export default function ReportPage() {
           </div>
         )}
 
-        {/* Person selector for list/behavior */}
+        {/* Person selector for list/behavior — พร้อม batch filter */}
         {(activeType === 'list' || activeType === 'behavior') && (
           <div className="bg-white rounded-2xl border border-orange-100 p-5 mb-5 shadow-sm">
+            {batches.length > 0 && (
+              <div className="mb-4 pb-4 border-b border-orange-50">
+                <p className="text-xs font-bold text-gray-400 mb-2">แยกตามรุ่น (ไม่บังคับ)</p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setBatchFilter('')}
+                    className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
+                      !batchFilter ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300'
+                    }`}>
+                    ทุกรุ่น
+                  </button>
+                  {batches.map(b => (
+                    <button key={b.id}
+                      onClick={() => setBatchFilter(String(b.id))}
+                      className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
+                        batchFilter === String(b.id) ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300'
+                      }`}>
+                      รุ่นที่ {b.batchNumber} ปี {b.year}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <PersonSelector persons={persons} selected={selectedPersonIds} onToggle={togglePerson} onAll={selectAllPersons} onClear={clearPersons} />
           </div>
         )}
@@ -344,6 +404,72 @@ export default function ReportPage() {
                       </tr>
                     );
                   })}
+                </tbody>
+              </table>
+              <p className="text-xs text-gray-400 mt-4 text-right">พิมพ์วันที่ {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Report: แบบประเมินรายวิชา */}
+        {activeType === 'course_eval' && (
+          <div>
+            <div className="px-6 py-4 border-b border-orange-100 no-print">
+              <p className="font-bold text-orange-950">ตัวอย่างรายงาน: แบบประเมินรายวิชา ({filteredPersons.length} คน)</p>
+            </div>
+            <div className="p-6 print-page">
+              {/* Header */}
+              <div className="text-center mb-4">
+                <p className="text-sm font-bold">แบบบันทึกพฤติกรรมการปฏิบัติงานรายบุคคล</p>
+                <p className="text-xs text-gray-600">โครงการฝึกอบรม-ฝึกงาน เพื่อเตรียมความพร้อมเข้าสู่สถานประกอบการ</p>
+                <p className="text-xs text-gray-600">หลักสูตร "เจ้าหน้าที่ที่ประจำสำนักงาน"</p>
+              </div>
+              <div className="flex justify-between text-xs mb-1">
+                <span>รายวิชา <span className="font-bold underline">{courseEvalForm.subject || '..............................................................................................'}</span></span>
+                <span>วันที่ <span className="font-bold underline">{courseEvalForm.date || '.............................'}</span></span>
+              </div>
+              {courseEvalForm.teacher && (
+                <p className="text-xs mb-3">อาจารย์ผู้สอน <span className="font-bold">{courseEvalForm.teacher}</span></p>
+              )}
+              <p className="text-xs text-gray-500 mb-1">คำชี้แจง: โปรดระบุคะแนน 1-5 องค์ประกอบตรงกับพฤติกรรมที่เห็นจริง สามารถปรับเปลี่ยนตัวชี้ตัวเลขได้ เช่น "ขั้นงาน" ไม่มีการทำ "ขั้นนำเสนอ" ที่นั่งเรียน สามารถปรับรายละเอียดให้สอดคล้องกับเนื้อหาวิชาและการเรียนการสอน</p>
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-300 px-2 py-2 text-center w-8">#</th>
+                    <th className="border border-gray-300 px-1 py-2 text-center w-14">รูป</th>
+                    <th className="border border-gray-300 px-2 py-2 text-left min-w-28">ชื่อ - สกุล</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-14">ความตั้งใจ/<br/>ความสนใจ</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-14">การตอบคำถาม/<br/>แสดงความคิดเห็น</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-14">การทำงาน<br/>ร่วมกับผู้อื่น/<br/>มีส่วนร่วม</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-14">ตรงต่อเวลา/<br/>ส่งงานครบ<br/>มอบหมาย</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-14">ขึ้น/<br/>ผลงาน</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-14">รวม<br/>(25 คะแนน)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPersons.map((p, i) => (
+                    <tr key={p.id} className="h-14">
+                      <td className="border border-gray-300 px-2 py-1 text-center align-middle">{i + 1}</td>
+                      <td className="border border-gray-300 px-1 py-1 text-center align-middle">
+                        {p.photos?.[0]?.filePath
+                          ? <img src={p.photos[0].filePath} alt={p.fullName}
+                              className="w-10 h-12 object-cover rounded mx-auto"
+                              style={{ printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' }} />
+                          : <div className="w-10 h-12 bg-gray-100 border border-gray-200 rounded mx-auto flex items-center justify-center text-gray-300 text-[8px]">ไม่มีรูป</div>
+                        }
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1 align-middle font-medium">{p.fullName}</td>
+                      <td className="border border-gray-300 px-2 py-1 text-center align-middle"></td>
+                      <td className="border border-gray-300 px-2 py-1 text-center align-middle"></td>
+                      <td className="border border-gray-300 px-2 py-1 text-center align-middle"></td>
+                      <td className="border border-gray-300 px-2 py-1 text-center align-middle"></td>
+                      <td className="border border-gray-300 px-2 py-1 text-center align-middle"></td>
+                      <td className="border border-gray-300 px-2 py-1 text-center align-middle"></td>
+                    </tr>
+                  ))}
+                  {filteredPersons.length === 0 && (
+                    <tr><td colSpan={9} className="border border-gray-300 px-2 py-6 text-center text-gray-400">กรุณาเลือกรายชื่อ</td></tr>
+                  )}
                 </tbody>
               </table>
               <p className="text-xs text-gray-400 mt-4 text-right">พิมพ์วันที่ {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
@@ -520,6 +646,8 @@ export default function ReportPage() {
           .no-print { display: none !important; }
           .print-area { border: none !important; box-shadow: none !important; border-radius: 0 !important; }
           .page-break { page-break-before: always; }
+          img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
       `}</style>
     </div>

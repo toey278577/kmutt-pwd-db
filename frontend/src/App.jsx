@@ -16,6 +16,7 @@ const TrainingList     = lazy(() => import('./pages/TrainingList'));
 const UserManagement   = lazy(() => import('./pages/UserManagement'));
 const Help             = lazy(() => import('./pages/Help'));
 const ReportPage       = lazy(() => import('./pages/ReportPage'));
+const BatchPage        = lazy(() => import('./pages/BatchPage'));
 
 function PageLoader() {
   return (
@@ -53,6 +54,7 @@ function AppRoutes() {
                 <Route path="/organizations" element={<OrganizationList />} />
                 <Route path="/help"         element={<Help />} />
                 <Route path="/report"       element={<ReportPage />} />
+                <Route path="/batches"      element={<BatchPage />} />
                 <Route path="/users"        element={
                   <ProtectedRoute adminOnly>
                     <UserManagement />

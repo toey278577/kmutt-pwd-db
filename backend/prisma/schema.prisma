@@ -42,6 +42,7 @@ model Person {
   skills           Skill[]
   followUps        FollowUp[]
   organizations    PersonOrganization[]
+  assessments      PersonAssessment[]
 
   @@map("persons")
 }
@@ -224,6 +225,44 @@ enum RoleType {
   INTERNSHIP
   EMPLOYMENT
   OTHER
+}
+
+enum BatchStatus {
+  ACTIVE
+  COMPLETED
+}
+
+model TrainingBatch {
+  id          Int         @id @default(autoincrement())
+  batchNumber Int         @map("batch_number")
+  year        Int
+  courseName  String      @map("course_name") @db.VarChar(255)
+  startDate   DateTime?   @map("start_date") @db.Date
+  endDate     DateTime?   @map("end_date") @db.Date
+  status      BatchStatus @default(ACTIVE)
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  assessments PersonAssessment[]
+
+  @@map("training_batches")
+}
+
+model PersonAssessment {
+  id             Int     @id @default(autoincrement())
+  personId       Int     @map("person_id")
+  batchId        Int     @map("batch_id")
+  preTestScore   Float?  @map("pre_test_score")
+  postTestScore  Float?  @map("post_test_score")
+  softSkillComm  Float?  @map("soft_skill_comm")
+  softSkillTime  Float?  @map("soft_skill_time")
+  softSkillMotiv Float?  @map("soft_skill_motiv")
+  softSkillDuty  Float?  @map("soft_skill_duty")
+
+  person  Person        @relation(fields: [personId], references: [id], onDelete: Cascade)
+  batch   TrainingBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, batchId])
+  @@map("person_assessments")
 }
 
 enum UserRole {

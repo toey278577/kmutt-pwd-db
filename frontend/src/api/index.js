@@ -113,3 +113,15 @@ export const getAllFollowUp = () => api.get('/data/followup-all');
 export const getPersonPhotos = (id) => api.get(`/persons/${id}/photos`);
 export const uploadPersonPhoto = (id, data) => api.post(`/persons/${id}/photos`, data);
 export const deletePersonPhoto = (id, pid) => api.delete(`/persons/${id}/photos/${pid}`);
+
+// training batches (รุ่น)
+export const getBatches = () => cached('batches', () => api.get('/batches'), 30_000);
+export const getBatch = (id) => api.get(`/batches/${id}`);
+export const createBatch = (data) => api.post('/batches', data).then(r => { invalidate('batches'); return r; });
+export const updateBatch = (id, data) => api.put(`/batches/${id}`, data).then(r => { invalidate('batches'); return r; });
+export const deleteBatch = (id) => api.delete(`/batches/${id}`).then(r => { invalidate('batches'); return r; });
+
+// assessments (ประเมินทักษะ)
+export const getAssessments = (personId) => api.get(`/persons/${personId}/assessments`);
+export const saveAssessment = (personId, data) => api.post(`/persons/${personId}/assessments`, data);
+export const deleteAssessment = (personId, aid) => api.delete(`/persons/${personId}/assessments/${aid}`);

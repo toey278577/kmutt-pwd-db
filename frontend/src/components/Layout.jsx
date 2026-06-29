@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, Shield, Eye, BookOpen, Printer, Menu, X, ChevronRight, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, Shield, Eye, BookOpen, Printer, Menu, X, ChevronRight, Sun, Moon, Layers } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -10,6 +10,7 @@ const menu = [
   { label: 'การอบรม & ฝึกงาน', icon: GraduationCap, path: '/training' },
   { label: 'ติดตามผล', icon: Target, path: '/followup' },
   { label: 'สถานประกอบการ', icon: Building2, path: '/organizations' },
+  { label: 'จัดการรุ่น', icon: Layers, path: '/batches' },
   { label: 'ออกรายงาน', icon: Printer, path: '/report' },
   { label: 'คู่มือการใช้งาน', icon: BookOpen, path: '/help' },
 ];
