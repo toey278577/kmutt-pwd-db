@@ -12,9 +12,9 @@ const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อ�
 const EMP_LABELS = { EMPLOYED: 'มีงานทำ', UNEMPLOYED: 'ว่างงาน', STUDYING: 'ศึกษาต่อ' };
 
 const statCards = [
-  { key: 'totalPersons', label: 'คนพิการทั้งหมด', icon: Users, gradient: 'from-orange-500 to-red-500', glow: 'shadow-orange-200', bg: 'bg-orange-50', text: 'text-orange-600' },
-  { key: 'totalOrgs', label: 'สถานประกอบการ', icon: Building2, gradient: 'from-cyan-500 to-blue-500', glow: 'shadow-cyan-200', bg: 'bg-cyan-50', text: 'text-cyan-600' },
-  { key: 'totalTraining', label: 'บันทึกการอบรม', icon: GraduationCap, gradient: 'from-emerald-500 to-teal-500', glow: 'shadow-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-600' },
+  { key: 'totalPersons', label: 'คนพิการทั้งหมด', icon: Users, chip: 'bg-orange-50', text: 'text-orange-600' },
+  { key: 'totalOrgs', label: 'สถานประกอบการ', icon: Building2, chip: 'bg-cyan-50', text: 'text-cyan-600' },
+  { key: 'totalTraining', label: 'บันทึกการอบรม', icon: GraduationCap, chip: 'bg-emerald-50', text: 'text-emerald-600' },
 ];
 
 const CustomTooltip = ({ active, payload }) => {
@@ -72,45 +72,30 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
 
-      {/* ═══ HERO BANNER ═══ */}
-      <div className="relative overflow-hidden rounded-3xl p-6 md:p-8"
-        style={{ background: 'linear-gradient(135deg,#431407 0%,#9a3412 50%,#ea580c 100%)' }}>
-        {/* Decorative blobs */}
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle,#fb923c,transparent)' }} />
-        <div className="absolute -bottom-10 left-20 w-48 h-48 rounded-full opacity-15 blur-2xl" style={{ background: 'radial-gradient(circle,#fbbf24,transparent)' }} />
-        <div className="absolute top-0 right-0 w-full h-full opacity-5"
-          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+      {/* ═══ HEADER ═══ */}
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-gray-800">Dashboard</h1>
+          <p className="text-gray-400 text-sm mt-0.5">ภาพรวมระบบฐานข้อมูลคนพิการ · โครงการฝึกอบรม-ฝึกงาน มจธ.</p>
+        </div>
+        <span className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-xs font-bold text-orange-600 shadow-sm">
+          <img src="/logo-icon.png" className="h-4 w-4 object-contain" alt="" /> KMUTT
+        </span>
+      </div>
 
-        <div className="relative flex items-center justify-between gap-6">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm text-orange-200 text-xs font-bold tracking-widest uppercase border border-white/10">
-                KMUTT · มจธ.
-              </span>
+      {/* ═══ STAT CARDS ═══ */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {statCards.map(({ key, label, icon: Icon, chip, text }) => (
+          <div key={key} className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${chip}`}>
+              <Icon size={22} className={text} />
             </div>
-            <h1 className="text-2xl md:text-3xl font-black text-white leading-tight mb-1">
-              ระบบฐานข้อมูลคนพิการ
-            </h1>
-            <p className="text-orange-200/70 text-sm font-medium">
-              โครงการฝึกอบรม-ฝึกงาน เพื่อเตรียมความพร้อมเข้าสู่สถานประกอบการ
-            </p>
+            <div>
+              <p className="text-2xl font-black text-gray-800 leading-none">{stats[key]}</p>
+              <p className="text-gray-400 text-sm mt-1">{label}</p>
+            </div>
           </div>
-          <img src="/logo.jpg" alt="KMUTT"
-            className="h-16 md:h-20 object-contain opacity-90 flex-shrink-0 drop-shadow-2xl" />
-        </div>
-
-        {/* Mini stat strip */}
-        <div className="relative mt-5 grid grid-cols-3 gap-3">
-          {statCards.map(({ key, label, icon: Icon }) => (
-            <div key={key} className="rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 px-4 py-3 flex items-center gap-3">
-              <Icon size={18} className="text-orange-200 flex-shrink-0" />
-              <div>
-                <p className="text-white text-xl font-black leading-none">{stats[key]}</p>
-                <p className="text-orange-200/70 text-xs mt-0.5">{label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        ))}
       </div>
 
       {/* ═══ BATCH STATUS ═══ */}

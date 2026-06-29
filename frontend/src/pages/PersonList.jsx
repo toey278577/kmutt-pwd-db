@@ -185,34 +185,25 @@ export default function PersonList() {
   return (
     <div className="flex flex-col" style={{ height: 'calc(100vh - 56px)' }}>
       {/* Header */}
-      <div className="mb-4 relative overflow-hidden rounded-3xl flex-shrink-0"
-        style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
-        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-20 blur-2xl"
-          style={{ background: 'radial-gradient(circle,#fb923c,transparent)' }} />
-        <div className="absolute inset-0 opacity-5"
-          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-        <div className="relative px-6 py-5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
-              <Users size={22} color="white" />
-            </div>
-            <div>
-              <p className="text-orange-300/70 text-xs font-bold tracking-[0.12em] uppercase mb-0.5">ฐานข้อมูล</p>
-              <h1 className="text-xl font-black text-white leading-tight">ข้อมูลคนพิการ</h1>
-              <p className="text-orange-200/50 text-xs mt-0.5">
-                <span className="text-orange-300 font-bold">{persons.length}</span> รายการในระบบ
-              </p>
-            </div>
+      <div className="mb-4 flex items-center justify-between gap-4 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+            <Users size={22} className="text-orange-600" />
           </div>
-          {canEdit && (
-            <button
-              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold text-white active:scale-95 transition-all flex-shrink-0 border border-white/20 backdrop-blur-sm"
-              style={{ background: 'rgba(234,88,12,0.4)', boxShadow: '0 0 20px rgba(234,88,12,0.3)' }}
-              onClick={() => openModal()}>
-              <Plus size={15} /> เพิ่มคนพิการ
-            </button>
-          )}
+          <div>
+            <h1 className="text-xl font-black text-gray-800 leading-tight">ข้อมูลคนพิการ</h1>
+            <p className="text-gray-400 text-sm mt-0.5">
+              <span className="text-orange-600 font-bold">{persons.length}</span> รายการในระบบ
+            </p>
+          </div>
         </div>
+        {canEdit && (
+          <button
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm flex-shrink-0"
+            onClick={() => openModal()}>
+            <Plus size={16} /> เพิ่มคนพิการ
+          </button>
+        )}
       </div>
 
       {/* Search */}
@@ -279,9 +270,9 @@ export default function PersonList() {
         <div className="flex-1 overflow-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10">
-              <tr style={{ background: 'linear-gradient(135deg,#431407,#7c2d12)' }}>
+              <tr className="bg-gray-50 border-b border-gray-200">
                 {['#','ชื่อ-นามสกุล','เลขบัตร','เพศ','จังหวัด','การศึกษา','สถานะ','จัดการ'].map((h, i) => (
-                  <th key={h} className={`px-4 py-3.5 text-left text-xs font-bold text-orange-200/70 uppercase tracking-wider ${i === 0 ? 'w-10' : ''} ${i === 7 ? 'text-center' : ''}`}>{h}</th>
+                  <th key={h} className={`px-4 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider ${i === 0 ? 'w-10' : ''} ${i === 7 ? 'text-center' : ''}`}>{h}</th>
                 ))}
               </tr>
             </thead>

@@ -24,14 +24,19 @@
 .animate-bounce-in { animation: bounce-in 0.35s ease-out forwards; }
 
 body {
-  background: #fff7ed;
+  background: #f8fafc;
   font-family: 'Sarabun', sans-serif;
+  color: #0f172a;
 }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #fff7ed; }
-::-webkit-scrollbar-thumb { background: #fed7aa; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #fb923c; }
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ─── Design system (Minimal SaaS — clean white + orange accent) ─── */
+.page-fade { animation: pageFade .35s ease-out; }
+@keyframes pageFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ─── Dark Mode ─── */
 html.dark body {
