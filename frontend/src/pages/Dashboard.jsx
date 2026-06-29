@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Users, Building2, GraduationCap, TrendingUp, Layers, CheckCircle, Clock, ArrowRight } from 'lucide-react';
+import { Users, Building2, GraduationCap, TrendingUp, Layers, CheckCircle, Clock, ArrowRight, Sparkles, UserPlus, ClipboardList } from 'lucide-react';
 import {
   PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar,
   XAxis, YAxis, ResponsiveContainer, CartesianGrid,
@@ -12,9 +12,9 @@ const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อ�
 const EMP_LABELS = { EMPLOYED: 'มีงานทำ', UNEMPLOYED: 'ว่างงาน', STUDYING: 'ศึกษาต่อ' };
 
 const statCards = [
-  { key: 'totalPersons', label: 'คนพิการทั้งหมด', icon: Users, chip: 'bg-orange-50', text: 'text-orange-600' },
-  { key: 'totalOrgs', label: 'สถานประกอบการ', icon: Building2, chip: 'bg-cyan-50', text: 'text-cyan-600' },
-  { key: 'totalTraining', label: 'บันทึกการอบรม', icon: GraduationCap, chip: 'bg-emerald-50', text: 'text-emerald-600' },
+  { key: 'totalPersons', label: 'คนพิการทั้งหมด', icon: Users, chip: 'bg-orange-50', text: 'text-orange-600', ring: 'ring-orange-100' },
+  { key: 'totalOrgs', label: 'สถานประกอบการ', icon: Building2, chip: 'bg-cyan-50', text: 'text-cyan-600', ring: 'ring-cyan-100' },
+  { key: 'totalTraining', label: 'บันทึกการอบรม', icon: GraduationCap, chip: 'bg-emerald-50', text: 'text-emerald-600', ring: 'ring-emerald-100' },
 ];
 
 const CustomTooltip = ({ active, payload }) => {
@@ -68,6 +68,7 @@ export default function Dashboard() {
 
   const genderData = stats.byGender.map(g => ({ ...g, name: GENDER_LABELS[g.name] || g.name }));
   const empData = stats.byEmployment.map(e => ({ ...e, name: EMP_LABELS[e.name] || e.name }));
+  const hasData = (stats.totalPersons || 0) > 0;
 
   return (
     <div className="space-y-6">
@@ -85,14 +86,14 @@ export default function Dashboard() {
 
       {/* ═══ STAT CARDS ═══ */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {statCards.map(({ key, label, icon: Icon, chip, text }) => (
-          <div key={key} className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${chip}`}>
+        {statCards.map(({ key, label, icon: Icon, chip, text, ring }) => (
+          <div key={key} className="group bg-white border border-gray-200 rounded-2xl shadow-sm p-5 flex items-center gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ring-1 ${chip} ${ring} group-hover:scale-105 transition-transform`}>
               <Icon size={22} className={text} />
             </div>
-            <div>
-              <p className="text-2xl font-black text-gray-800 leading-none">{stats[key]}</p>
-              <p className="text-gray-400 text-sm mt-1">{label}</p>
+            <div className="min-w-0">
+              <p className="text-3xl font-black text-gray-800 leading-none tracking-tight">{stats[key]}</p>
+              <p className="text-gray-400 text-sm mt-1.5">{label}</p>
             </div>
           </div>
         ))}
@@ -133,6 +134,11 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* ═══ EMPTY STATE — ยังไม่มีข้อมูล (แบบ onboarding) ═══ */}
+      {!hasData && <EmptyDashboard onAdd={() => navigate('/persons')} onBatch={() => navigate('/batches')} />}
+
+      {/* ═══ CHARTS — แสดงเมื่อมีข้อมูล ═══ */}
+      {hasData && (<>
       {/* ═══ CHART ROW 1 ═══ */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <GlassChart title="แยกตามเพศ" accent="#ea580c">
@@ -229,6 +235,50 @@ export default function Dashboard() {
             </ResponsiveContainer>
           ) : <EmptyChart />}
         </GlassChart>
+      </div>
+      </>)}
+    </div>
+  );
+}
+
+function EmptyDashboard({ onAdd, onBatch }) {
+  const steps = [
+    { icon: UserPlus, title: 'เพิ่มข้อมูลคนพิการ', desc: 'บันทึกประวัติ ความพิการ และข้อมูลติดต่อ' },
+    { icon: Layers, title: 'สร้างรุ่นฝึกอบรม', desc: 'จัดกลุ่มผู้เข้าร่วมตามรุ่น พร้อมประเมินทักษะ' },
+    { icon: ClipboardList, title: 'ออกรายงาน', desc: 'พิมพ์รายชื่อ ใบ Certificate และรายงานต่างๆ' },
+  ];
+  return (
+    <div className="bg-white border border-gray-200 rounded-3xl shadow-sm px-6 py-12 md:py-16 text-center">
+      <div className="w-16 h-16 rounded-3xl bg-orange-50 ring-1 ring-orange-100 flex items-center justify-center mx-auto mb-5">
+        <Sparkles size={28} className="text-orange-500" />
+      </div>
+      <h2 className="text-xl font-black text-gray-800 mb-2">เริ่มต้นใช้งานระบบ</h2>
+      <p className="text-gray-400 text-sm max-w-md mx-auto mb-7 leading-relaxed">
+        ยังไม่มีข้อมูลในระบบ — เพิ่มข้อมูลคนพิการและสร้างรุ่นฝึกอบรม แล้วสถิติและกราฟภาพรวมจะแสดงที่นี่โดยอัตโนมัติ
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
+        <button onClick={onAdd}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm">
+          <UserPlus size={16} /> เพิ่มข้อมูลคนพิการ
+        </button>
+        <button onClick={onBatch}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 bg-white border border-gray-200 hover:border-orange-300 hover:text-orange-600 active:scale-95 transition-all">
+          <Layers size={16} /> สร้างรุ่นฝึกอบรม
+        </button>
+      </div>
+      <div className="grid sm:grid-cols-3 gap-3 max-w-3xl mx-auto text-left">
+        {steps.map(({ icon: Icon, title, desc }, i) => (
+          <div key={i} className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+                <Icon size={15} className="text-orange-500" />
+              </div>
+              <span className="text-xs font-black text-gray-300">ขั้นที่ {i + 1}</span>
+            </div>
+            <p className="font-bold text-gray-700 text-sm mb-0.5">{title}</p>
+            <p className="text-gray-400 text-xs leading-relaxed">{desc}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
