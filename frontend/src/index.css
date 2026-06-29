@@ -24,15 +24,19 @@
 .animate-bounce-in { animation: bounce-in 0.35s ease-out forwards; }
 
 body {
-  background: #f8fafc;
+  background: #fff7ed;
   font-family: 'Sarabun', sans-serif;
-  color: #0f172a;
+  color: #1c1917;
 }
 
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+::-webkit-scrollbar-thumb { background: #fdba74; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #fb923c; }
+
+/* Vibrant orange utility */
+.btn-orange { background-image: linear-gradient(135deg,#fb923c,#ea580c); }
+.btn-orange:hover { background-image: linear-gradient(135deg,#f97316,#c2410c); }
 
 /* ─── Design system (Minimal SaaS — clean white + orange accent) ─── */
 .page-fade { animation: pageFade .35s ease-out; }

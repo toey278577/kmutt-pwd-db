@@ -16,10 +16,10 @@ const menu = [
 ];
 
 const ROLE_LABEL = { ADMIN: 'ผู้ดูแลระบบ', STAFF: 'เจ้าหน้าที่', VIEWER: 'ผู้ดูข้อมูล' };
-const ROLE_COLOR = { ADMIN: 'from-red-400 to-orange-500', STAFF: 'from-orange-400 to-amber-500', VIEWER: 'from-sky-400 to-cyan-500' };
-const ROLE_BADGE = { ADMIN: 'bg-red-500/15 text-red-300 border-red-500/25', STAFF: 'bg-orange-500/15 text-orange-300 border-orange-500/25', VIEWER: 'bg-sky-500/15 text-sky-300 border-sky-500/25' };
+const ROLE_COLOR = { ADMIN: 'from-rose-400 to-red-500', STAFF: 'from-amber-300 to-orange-500', VIEWER: 'from-sky-300 to-cyan-500' };
+const ROLE_BADGE = 'bg-white/20 text-white border-white/30';
 
-const SIDEBAR_BG = 'linear-gradient(180deg,#1c1917 0%,#0c0a09 100%)';
+const SIDEBAR_BG = 'linear-gradient(170deg,#fb923c 0%,#ea580c 45%,#c2410c 100%)';
 
 export default function Layout({ children }) {
   const navigate = useNavigate();
@@ -37,11 +37,11 @@ export default function Layout({ children }) {
     return (
       <button onClick={() => handleNav(path)}
         className={`group relative w-full flex items-center gap-3 pl-4 pr-3 py-2.5 rounded-xl text-left transition-all duration-200
-          ${active ? 'bg-white/[0.07] text-white' : 'text-stone-400 hover:text-white hover:bg-white/[0.04]'}`}>
+          ${active ? 'bg-white/20 text-white shadow-sm' : 'text-white/75 hover:text-white hover:bg-white/10'}`}>
         {/* active left bar */}
         <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-200
-          ${active ? 'h-5 bg-orange-500' : 'h-0 bg-transparent'}`} />
-        <Icon size={17} className={`flex-shrink-0 transition-colors ${active ? 'text-orange-400' : 'text-stone-500 group-hover:text-stone-300'}`} />
+          ${active ? 'h-5 bg-white' : 'h-0 bg-transparent'}`} />
+        <Icon size={17} className={`flex-shrink-0 transition-colors ${active ? 'text-white' : 'text-white/60 group-hover:text-white'}`} />
         <span className={`text-sm flex-1 ${active ? 'font-semibold' : 'font-normal'}`}>{label}</span>
       </button>
     );
@@ -83,14 +83,14 @@ export default function Layout({ children }) {
         style={{ background: SIDEBAR_BG }}>
 
         {/* ── Logo ── */}
-        <div className="px-4 pb-4 flex items-center gap-3 border-b border-white/[0.06]"
+        <div className="px-4 pb-4 flex items-center gap-3 border-b border-white/15"
           style={{ paddingTop: 'max(20px, env(safe-area-inset-top))' }}>
           <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-md flex-shrink-0">
             <img src="/logo-icon.png" alt="KMUTT" className="h-8 w-8 object-contain" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-white font-black text-sm leading-none tracking-tight">PWDs <span className="text-orange-400">KMUTT</span></p>
-            <p className="text-stone-400 text-[10px] font-medium leading-snug mt-1">ระบบฐานข้อมูลคนพิการ มจธ.</p>
+            <p className="text-white font-black text-sm leading-none tracking-tight">PWDs <span className="text-amber-200">KMUTT</span></p>
+            <p className="text-white/70 text-[10px] font-medium leading-snug mt-1">ระบบฐานข้อมูลคนพิการ มจธ.</p>
           </div>
           <button onClick={() => setOpen(false)} className="md:hidden text-white/40 hover:text-white flex-shrink-0 p-1 rounded-lg hover:bg-white/10 transition-all">
             <X size={18} />
@@ -99,20 +99,20 @@ export default function Layout({ children }) {
 
         {/* ── Menu ── */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          <p className="text-stone-500 text-[10px] font-bold tracking-[0.15em] px-4 mb-2 uppercase">เมนูหลัก</p>
+          <p className="text-white/60 text-[10px] font-bold tracking-[0.15em] px-4 mb-2 uppercase">เมนูหลัก</p>
           {menu.map((m) => <NavItem key={m.path} {...m} />)}
 
           {isAdmin && (
             <>
-              <p className="text-stone-500 text-[10px] font-bold tracking-[0.15em] px-4 mb-2 mt-4 uppercase">ผู้ดูแลระบบ</p>
+              <p className="text-white/60 text-[10px] font-bold tracking-[0.15em] px-4 mb-2 mt-4 uppercase">ผู้ดูแลระบบ</p>
               <NavItem label="จัดการผู้ใช้" icon={UserCog} path="/users" />
             </>
           )}
         </nav>
 
         {/* ── Theme Toggle ── */}
-        <div className="px-4 py-2.5 border-t border-white/[0.06] flex items-center justify-between">
-          <span className="text-stone-500 text-[10px] font-bold tracking-widest uppercase">
+        <div className="px-4 py-2.5 border-t border-white/15 flex items-center justify-between">
+          <span className="text-white/60 text-[10px] font-bold tracking-widest uppercase">
             {dark ? 'Dark Mode' : 'Light Mode'}
           </span>
           <button onClick={toggle} title={dark ? 'เปลี่ยนเป็น Light' : 'เปลี่ยนเป็น Dark'}
@@ -126,19 +126,19 @@ export default function Layout({ children }) {
         </div>
 
         {/* ── User Card ── */}
-        <div className="p-3 border-t border-white/[0.06]" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
-          <div className="flex items-center gap-3 px-3 py-3 rounded-2xl bg-white/[0.05] border border-white/[0.06]">
-            <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${ROLE_COLOR[user?.role] || 'from-orange-400 to-amber-500'} flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow`}>
+        <div className="p-3 border-t border-white/15" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+          <div className="flex items-center gap-3 px-3 py-3 rounded-2xl bg-white/15 border border-white/20">
+            <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${ROLE_COLOR[user?.role] || 'from-amber-300 to-orange-500'} flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow`}>
               {initials}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-bold leading-none truncate">{user?.name}</p>
-              <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border ${ROLE_BADGE[user?.role] || ROLE_BADGE.STAFF}`}>
+              <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border ${ROLE_BADGE}`}>
                 {ROLE_LABEL[user?.role] || 'เจ้าหน้าที่'}
               </span>
             </div>
             <button onClick={handleLogout} title="ออกจากระบบ"
-              className="text-stone-500 hover:text-red-400 transition-colors p-1.5 rounded-xl hover:bg-red-500/10 flex-shrink-0">
+              className="text-white/70 hover:text-white transition-colors p-1.5 rounded-xl hover:bg-white/15 flex-shrink-0">
               <LogOut size={15} />
             </button>
           </div>

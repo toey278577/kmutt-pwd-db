@@ -12,9 +12,9 @@ const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อ�
 const EMP_LABELS = { EMPLOYED: 'มีงานทำ', UNEMPLOYED: 'ว่างงาน', STUDYING: 'ศึกษาต่อ' };
 
 const statCards = [
-  { key: 'totalPersons', label: 'คนพิการทั้งหมด', icon: Users, chip: 'bg-orange-50', text: 'text-orange-600', ring: 'ring-orange-100' },
-  { key: 'totalOrgs', label: 'สถานประกอบการ', icon: Building2, chip: 'bg-cyan-50', text: 'text-cyan-600', ring: 'ring-cyan-100' },
-  { key: 'totalTraining', label: 'บันทึกการอบรม', icon: GraduationCap, chip: 'bg-emerald-50', text: 'text-emerald-600', ring: 'ring-emerald-100' },
+  { key: 'totalPersons', label: 'คนพิการทั้งหมด', icon: Users, grad: 'linear-gradient(135deg,#fb923c,#ea580c)' },
+  { key: 'totalOrgs', label: 'สถานประกอบการ', icon: Building2, grad: 'linear-gradient(135deg,#22d3ee,#0891b2)' },
+  { key: 'totalTraining', label: 'บันทึกการอบรม', icon: GraduationCap, grad: 'linear-gradient(135deg,#34d399,#059669)' },
 ];
 
 const CustomTooltip = ({ active, payload }) => {
@@ -73,23 +73,31 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
 
-      {/* ═══ HEADER ═══ */}
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-gray-800">Dashboard</h1>
-          <p className="text-gray-400 text-sm mt-0.5">ภาพรวมระบบฐานข้อมูลคนพิการ · โครงการฝึกอบรม-ฝึกงาน มจธ.</p>
+      {/* ═══ HERO ═══ */}
+      <div className="relative overflow-hidden rounded-3xl p-6 md:p-7 text-white shadow-lg"
+        style={{ background: 'linear-gradient(120deg,#fb923c 0%,#ea580c 50%,#c2410c 100%)' }}>
+        <div className="absolute -top-16 -right-10 w-64 h-64 rounded-full opacity-25 blur-3xl" style={{ background: 'radial-gradient(circle,#fde68a,transparent 70%)' }} />
+        <div className="absolute -bottom-16 left-1/3 w-56 h-56 rounded-full opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle,#fff,transparent 70%)' }} />
+        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '30px 30px' }} />
+        <div className="relative flex items-center justify-between gap-4">
+          <div>
+            <p className="text-white/80 text-xs font-bold tracking-[0.18em] uppercase mb-2">KMUTT · มจธ.</p>
+            <h1 className="text-2xl md:text-3xl font-black leading-tight">ภาพรวมระบบ</h1>
+            <p className="text-white/85 text-sm mt-1.5">ฐานข้อมูลคนพิการ · โครงการฝึกอบรม-ฝึกงาน เพื่อเตรียมความพร้อมสู่สถานประกอบการ</p>
+          </div>
+          <div className="hidden md:flex w-16 h-16 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-sm items-center justify-center flex-shrink-0">
+            <img src="/logo-icon.png" className="h-11 w-11 object-contain" alt="KMUTT" onError={e => { e.target.style.display='none'; }} />
+          </div>
         </div>
-        <span className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-xs font-bold text-orange-600 shadow-sm">
-          <img src="/logo-icon.png" className="h-4 w-4 object-contain" alt="" /> KMUTT
-        </span>
       </div>
 
       {/* ═══ STAT CARDS ═══ */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {statCards.map(({ key, label, icon: Icon, chip, text, ring }) => (
-          <div key={key} className="group bg-white border border-gray-200 rounded-2xl shadow-sm p-5 flex items-center gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ring-1 ${chip} ${ring} group-hover:scale-105 transition-transform`}>
-              <Icon size={22} className={text} />
+        {statCards.map(({ key, label, icon: Icon, grad }) => (
+          <div key={key} className="group bg-white border border-orange-100 rounded-2xl shadow-sm p-5 flex items-center gap-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform"
+              style={{ background: grad }}>
+              <Icon size={22} className="text-white" />
             </div>
             <div className="min-w-0">
               <p className="text-3xl font-black text-gray-800 leading-none tracking-tight">{stats[key]}</p>
