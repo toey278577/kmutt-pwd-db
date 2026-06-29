@@ -268,7 +268,7 @@ function EmptyDashboard({ onAdd, onBatch }) {
       </div>
       <div className="grid sm:grid-cols-3 gap-3 max-w-3xl mx-auto text-left">
         {steps.map(({ icon: Icon, title, desc }, i) => (
-          <div key={i} className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
+          <div key={i} className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
             <div className="flex items-center gap-2.5 mb-2">
               <div className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
                 <Icon size={15} className="text-orange-500" />

@@ -175,7 +175,7 @@ export default function OrganizationList() {
                 value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
             </div>
           </div>
-          <div className="px-6 py-4 bg-gray-50/80 border-t border-gray-100 flex justify-end gap-2">
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
             <button className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-all"
               onClick={() => modalRef.current?.close()}>ยกเลิก</button>
             <button className="px-6 py-2.5 rounded-2xl text-sm font-bold text-white active:scale-95 transition-all"

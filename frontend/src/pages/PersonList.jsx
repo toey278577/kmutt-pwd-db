@@ -589,7 +589,7 @@ export default function PersonList() {
             </Section>
           </div>
           {/* Footer */}
-          <div className="px-6 py-4 bg-gray-50/80 border-t border-gray-100 flex justify-end gap-2">
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
             <button
               className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-all active:scale-95"
               onClick={() => modalRef.current?.close()}>ยกเลิก</button>

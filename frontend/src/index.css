@@ -41,7 +41,7 @@ body {
 /* ─── Dark Mode — โทนเทาเข้มอบอุ่น (stone) สะอาด เข้ากับ sidebar ─── */
 html.dark body {
   background-color: #131110;
-  color: #e7e5e4;
+  color: #f5f5f4;
 }
 
 html.dark ::-webkit-scrollbar-thumb { background: #44403c; }
@@ -80,7 +80,7 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #57534e; }
   html.dark main .text-gray-900,
   html.dark main .text-gray-800,
   html.dark main .text-gray-700,
-  html.dark main .text-orange-950        { color: #e7e5e4 !important; }
+  html.dark main .text-orange-950        { color: #f5f5f4 !important; }
   html.dark main .text-gray-600,
   html.dark main .text-gray-500          { color: #a8a29e !important; }
   html.dark main .text-gray-400          { color: #78716c !important; }
@@ -94,16 +94,16 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #57534e; }
   html.dark main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]) {
     background-color: #181613 !important;
     border-color: #2e2a26 !important;
-    color: #e7e5e4 !important;
+    color: #f5f5f4 !important;
   }
   html.dark main input::placeholder      { color: #57534e !important; }
-  html.dark main select                  { background-color: #181613 !important; border-color: #2e2a26 !important; color: #e7e5e4 !important; }
-  html.dark main textarea                { background-color: #181613 !important; border-color: #2e2a26 !important; color: #e7e5e4 !important; }
+  html.dark main select                  { background-color: #181613 !important; border-color: #2e2a26 !important; color: #f5f5f4 !important; }
+  html.dark main textarea                { background-color: #181613 !important; border-color: #2e2a26 !important; color: #f5f5f4 !important; }
 
   /* Tables */
   html.dark main tr.bg-white             { background-color: #1c1a18 !important; }
   html.dark main tr.bg-gray-50           { background-color: #181613 !important; }
-  html.dark main td, html.dark main th   { color: #e7e5e4 !important; }
+  html.dark main td, html.dark main th   { color: #f5f5f4 !important; }
   html.dark main .bg-gray-50 th          { color: #a8a29e !important; }
 
   /* Dividers */
@@ -130,7 +130,7 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #57534e; }
   html.dark main .recharts-tooltip-wrapper .recharts-default-tooltip {
     background: #1c1a18 !important;
     border-color: #2e2a26 !important;
-    color: #e7e5e4 !important;
+    color: #f5f5f4 !important;
   }
 }
 
