@@ -96,22 +96,27 @@ export default function PersonDetail() {
     getBatches().then((r) => setBatches(r.data)).catch(() => {});
   };
 
-  const handleAssessBatchChange = (batchId) => {
-    setAssessBatchId(batchId);
-    const existing = assessments.find(a => String(a.batchId) === String(batchId));
-    if (existing) {
-      setAssessForm({
-        preTestScore: existing.preTestScore ?? '',
-        postTestScore: existing.postTestScore ?? '',
-        softSkillComm: existing.softSkillComm ?? '',
-        softSkillTime: existing.softSkillTime ?? '',
-        softSkillMotiv: existing.softSkillMotiv ?? '',
-        softSkillDuty: existing.softSkillDuty ?? '',
-      });
-    } else {
+  // default รุ่นในแท็บประเมิน = รุ่นที่คนนี้สังกัด
+  useEffect(() => {
+    if (person?.batchId) setAssessBatchId(String(person.batchId));
+  }, [person?.batchId]);
+
+  // prefill ฟอร์มประเมินจากผลที่บันทึกไว้ของรุ่นที่เลือก (auto sync เมื่อ assessments เปลี่ยน)
+  useEffect(() => {
+    if (!assessBatchId) {
       setAssessForm({ preTestScore: '', postTestScore: '', softSkillComm: '', softSkillTime: '', softSkillMotiv: '', softSkillDuty: '' });
+      return;
     }
-  };
+    const existing = assessments.find(a => String(a.batchId) === String(assessBatchId));
+    setAssessForm(existing ? {
+      preTestScore: existing.preTestScore ?? '',
+      postTestScore: existing.postTestScore ?? '',
+      softSkillComm: existing.softSkillComm ?? '',
+      softSkillTime: existing.softSkillTime ?? '',
+      softSkillMotiv: existing.softSkillMotiv ?? '',
+      softSkillDuty: existing.softSkillDuty ?? '',
+    } : { preTestScore: '', postTestScore: '', softSkillComm: '', softSkillTime: '', softSkillMotiv: '', softSkillDuty: '' });
+  }, [assessBatchId, assessments]);
 
   const handleSaveAssessment = async () => {
     if (!assessBatchId) return alert('กรุณาเลือกรุ่นก่อน');
@@ -128,7 +133,6 @@ export default function PersonDetail() {
     if (!confirm('ลบข้อมูลประเมินนี้?')) return;
     await deleteAssessment(id, aid).catch(() => {});
     getAssessments(id).then(r => setAssessments(r.data));
-    if (assessBatchId) handleAssessBatchChange(assessBatchId);
   };
 
   const handlePhotoChange = async (e) => {
@@ -467,7 +471,7 @@ export default function PersonDetail() {
                 <select
                   className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
                   value={assessBatchId}
-                  onChange={e => handleAssessBatchChange(e.target.value)}>
+                  onChange={e => setAssessBatchId(e.target.value)}>
                   <option value="">— เลือกรุ่น —</option>
                   {batches.map(b => (
                     <option key={b.id} value={b.id}>รุ่นที่ {b.batchNumber} ปี พ.ศ. {b.year} {b.status === 'ACTIVE' ? '(กำลังดำเนินการ)' : ''}</option>

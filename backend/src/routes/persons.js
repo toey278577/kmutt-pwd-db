@@ -70,7 +70,7 @@ router.delete('/:id/disability/:did', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const { search, province, gender, withPhotos } = req.query;
+    const { search, province, gender, withPhotos, batchId } = req.query;
     const where = {};
     if (search) {
       where.OR = [
@@ -80,11 +80,12 @@ router.get('/', async (req, res) => {
     }
     if (province) where.province = province;
     if (gender) where.gender = gender;
+    if (batchId) where.batchId = parseInt(batchId);
 
     const select = {
       id: true, fullName: true, thaiId: true, gender: true,
       birthDate: true, phone: true, mobile: true, province: true,
-      educationLevel: true, lifeStatus: true, createdAt: true,
+      educationLevel: true, lifeStatus: true, createdAt: true, batchId: true,
       disabilityInfos: { select: { id: true, disabilityType: { select: { typeName: true } } } },
     };
     if (withPhotos === 'true') {
@@ -112,6 +113,7 @@ router.get('/:id', async (req, res) => {
         skills: true,
         followUps: true,
         organizations: { include: { organization: true } },
+        batch: true,
       },
     });
     if (!person) return res.status(404).json({ error: 'Not found' });
@@ -127,7 +129,7 @@ router.post('/', async (req, res) => {
       birthDate, maritalStatus, gender, lifeStatus,
       thaiId, phone, email, address, province, nationality, religion, educationLevel,
       mobile, landmark, houseNo, moo, building, floor, soi, road, subDistrict, district, postalCode,
-      fullName,
+      fullName, batchId,
     } = req.body;
     const data = {
       fullName,
@@ -152,6 +154,7 @@ router.post('/', async (req, res) => {
       subDistrict: subDistrict || null,
       district: district || null,
       postalCode: postalCode || null,
+      batchId: batchId ? parseInt(batchId) : null,
     };
     if (!thaiId || thaiId.trim().length !== 13) {
       return res.status(400).json({ error: 'กรุณากรอกเลขบัตรประชาชน / บัตรคนพิการ ให้ครบ 13 หลัก' });
@@ -169,7 +172,7 @@ router.put('/:id', async (req, res) => {
     const {
       fullName, thaiId, phone, mobile, email, landmark,
       houseNo, moo, building, floor, soi, road, subDistrict, district, province, postalCode,
-      address, nationality, religion, educationLevel, birthDate, maritalStatus, gender, lifeStatus,
+      address, nationality, religion, educationLevel, birthDate, maritalStatus, gender, lifeStatus, batchId,
     } = req.body;
     const data = {
       fullName, phone, mobile: mobile || null, email, landmark: landmark || null,
@@ -177,6 +180,7 @@ router.put('/:id', async (req, res) => {
       soi: soi || null, road: road || null, subDistrict: subDistrict || null, district: district || null,
       province, postalCode: postalCode || null, address, nationality, religion, educationLevel,
       birthDate: toDate(birthDate), maritalStatus: toMarital(maritalStatus), gender, lifeStatus,
+      batchId: batchId ? parseInt(batchId) : null,
     };
     if (thaiId) data.thaiId = thaiId;
     const person = await prisma.person.update({

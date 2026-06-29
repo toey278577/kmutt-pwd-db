@@ -32,9 +32,11 @@ model Person {
   maritalStatus    MaritalStatus? @map("marital_status")
   educationLevel   String?  @map("education_level") @db.VarChar(100)
   lifeStatus       LifeStatus @default(ALIVE) @map("life_status")
+  batchId          Int?     @map("batch_id")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
+  batch            TrainingBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
   photos           PersonPhoto[]
   disabilityInfos  DisabilityInfo[]
   trainingRecords  TrainingRecord[]
@@ -243,6 +245,7 @@ model TrainingBatch {
   createdAt   DateTime    @default(now()) @map("created_at")
 
   assessments PersonAssessment[]
+  persons     Person[]
 
   @@map("training_batches")
 }

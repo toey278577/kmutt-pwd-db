@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown, Users, Camera, X } from 'lucide-react';
-import { getPersons, createPerson, updatePerson, deletePerson, getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo, getPersonPhotos, uploadPersonPhoto } from '../api';
+import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown, Users, Camera, X, Layers } from 'lucide-react';
+import { getPersons, createPerson, updatePerson, deletePerson, getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo, getPersonPhotos, uploadPersonPhoto, getBatches } from '../api';
 import { useAuth } from '../context/AuthContext';
 
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
@@ -35,7 +35,7 @@ const emptyForm = {
   province: '', postalCode: '',
   address: '',
   nationality: 'ไทย', religion: 'พุทธ', maritalStatus: 'SINGLE',
-  educationLevel: '', lifeStatus: 'ALIVE',
+  educationLevel: '', lifeStatus: 'ALIVE', batchId: '',
 };
 
 export default function PersonList() {
@@ -57,20 +57,30 @@ export default function PersonList() {
   const [errors, setErrors] = useState({});
   const [loadError, setLoadError] = useState(false);
   const formBodyRef = useRef(null);
+  const [batches, setBatches] = useState([]);
+  const [batchFilter, setBatchFilter] = useState('');
 
   const PAGE_SIZE = 10;
   const totalPages = Math.ceil(persons.length / PAGE_SIZE);
   const paged = persons.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const load = (q = '') => {
+  const load = (q = '', b = batchFilter) => {
     setLoadError(false);
-    return getPersons(q ? { search: q } : {})
+    const params = {};
+    if (q) params.search = q;
+    if (b) params.batchId = b;
+    return getPersons(params)
       .then((r) => { setPersons(r.data); setPage(1); })
       .catch(() => setLoadError(true));
+  };
+  const handleBatchFilter = (b) => {
+    setBatchFilter(b);
+    load(search, b);
   };
   useEffect(() => {
     load();
     getDisabilityTypes().then((r) => setDisabilityTypes(r.data)).catch(() => {});
+    getBatches().then((r) => setBatches(r.data)).catch(() => {});
   }, []);
 
   const openModal = (person = null) => {
@@ -141,6 +151,7 @@ export default function PersonList() {
       address: form.address,
       nationality: form.nationality, religion: form.religion,
       maritalStatus: form.maritalStatus, educationLevel: form.educationLevel, lifeStatus: form.lifeStatus,
+      batchId: form.batchId || null,
     };
     if (!payload.birthDate) delete payload.birthDate;
     try {
@@ -238,6 +249,29 @@ export default function PersonList() {
             ค้นหา
           </button>
         </div>
+
+        {/* Batch filter — รายชื่อแยกรุ่น */}
+        {batches.length > 0 && (
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 mr-1">
+              <Layers size={13} className="text-orange-400" /> แยกรุ่น:
+            </span>
+            <button onClick={() => handleBatchFilter('')}
+              className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
+                !batchFilter ? 'bg-orange-500 text-white border-orange-500 shadow-sm' : 'bg-white text-gray-500 border-gray-200 hover:border-orange-300'
+              }`}>
+              ทุกรุ่น
+            </button>
+            {batches.map(b => (
+              <button key={b.id} onClick={() => handleBatchFilter(String(b.id))}
+                className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
+                  batchFilter === String(b.id) ? 'bg-orange-500 text-white border-orange-500 shadow-sm' : 'bg-white text-gray-500 border-gray-200 hover:border-orange-300'
+                }`}>
+                รุ่นที่ {b.batchNumber}/{b.year}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -471,6 +505,10 @@ export default function PersonList() {
                 </div>
                 <SelectField label="สถานะ" value={form.lifeStatus} onChange={(v) => setForm({ ...form, lifeStatus: v })}
                   options={[['ALIVE','มีชีวิต'],['DECEASED','เสียชีวิต']]} />
+
+                {/* รุ่นที่เข้าร่วม */}
+                <SelectField label="รุ่นที่เข้าร่วม" value={String(form.batchId || '')} onChange={(v) => setForm({ ...form, batchId: v })}
+                  options={[['', '— ไม่ระบุรุ่น —'], ...batches.map(b => [String(b.id), `รุ่นที่ ${b.batchNumber} ปี ${b.year}`])]} />
 
                 {/* ประเภทความพิการ */}
                 <div className="col-span-2">

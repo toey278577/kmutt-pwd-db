@@ -104,9 +104,16 @@ export default function ReportPage() {
 
   const clearPersons = () => setSelectedPersonIds([]);
 
-  const filteredPersons = selectedPersonIds.length > 0
-    ? persons.filter(p => selectedPersonIds.includes(p.id))
+  // เปลี่ยนรุ่น → ล้างรายชื่อที่เลือกไว้ กันค้างข้ามรุ่น
+  const changeBatch = (b) => { setBatchFilter(b); setSelectedPersonIds([]); };
+
+  // กรองตามรุ่นก่อน แล้วค่อยกรองตามรายชื่อที่เลือก
+  const batchPersons = batchFilter
+    ? persons.filter(p => String(p.batchId) === batchFilter)
     : persons;
+  const filteredPersons = selectedPersonIds.length > 0
+    ? batchPersons.filter(p => selectedPersonIds.includes(p.id))
+    : batchPersons;
 
   const filteredOrgs = selectedOrgIds.length > 0
     ? orgs.filter(o => selectedOrgIds.includes(o.id))
@@ -196,7 +203,8 @@ export default function ReportPage() {
                   value={courseEvalForm.date} onChange={e => setCourseEvalForm({...courseEvalForm, date: e.target.value})} />
               </div>
             </div>
-            <PersonSelector persons={persons} selected={selectedPersonIds} onToggle={togglePerson} onAll={selectAllPersons} onClear={clearPersons} />
+            <BatchFilter batches={batches} value={batchFilter} onChange={changeBatch} />
+            <PersonSelector persons={batchPersons} selected={selectedPersonIds} onToggle={togglePerson} onAll={() => setSelectedPersonIds(batchPersons.map(p => p.id))} onClear={clearPersons} />
           </div>
         )}
 
@@ -330,30 +338,8 @@ export default function ReportPage() {
         {/* Person selector for list/behavior — พร้อม batch filter */}
         {(activeType === 'list' || activeType === 'behavior') && (
           <div className="bg-white rounded-2xl border border-orange-100 p-5 mb-5 shadow-sm">
-            {batches.length > 0 && (
-              <div className="mb-4 pb-4 border-b border-orange-50">
-                <p className="text-xs font-bold text-gray-400 mb-2">แยกตามรุ่น (ไม่บังคับ)</p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setBatchFilter('')}
-                    className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
-                      !batchFilter ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300'
-                    }`}>
-                    ทุกรุ่น
-                  </button>
-                  {batches.map(b => (
-                    <button key={b.id}
-                      onClick={() => setBatchFilter(String(b.id))}
-                      className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
-                        batchFilter === String(b.id) ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300'
-                      }`}>
-                      รุ่นที่ {b.batchNumber} ปี {b.year}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            <PersonSelector persons={persons} selected={selectedPersonIds} onToggle={togglePerson} onAll={selectAllPersons} onClear={clearPersons} />
+            <BatchFilter batches={batches} value={batchFilter} onChange={changeBatch} />
+            <PersonSelector persons={batchPersons} selected={selectedPersonIds} onToggle={togglePerson} onAll={() => setSelectedPersonIds(batchPersons.map(p => p.id))} onClear={clearPersons} />
           </div>
         )}
       </div>
@@ -650,6 +636,33 @@ export default function ReportPage() {
           * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
       `}</style>
+    </div>
+  );
+}
+
+function BatchFilter({ batches, value, onChange }) {
+  if (!batches || batches.length === 0) return null;
+  return (
+    <div className="mb-4 pb-4 border-b border-orange-50">
+      <p className="text-xs font-bold text-gray-400 mb-2 flex items-center gap-1.5">
+        <Layers size={13} className="text-orange-400" /> แยกตามรุ่น (ไม่บังคับ)
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <button onClick={() => onChange('')}
+          className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
+            !value ? 'bg-orange-500 text-white border-orange-500 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300'
+          }`}>
+          ทุกรุ่น
+        </button>
+        {batches.map(b => (
+          <button key={b.id} onClick={() => onChange(String(b.id))}
+            className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
+              value === String(b.id) ? 'bg-orange-500 text-white border-orange-500 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300'
+            }`}>
+            รุ่นที่ {b.batchNumber} ปี {b.year}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

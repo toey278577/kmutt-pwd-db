@@ -2,6 +2,14 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient');
 
+// แปลงคะแนนให้ปลอดภัย: ค่าว่าง/ไม่ใช่ตัวเลข → null, นอกช่วง → clamp อยู่ใน [0, max]
+const score = (val, max) => {
+  if (val == null || val === '') return null;
+  const n = Number(val);
+  if (Number.isNaN(n)) return null;
+  return Math.min(Math.max(n, 0), max);
+};
+
 // GET /api/persons/:id/assessments — ดึงผลประเมินทุกรุ่นของคนนี้
 router.get('/:id/assessments', async (req, res) => {
   try {
@@ -23,26 +31,18 @@ router.post('/:id/assessments', async (req, res) => {
     const { batchId, preTestScore, postTestScore, softSkillComm, softSkillTime, softSkillMotiv, softSkillDuty } = req.body;
     if (!batchId) return res.status(400).json({ error: 'batchId จำเป็นต้องมี' });
 
+    const fields = {
+      preTestScore: score(preTestScore, 100),
+      postTestScore: score(postTestScore, 100),
+      softSkillComm: score(softSkillComm, 5),
+      softSkillTime: score(softSkillTime, 5),
+      softSkillMotiv: score(softSkillMotiv, 5),
+      softSkillDuty: score(softSkillDuty, 5),
+    };
     const assessment = await prisma.personAssessment.upsert({
       where: { personId_batchId: { personId, batchId: Number(batchId) } },
-      create: {
-        personId,
-        batchId: Number(batchId),
-        preTestScore: preTestScore != null ? Number(preTestScore) : null,
-        postTestScore: postTestScore != null ? Number(postTestScore) : null,
-        softSkillComm: softSkillComm != null ? Number(softSkillComm) : null,
-        softSkillTime: softSkillTime != null ? Number(softSkillTime) : null,
-        softSkillMotiv: softSkillMotiv != null ? Number(softSkillMotiv) : null,
-        softSkillDuty: softSkillDuty != null ? Number(softSkillDuty) : null,
-      },
-      update: {
-        preTestScore: preTestScore != null ? Number(preTestScore) : null,
-        postTestScore: postTestScore != null ? Number(postTestScore) : null,
-        softSkillComm: softSkillComm != null ? Number(softSkillComm) : null,
-        softSkillTime: softSkillTime != null ? Number(softSkillTime) : null,
-        softSkillMotiv: softSkillMotiv != null ? Number(softSkillMotiv) : null,
-        softSkillDuty: softSkillDuty != null ? Number(softSkillDuty) : null,
-      },
+      create: { personId, batchId: Number(batchId), ...fields },
+      update: fields,
       include: { batch: true },
     });
     res.json(assessment);

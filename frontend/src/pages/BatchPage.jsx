@@ -34,8 +34,8 @@ export default function BatchPage() {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const load = () => {
-    setLoading(true);
+  const load = (silent = false) => {
+    if (!silent) setLoading(true);
     getBatches().then(r => { setBatches(r.data); setLoading(false); }).catch(() => setLoading(false));
   };
 
@@ -81,7 +81,7 @@ export default function BatchPage() {
         await createBatch(form);
       }
       setShowModal(false);
-      load();
+      load(true);
     } catch {
       /* ignore */
     } finally {
@@ -92,7 +92,7 @@ export default function BatchPage() {
   const handleDelete = async (id) => {
     if (!confirm('ลบรุ่นนี้? ข้อมูลผลประเมินในรุ่นนี้จะถูกลบด้วย')) return;
     await deleteBatch(id).catch(() => {});
-    load();
+    load(true);
   };
 
   const activeBatch = batches.find(b => b.status === 'ACTIVE');
