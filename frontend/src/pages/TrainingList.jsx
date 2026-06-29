@@ -57,23 +57,15 @@ export default function TrainingList() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl"
-        style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
-        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-20 blur-2xl"
-          style={{ background: 'radial-gradient(circle,#fb923c,transparent)' }} />
-        <div className="absolute inset-0 opacity-5"
-          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-        <div className="relative px-6 py-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
-            <GraduationCap size={22} color="white" />
-          </div>
-          <div>
-            <p className="text-orange-300/70 text-xs font-bold tracking-[0.12em] uppercase mb-0.5">ภาพรวม</p>
-            <h1 className="text-xl font-black text-white leading-tight">การอบรม & ฝึกงาน</h1>
-            <p className="text-orange-200/50 text-xs mt-0.5">
-              <span className="text-orange-300 font-bold">{rows.length}</span> รายการในระบบ
-            </p>
-          </div>
+      <div className="flex items-center gap-3">
+        <div className="w-11 h-11 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+          <GraduationCap size={22} className="text-orange-600" />
+        </div>
+        <div>
+          <h1 className="text-xl font-black text-gray-800 leading-tight">การอบรม & ฝึกงาน</h1>
+          <p className="text-gray-400 text-sm mt-0.5">
+            <span className="text-orange-600 font-bold">{rows.length}</span> รายการในระบบ
+          </p>
         </div>
       </div>
 
@@ -82,9 +74,9 @@ export default function TrainingList() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm" style={{ minWidth: '720px' }}>
             <thead>
-              <tr style={{ background: 'linear-gradient(135deg,#431407,#7c2d12)' }}>
+              <tr className="bg-gray-50 border-b border-gray-200">
                 {['ชื่อ', 'หลักสูตร', 'หน่วยงาน', 'รูปแบบ', 'ช่วงเวลา', 'ทักษะที่ได้', 'ผลประเมิน'].map(h => (
-                  <th key={h} className="px-4 py-3.5 text-left text-xs font-bold text-orange-200/70 uppercase tracking-wide">{h}</th>
+                  <th key={h} className="px-4 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
             </thead>

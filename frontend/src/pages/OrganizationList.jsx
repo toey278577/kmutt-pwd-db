@@ -48,34 +48,25 @@ export default function OrganizationList() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl"
-        style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
-        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-20 blur-2xl"
-          style={{ background: 'radial-gradient(circle,#fb923c,transparent)' }} />
-        <div className="absolute inset-0 opacity-5"
-          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-        <div className="relative px-6 py-5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
-              <Building2 size={22} color="white" />
-            </div>
-            <div>
-              <p className="text-orange-300/70 text-xs font-bold tracking-[0.12em] uppercase mb-0.5">ฐานข้อมูล</p>
-              <h1 className="text-xl font-black text-white leading-tight">สถานประกอบการ</h1>
-              <p className="text-orange-200/50 text-xs mt-0.5">
-                <span className="text-orange-300 font-bold">{orgs.length}</span> แห่งในระบบ
-              </p>
-            </div>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+            <Building2 size={22} className="text-orange-600" />
           </div>
-          {canEdit && (
-            <button
-              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold text-white active:scale-95 transition-all flex-shrink-0 border border-white/20"
-              style={{ background: 'rgba(234,88,12,0.4)', boxShadow: '0 0 20px rgba(234,88,12,0.3)' }}
-              onClick={() => openModal()}>
-              <Plus size={15} /> เพิ่มองค์กร
-            </button>
-          )}
+          <div>
+            <h1 className="text-xl font-black text-gray-800 leading-tight">สถานประกอบการ</h1>
+            <p className="text-gray-400 text-sm mt-0.5">
+              <span className="text-orange-600 font-bold">{orgs.length}</span> แห่งในระบบ
+            </p>
+          </div>
         </div>
+        {canEdit && (
+          <button
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm flex-shrink-0"
+            onClick={() => openModal()}>
+            <Plus size={16} /> เพิ่มองค์กร
+          </button>
+        )}
       </div>
 
       {/* Table */}
@@ -83,9 +74,9 @@ export default function OrganizationList() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm" style={{ minWidth: '640px' }}>
             <thead>
-              <tr style={{ background: 'linear-gradient(135deg,#431407,#7c2d12)' }}>
+              <tr className="bg-gray-50 border-b border-gray-200">
                 {['#', 'ชื่อองค์กร', 'ประเภทธุรกิจ', 'ผู้ติดต่อ', 'เบอร์โทร / Email', 'จัดการ'].map((h, i) => (
-                  <th key={h} className={`px-4 py-3.5 text-left text-xs font-bold text-orange-200/70 uppercase tracking-wide ${i === 0 ? 'w-10' : ''} ${i === 5 ? 'text-center' : ''}`}>{h}</th>
+                  <th key={h} className={`px-4 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wide ${i === 0 ? 'w-10' : ''} ${i === 5 ? 'text-center' : ''}`}>{h}</th>
                 ))}
               </tr>
             </thead>

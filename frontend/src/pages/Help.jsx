@@ -60,8 +60,8 @@ const Table = ({ headers, rows }) => (
   <div className="overflow-x-auto rounded-2xl border border-orange-100 mb-4 shadow-sm">
     <table className="w-full text-sm">
       <thead>
-        <tr style={{ background: 'linear-gradient(135deg,#431407,#7c2d12)' }}>
-          {headers.map(h => <th key={h} className="px-4 py-2.5 text-left text-xs font-bold text-orange-200/80 uppercase tracking-wide">{h}</th>)}
+        <tr className="bg-gray-50 border-b border-gray-200">
+          {headers.map(h => <th key={h} className="px-4 py-2.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">{h}</th>)}
         </tr>
       </thead>
       <tbody>
@@ -551,19 +551,13 @@ export default function Help() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <div className="mb-4 relative overflow-hidden rounded-3xl flex-shrink-0"
-        style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
-        <div className="absolute inset-0 opacity-5"
-          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-        <div className="relative px-6 py-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
-            <BookOpen size={22} color="white" />
-          </div>
-          <div>
-            <p className="text-orange-300/70 text-xs font-bold tracking-[0.12em] uppercase mb-0.5">ช่วยเหลือ</p>
-            <h1 className="text-xl font-black text-white leading-tight">คู่มือการใช้งาน</h1>
-            <p className="text-orange-200/50 text-xs mt-0.5">ระบบฐานข้อมูลคนพิการ มจธ. — อัปเดต มิ.ย. 2568</p>
-          </div>
+      <div className="mb-4 flex items-center gap-3 flex-shrink-0">
+        <div className="w-11 h-11 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+          <BookOpen size={22} className="text-orange-600" />
+        </div>
+        <div>
+          <h1 className="text-xl font-black text-gray-800 leading-tight">คู่มือการใช้งาน</h1>
+          <p className="text-gray-400 text-sm mt-0.5">ระบบฐานข้อมูลคนพิการ มจธ. — อัปเดต มิ.ย. 2568</p>
         </div>
       </div>
 

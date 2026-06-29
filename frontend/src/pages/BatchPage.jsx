@@ -101,28 +101,22 @@ export default function BatchPage() {
     <div className="space-y-5">
 
       {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl px-6 py-5"
-        style={{ background: 'linear-gradient(135deg,#431407 0%,#9a3412 60%,#ea580c 100%)' }}>
-        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full opacity-20 blur-3xl"
-          style={{ background: 'radial-gradient(circle,#fb923c,transparent)' }} />
-        <div className="relative flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
-              <Layers size={20} color="white" />
-            </div>
-            <div>
-              <p className="text-orange-300/70 text-xs font-bold tracking-widest uppercase mb-0.5">รุ่น / Batch</p>
-              <h1 className="text-lg font-black text-white">จัดการรุ่นการฝึกอบรม</h1>
-            </div>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+            <Layers size={22} className="text-orange-600" />
           </div>
-          {canEdit && (
-            <button onClick={openNew}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white border border-white/20 hover:bg-white/10 active:scale-95 transition-all flex-shrink-0"
-              style={{ background: 'rgba(234,88,12,0.4)' }}>
-              <Plus size={16} /> เพิ่มรุ่น
-            </button>
-          )}
+          <div>
+            <h1 className="text-xl font-black text-gray-800 leading-tight">จัดการรุ่นการฝึกอบรม</h1>
+            <p className="text-gray-400 text-sm mt-0.5">รุ่นการฝึกอบรม-ฝึกงานคนพิการ</p>
+          </div>
         </div>
+        {canEdit && (
+          <button onClick={openNew}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm flex-shrink-0">
+            <Plus size={16} /> เพิ่มรุ่น
+          </button>
+        )}
       </div>
 
       {/* Active batch highlight */}
