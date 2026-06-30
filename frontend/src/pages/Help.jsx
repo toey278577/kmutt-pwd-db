@@ -3,20 +3,23 @@ import {
   BookOpen, LogIn, Shield, Users, GraduationCap, Target,
   Building2, UserCog, ChevronRight, CheckCircle, LayoutDashboard,
   Printer, Camera, AlertCircle, FileText, Award, Info,
+  Layers, TrendingUp,
 } from 'lucide-react';
 
 const sections = [
-  { id: 'intro',     label: 'ภาพรวมระบบ',          icon: Info },
-  { id: 'login',     label: 'การเข้าสู่ระบบ',        icon: LogIn },
-  { id: 'roles',     label: 'สิทธิ์ผู้ใช้งาน',        icon: Shield },
-  { id: 'dashboard', label: 'Dashboard',             icon: LayoutDashboard },
-  { id: 'persons',   label: 'ข้อมูลคนพิการ',         icon: Users },
-  { id: 'photo',     label: 'รูปถ่าย 1 นิ้ว',         icon: Camera },
-  { id: 'training',  label: 'การอบรม & ฝึกงาน',      icon: GraduationCap },
-  { id: 'followup',  label: 'ติดตามผล',              icon: Target },
-  { id: 'orgs',      label: 'สถานประกอบการ',         icon: Building2 },
-  { id: 'report',    label: 'ออกรายงาน',             icon: Printer },
-  { id: 'users',     label: 'จัดการผู้ใช้ (Admin)',   icon: UserCog },
+  { id: 'intro',      label: 'ภาพรวมระบบ',          icon: Info },
+  { id: 'login',      label: 'การเข้าสู่ระบบ',        icon: LogIn },
+  { id: 'roles',      label: 'สิทธิ์ผู้ใช้งาน',        icon: Shield },
+  { id: 'dashboard',  label: 'Dashboard',             icon: LayoutDashboard },
+  { id: 'batch',      label: 'จัดการรุ่น',            icon: Layers },
+  { id: 'persons',    label: 'ข้อมูลคนพิการ',         icon: Users },
+  { id: 'photo',      label: 'รูปถ่าย 1 นิ้ว',         icon: Camera },
+  { id: 'training',   label: 'การอบรม & ฝึกงาน',      icon: GraduationCap },
+  { id: 'assessment', label: 'ประเมินทักษะ',          icon: TrendingUp },
+  { id: 'followup',   label: 'ติดตามผล',              icon: Target },
+  { id: 'orgs',       label: 'สถานประกอบการ',         icon: Building2 },
+  { id: 'report',     label: 'ออกรายงาน',             icon: Printer },
+  { id: 'users',      label: 'จัดการผู้ใช้ (Admin)',   icon: UserCog },
 ];
 
 /* ── Shared Components ── */
@@ -98,12 +101,14 @@ const CONTENT = {
 
       <div className="grid grid-cols-2 gap-3 mb-6">
         {[
+          { icon: Layers,         label: 'จัดการรุ่น',        desc: 'แบ่งผู้เข้าร่วมเป็นรุ่น/ปี ติดตามแยกรุ่น' },
           { icon: Users,          label: 'ข้อมูลคนพิการ',     desc: 'ข้อมูลส่วนตัว ที่อยู่ ความพิการ รูปถ่าย' },
           { icon: GraduationCap,  label: 'การอบรม & ฝึกงาน', desc: 'ประวัติหลักสูตร ทักษะที่ได้รับ' },
+          { icon: TrendingUp,     label: 'ประเมินทักษะ',      desc: 'Pre/Post test + Soft Skills 4 ด้าน' },
           { icon: Target,         label: 'ติดตามผล',          desc: 'สถานะงาน รายได้ ความพึงพอใจ' },
           { icon: Building2,      label: 'สถานประกอบการ',     desc: 'ข้อมูลบริษัท การเชื่อมโยงกับผู้เข้าร่วม' },
-          { icon: LayoutDashboard,label: 'Dashboard',         desc: 'กราฟสถิติ 6 มิติ อัปเดตแบบ real-time' },
-          { icon: Printer,        label: 'ออกรายงาน',         desc: 'ตาราง พฤติกรรม Certificate รายงานบริษัท' },
+          { icon: LayoutDashboard,label: 'Dashboard',         desc: 'กราฟสถิติ 6 มิติ + สถานะรุ่นปัจจุบัน' },
+          { icon: Printer,        label: 'ออกรายงาน',         desc: 'รายชื่อ พฤติกรรม ประเมินรายวิชา Cert บริษัท' },
         ].map(({ icon: Icon, label, desc }) => (
           <div key={label} className="rounded-2xl border border-orange-100 bg-orange-50/30 p-3.5 flex items-start gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -204,6 +209,7 @@ const CONTENT = {
       <Table
         headers={['ส่วน', 'เนื้อหา']}
         rows={[
+          ['รุ่นปัจจุบัน', 'แถบสรุปรุ่นที่ "กำลังดำเนินการ" + จำนวนผู้เข้าร่วมในรุ่น'],
           ['Stat Cards (3 ช่อง)', 'จำนวนคนพิการทั้งหมด / สถานประกอบการ / บันทึกการอบรม'],
           ['กราฟ: แยกตามเพศ', 'Pie chart แสดงสัดส่วน ชาย / หญิง / อื่นๆ'],
           ['กราฟ: ประเภทความพิการ', 'Pie chart แสดง 7 ประเภทความพิการ'],
@@ -223,6 +229,46 @@ const CONTENT = {
       <div className="flex flex-wrap gap-2">
         {['กรุงเทพฯ (ปริมณฑล)', 'ภาคกลาง', 'ภาคเหนือ', 'ภาคอีสาน', 'ภาคตะวันออก', 'ภาคใต้'].map(r => <Chip key={r} color="blue">{r}</Chip>)}
       </div>
+    </div>
+  ),
+
+  /* ─ Batch ─ */
+  batch: (
+    <div>
+      <H2>จัดการรุ่น (Batch)</H2>
+      <p className="text-sm text-gray-600 mb-4">
+        ระบบแบ่งผู้เข้าร่วมโครงการออกเป็น <strong>"รุ่น"</strong> ตามปีหรือรอบการอบรม
+        ทำให้ติดตามและออกรายงานแยกแต่ละรุ่นได้ง่าย
+      </p>
+
+      <Warn>ต้อง<strong>สร้างรุ่นก่อน</strong> จึงจะเพิ่มข้อมูลคนพิการได้ เพราะช่อง "รุ่นที่เข้าร่วม" เป็นช่อง<strong className="text-red-600">บังคับ</strong> <span className="text-red-500 font-bold">*</span></Warn>
+
+      <H3>การเพิ่มรุ่นใหม่</H3>
+      <div className="mb-4">
+        <Step n="1">ไปที่เมนู <strong>"จัดการรุ่น"</strong></Step>
+        <Step n="2">กดปุ่ม <strong>"+ เพิ่มรุ่น"</strong></Step>
+        <Step n="3">กรอก <strong>รุ่นที่</strong> (เช่น 1, 2, 3) และ <strong>ปี พ.ศ.</strong> (บังคับ)</Step>
+        <Step n="4">เลือก <strong>สถานะ</strong> และระบุช่วงวันที่ (ถ้ามี)</Step>
+        <Step n="5">กด <strong>"บันทึก"</strong></Step>
+      </div>
+
+      <H3>สถานะของรุ่น</H3>
+      <div className="flex gap-2 flex-wrap mb-4">
+        <Chip color="green">กำลังดำเนินการ (ACTIVE)</Chip>
+        <Chip color="gray">เสร็จสิ้น (COMPLETED)</Chip>
+      </div>
+      <Warn>รุ่นที่ตั้งสถานะ <strong>"กำลังดำเนินการ"</strong> จะถูกใช้เป็น <strong>รุ่นปัจจุบัน</strong> แสดงสถิติเด่นบนหน้า Dashboard</Warn>
+
+      <H3>การกรอก วันที่ — รูปแบบไทย</H3>
+      <div className="bg-gray-900 rounded-xl px-4 py-3 font-mono text-orange-400 text-sm mb-3">
+        วว/ดด/ปปปป (พ.ศ.) — เช่น 01/06/2568
+      </div>
+
+      <H3>ดูรายชื่อแยกตามรุ่น</H3>
+      <ul>
+        <Li>ในหน้า <strong>ข้อมูลคนพิการ</strong> มี<strong>แถบเลือกรุ่น</strong> (pills) กรองรายชื่อเฉพาะรุ่นนั้น</Li>
+        <Li>ในหน้า <strong>ออกรายงาน</strong> เลือกรุ่นเพื่อออกรายงานเฉพาะคนในรุ่นได้</Li>
+      </ul>
     </div>
   ),
 
@@ -256,6 +302,7 @@ const CONTENT = {
             ['ชื่อ-นามสกุล', 'บังคับ'], ['เลขบัตรประชาชน / บัตรคนพิการ', 'บังคับ (13 หลัก)'],
             ['วันเกิด', 'บังคับ (ต้องเป็นอดีต)'], ['ระดับการศึกษา', 'บังคับ'],
             ['ประเภทความพิการ', 'บังคับ (สำหรับเพิ่มใหม่)'],
+            ['รุ่นที่เข้าร่วม', 'บังคับ'],
           ].map(([n, note]) => <FieldRequired key={n} name={n} note={note} />)}
         </div>
         <div className="px-4 py-2 text-xs font-bold text-orange-400 uppercase tracking-wide bg-orange-50 border-y border-orange-100">ที่อยู่ & ติดต่อ</div>
@@ -285,7 +332,7 @@ const CONTENT = {
       </div>
       <Warn>ปีต้องเป็นอดีตเท่านั้น — ถ้ากรอกปีปัจจุบัน (2568) หรืออนาคต ระบบจะล้างค่าทิ้งอัตโนมัติ</Warn>
 
-      <H3>รายละเอียดคนพิการ (6 แท็บ)</H3>
+      <H3>รายละเอียดคนพิการ (7 แท็บ)</H3>
       <Table
         headers={['แท็บ', 'เนื้อหา']}
         rows={[
@@ -293,6 +340,7 @@ const CONTENT = {
           ['การอบรม', 'ประวัติหลักสูตรอบรม / ฝึกงาน วันที่ ผลประเมิน'],
           ['ประสบการณ์งาน', 'ประวัติการทำงาน รายได้ ผลลัพธ์'],
           ['ทักษะ', 'tag ทักษะพร้อมระดับ (เริ่มต้น / ปานกลาง / เชี่ยวชาญ)'],
+          ['ประเมินทักษะ', 'Pre/Post test + Soft Skills 4 ด้าน แยกตามรุ่น'],
           ['ติดตามผล', 'สถานะงานหลังจบ ความพึงพอใจ ปัญหา'],
           ['สถานประกอบการ', 'ความสัมพันธ์กับองค์กรที่ฝึกงาน/ทำงาน เงินสนับสนุน'],
         ]}
@@ -373,6 +421,55 @@ const CONTENT = {
     </div>
   ),
 
+  /* ─ Assessment ─ */
+  assessment: (
+    <div>
+      <H2>ประเมินทักษะ (Pre / Post / Soft Skills)</H2>
+      <p className="text-sm text-gray-600 mb-4">
+        บันทึกผลการประเมินทักษะของผู้เข้าร่วม <strong>แยกตามรุ่น</strong> เพื่อวัดพัฒนาการก่อน-หลังการอบรม
+        อยู่ในแท็บ <strong>"ประเมินทักษะ"</strong> ในหน้ารายละเอียดคนพิการ
+      </p>
+
+      <H3>คะแนนที่บันทึกได้</H3>
+      <Table
+        headers={['รายการ', 'คะแนนเต็ม', 'ความหมาย']}
+        rows={[
+          ['Pre-test', '100', 'คะแนนทดสอบก่อนอบรม'],
+          ['Post-test', '100', 'คะแนนทดสอบหลังอบรม'],
+          ['Soft Skills — 4 ด้าน', '5 ต่อด้าน', 'ประเมินทักษะทางสังคม (ดูด้านล่าง)'],
+        ]}
+      />
+
+      <H3>Soft Skills 4 ด้าน (ด้านละ 0–5 คะแนน)</H3>
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        {[
+          ['การสื่อสาร', 'orange'], ['การบริหารเวลา', 'blue'],
+          ['การจูงใจตนเอง', 'red'], ['การทำงานตามหน้าที่', 'green'],
+        ].map(([n, c]) => (
+          <div key={n} className="rounded-xl border border-orange-100 bg-orange-50/30 px-3.5 py-2.5">
+            <Chip color={c}>{n}</Chip>
+          </div>
+        ))}
+      </div>
+
+      <H3>วิธีบันทึกผลประเมิน</H3>
+      <div className="mb-4">
+        <Step n="1">ไปที่ <strong>ข้อมูลคนพิการ</strong> → ดูรายละเอียด → แท็บ <strong>"ประเมินทักษะ"</strong></Step>
+        <Step n="2">เลือก <strong>รุ่น</strong> ที่ต้องการบันทึก (ค่าเริ่มต้น = รุ่นที่คนนั้นสังกัด)</Step>
+        <Step n="3">กรอกคะแนน <strong>Pre-test / Post-test</strong> และ <strong>Soft Skills</strong> 4 ด้าน</Step>
+        <Step n="4">กด <strong>"บันทึก"</strong> — แต่ละคน 1 ผลประเมินต่อ 1 รุ่น</Step>
+      </div>
+
+      <Warn>ถ้ากรอกคะแนนเกินคะแนนเต็ม ระบบจะปรับให้อยู่ในช่วงที่ถูกต้องอัตโนมัติ (Pre/Post 0–100, Soft Skills 0–5)</Warn>
+
+      <H3>การดูพัฒนาการ</H3>
+      <ul>
+        <Li>ประวัติการประเมินจะแสดง <strong>ส่วนต่าง Pre → Post</strong> (พัฒนาการ +/- คะแนน)</Li>
+        <Li>แสดงคะแนน Soft Skills รวมของแต่ละด้าน</Li>
+      </ul>
+    </div>
+  ),
+
   /* ─ FollowUp ─ */
   followup: (
     <div>
@@ -443,7 +540,7 @@ const CONTENT = {
   report: (
     <div>
       <H2>ออกรายงาน</H2>
-      <p className="text-sm text-gray-600 mb-4">ระบบออกรายงาน 4 ประเภท สามารถพิมพ์หรือบันทึกเป็น PDF ได้</p>
+      <p className="text-sm text-gray-600 mb-4">ระบบออกรายงาน 5 ประเภท สามารถพิมพ์หรือบันทึกเป็น PDF ได้ และเลือกกรองตามรุ่นได้</p>
 
       <H3>ประเภทรายงาน</H3>
       <div className="space-y-3 mb-5">
@@ -454,10 +551,13 @@ const CONTENT = {
           { icon: Users, label: '2. แบบสังเกตพฤติกรรมรายบุคคล', color: '#06b6d4',
             desc: 'ตารางพร้อมช่องรูปภาพ: ชื่อ อายุ ประเภทความพิการ วุฒิการศึกษา ทักษะคอมพิวเตอร์ สาเหตุความพิการ',
             use: 'ส่งให้วิทยากรก่อนการอบรม' },
-          { icon: Award, label: '3. ใบ Certificate', color: '#10b981',
-            desc: 'ออกใบรับรองผลการอบรมของ มจธ. ชื่อผู้รับ หลักสูตร รุ่นที่ วันที่ ลายเซ็น',
+          { icon: Layers, label: '3. แบบประเมินรายวิชา', color: '#0ea5e9',
+            desc: 'ตารางให้คะแนน 5 หัวข้อ รวม 25 คะแนน พร้อมช่องรูปภาพผู้เข้าร่วม สำหรับวิทยากรประเมินรายวิชา',
+            use: 'ให้วิทยากรกรอกคะแนนรายวิชา' },
+          { icon: Award, label: '4. ใบ Certificate', color: '#10b981',
+            desc: 'ออกใบรับรองผลการอบรมของ มจธ. ชื่อผู้รับ หลักสูตร รุ่นที่ วันที่ ลายเซ็น (ไม่มีตราโลโก้ — ปั๊มเอง)',
             use: 'พิมพ์แยกใบ 1 ใบต่อ 1 คน' },
-          { icon: Building2, label: '4. รายงานส่งบริษัท', color: '#8b5cf6',
+          { icon: Building2, label: '5. รายงานส่งบริษัท', color: '#8b5cf6',
             desc: 'สรุปผลการดำเนินงาน รุ่นที่ วันที่ หลักสูตร งบประมาณ บริษัทสนับสนุน รายชื่อผู้เข้าร่วม',
             use: 'ส่งบริษัทสนับสนุนโครงการ' },
         ].map(({ icon: Icon, label, color, desc, use }) => (
@@ -478,11 +578,12 @@ const CONTENT = {
       <H3>วิธีใช้งานหน้าออกรายงาน</H3>
       <div className="mb-4">
         <Step n="1">ไปที่เมนู <strong>"ออกรายงาน"</strong></Step>
-        <Step n="2">เลือกประเภทรายงาน (4 ปุ่มด้านบน)</Step>
-        <Step n="3">กรอกข้อมูลตั้งค่า (สำหรับ Certificate / รายงานบริษัท)</Step>
-        <Step n="4">เลือกรายชื่อที่ต้องการ — หรือกด <strong>"เลือกทั้งหมด"</strong></Step>
-        <Step n="5">กดปุ่ม <strong>"พิมพ์ / บันทึก PDF"</strong> มุมขวาบน</Step>
-        <Step n="6">เบราว์เซอร์จะเปิด Print Dialog → เลือก <strong>"Save as PDF"</strong></Step>
+        <Step n="2">เลือกประเภทรายงาน (5 ปุ่มด้านบน)</Step>
+        <Step n="3">เลือก <strong>รุ่น</strong> ที่ต้องการ (ถ้าต้องการกรองเฉพาะรุ่น)</Step>
+        <Step n="4">กรอกข้อมูลตั้งค่า (สำหรับ Certificate / ประเมินรายวิชา / รายงานบริษัท)</Step>
+        <Step n="5">เลือกรายชื่อที่ต้องการ — หรือกด <strong>"เลือกทั้งหมด"</strong></Step>
+        <Step n="6">กดปุ่ม <strong>"พิมพ์ / บันทึก PDF"</strong> มุมขวาบน</Step>
+        <Step n="7">เบราว์เซอร์จะเปิด Print Dialog → เลือก <strong>"Save as PDF"</strong></Step>
       </div>
 
       <H3>การเลือกรายชื่อ</H3>
