@@ -46,6 +46,8 @@ model Person {
   organizations    PersonOrganization[]
   assessments      PersonAssessment[]
 
+  @@index([batchId])
+  @@index([province])
   @@map("persons")
 }
 
@@ -59,6 +61,7 @@ model PersonPhoto {
 
   person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
 
+  @@index([personId])
   @@map("person_photos")
 }
 
@@ -83,6 +86,8 @@ model DisabilityInfo {
   person             Person         @relation(fields: [personId], references: [id], onDelete: Cascade)
   disabilityType     DisabilityType @relation(fields: [disabilityTypeId], references: [id])
 
+  @@index([personId])
+  @@index([disabilityTypeId])
   @@map("disability_infos")
 }
 
@@ -99,6 +104,7 @@ model TrainingRecord {
 
   person           Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
 
+  @@index([personId])
   @@map("training_records")
 }
 
@@ -115,6 +121,7 @@ model WorkExperience {
 
   person           Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
 
+  @@index([personId])
   @@map("work_experiences")
 }
 
@@ -126,6 +133,7 @@ model Skill {
 
   person     Person     @relation(fields: [personId], references: [id], onDelete: Cascade)
 
+  @@index([personId])
   @@map("skills")
 }
 
@@ -142,6 +150,8 @@ model FollowUp {
 
   person           Person           @relation(fields: [personId], references: [id], onDelete: Cascade)
 
+  @@index([personId])
+  @@index([employmentStatus])
   @@map("follow_ups")
 }
 
@@ -174,6 +184,8 @@ model PersonOrganization {
   person        Person       @relation(fields: [personId], references: [id], onDelete: Cascade)
   organization  Organization @relation(fields: [orgId], references: [id])
 
+  @@index([personId])
+  @@index([orgId])
   @@map("person_organizations")
 }
 
@@ -265,6 +277,7 @@ model PersonAssessment {
   batch   TrainingBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
 
   @@unique([personId, batchId])
+  @@index([batchId])
   @@map("person_assessments")
 }
 

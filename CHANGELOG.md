@@ -39,6 +39,41 @@
 
 ---
 
+## 30 มิถุนายน 2568
+
+### ฟีเจอร์ใหม่ / UI
+- **ระบบ Toast กลางทั้งเว็บ** — เลิกใช้ `alert()`/`confirm()` ของ browser เปลี่ยนเป็น toast เด้งกลางบนจอ
+  - 🟢 เขียว = สำเร็จ (เพิ่ม/แก้/ลบ/อัปโหลด/บันทึกประเมิน)
+  - 🔴 แดง = ไม่ผ่าน (กรอกไม่ครบ บอกชัดว่าขาดช่องไหน / บันทึก-ลบไม่สำเร็จ / ไฟล์ใหญ่เกิน)
+  - 🗑️ Popup ยืนยันลบสวยๆ พร้อมไอคอน + ปุ่มแดง + ข้อความเตือน "กู้คืนไม่ได้" แทน `confirm()`
+  - ครอบคลุม: PersonList, PersonDetail (อบรม/งาน/ทักษะ/ติดตามผล/ประเมิน/รูป/องค์กร/ความพิการ), BatchPage, OrganizationList, UserManagement
+  - ไฟล์ใหม่ `context/ToastContext.jsx` + animation `pop-in`/`fade-in` ใน index.css
+  - เพิ่ม confirm ให้จุดที่เดิมลบทันทีไม่ถาม (อบรม/ทักษะ/งาน/ติดตามผล/องค์กร/ความพิการ)
+- **คู่มือการใช้งานอัปเดต** — เพิ่มหัวข้อ "จัดการรุ่น" + "ประเมินทักษะ", อัปเดตข้อมูลคนพิการ (รุ่นบังคับ + 7 แท็บ), Dashboard (รุ่นปัจจุบัน), รายงาน 4→5 ประเภท (เพิ่มแบบประเมินรายวิชา)
+
+### เสถียรภาพ / ความเร็ว
+- **เพิ่ม Database Index 13 ตัว** — เดิม foreign key ไม่มี index เลย (Postgres ไม่สร้างให้อัตโนมัติ) ทำให้ดึง training/skill/followup/ฯลฯ ของแต่ละคนต้อง scan ทั้งตาราง
+  - เพิ่ม index บน `person_id` ทุกตารางลูก + `disability_type_id`, `employment_status`, `org_id`, `batch_id`, `province`
+  - ผล: query เร็วขึ้นมาก (โดยเฉพาะเมื่อข้อมูลเยอะ) + การลบแบบ cascade เร็วขึ้น
+  - migration `add_performance_indexes` (CREATE INDEX ล้วน ไม่แตะข้อมูล — ปลอดภัย 100%) จะ apply เข้า Neon อัตโนมัติตอน deploy
+- **Light mode ลดความสว่าง** — พื้นหลัง `#fff7ed` → `#f4ede3` (ครีมอุ่น) + การ์ดขาว `#fff` → `#fffdfa` ลดอาการแสบตา
+
+### คำสั่งที่ใช้
+```bash
+# เพิ่ม index ใน schema.prisma แล้วสร้าง migration
+cd backend
+npx prisma migrate dev --name add_performance_indexes
+
+# build frontend ทดสอบ
+cd frontend
+npm run build
+
+# commit + push (ทำหลายรอบตามแต่ละงาน)
+git add -A && git commit -m "..." && git push origin main
+```
+
+---
+
 ## 29 มิถุนายน 2568
 
 ### ฟีเจอร์ใหม่
