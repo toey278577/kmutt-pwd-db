@@ -2,7 +2,7 @@ name: Keep Backend Alive
 
 on:
   schedule:
-    - cron: '*/10 * * * *'   # ping ทุก 10 นาที (Render หลับหลัง 15 นาที)
+    - cron: '*/5 * * * *'    # ping ทุก 5 นาที (Render หลับหลัง 15 นาที) — repo public ฟรีไม่จำกัด
   workflow_dispatch:          # กด run เองด้วยมือได้
 
 jobs:
@@ -11,7 +11,10 @@ jobs:
     steps:
       - name: Ping Render backend
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://kmutt-pwd-backend.onrender.com/api/health)
+          # --max-time 90 รอ cold start ได้ (~50s), --retry กันยิงพลาดตอนกำลังตื่น
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            --max-time 90 --retry 2 --retry-delay 15 --retry-all-errors \
+            https://kmutt-pwd-backend.onrender.com/api/health)
           echo "Health check status: $STATUS"
           if [ "$STATUS" != "200" ]; then
             echo "Warning: backend returned $STATUS"
