@@ -59,12 +59,8 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #57534e; }
   html.dark main .bg-gray-100            { background-color: #232020 !important; }
   html.dark main .bg-gray-900            { background-color: #0a0a0a !important; }
   html.dark main [class*="bg-amber-50"]  { background-color: #26211c !important; }
-  /* การ์ดสีพาสเทล (Pre/Post test, Soft Skills) → พื้นเข้มกลางๆ */
-  html.dark main [class*="bg-blue-50"],
-  html.dark main [class*="bg-emerald-50"],
-  html.dark main [class*="bg-violet-50"],
-  html.dark main [class*="bg-pink-50"],
-  html.dark main [class*="bg-cyan-50"]   { background-color: #1f1d1a !important; }
+  /* การ์ดสีพาสเทล (Pre/Post test, Soft Skills, badge สถานะ) — ปล่อยพาสเทลสว่าง
+     เพื่อให้ตัวอักษรสีเข้มข้างในอ่านได้ (เหมือน chip) ไม่ทำให้เข้มจนมองไม่เห็น */
 
   /* Borders — เส้นบางนุ่ม ไม่แข็ง */
   html.dark main .border-orange-100,
@@ -74,21 +70,17 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #57534e; }
   html.dark main .border-gray-200,
   html.dark main [class*="border-slate-"] { border-color: #2e2a26 !important; }
   html.dark main .border-gray-300        { border-color: #3a3530 !important; }
-  html.dark main [class*="border-blue-1"],
-  html.dark main [class*="border-emerald-1"],
-  html.dark main [class*="border-violet-1"],
-  html.dark main [class*="border-pink-1"],
-  html.dark main [class*="border-cyan-1"] { border-color: #2e2a26 !important; }
 
-  /* Text — หัวข้อสว่าง รองเทากลาง (ไม่ใช่สีส้ม) */
+  /* Text — บังคับหัวข้อสว่างชัด + รองเทาอ่านง่าย */
+  html.dark main h1, html.dark main h2, html.dark main h3,
   html.dark main .text-gray-900,
   html.dark main .text-gray-800,
   html.dark main .text-gray-700,
   html.dark main .text-orange-950        { color: #f5f5f4 !important; }
   html.dark main .text-gray-600,
-  html.dark main .text-gray-500          { color: #a8a29e !important; }
-  html.dark main .text-gray-400          { color: #78716c !important; }
-  html.dark main .text-gray-300          { color: #57534e !important; }
+  html.dark main .text-gray-500          { color: #c4bfb8 !important; }
+  html.dark main .text-gray-400          { color: #a8a29e !important; }
+  html.dark main .text-gray-300          { color: #8c8681 !important; }
   html.dark main .text-amber-700         { color: #fbbf24 !important; }
   html.dark main .text-orange-800        { color: #fb923c !important; }
   html.dark main .divide-gray-50,
