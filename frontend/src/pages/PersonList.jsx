@@ -120,6 +120,7 @@ export default function PersonList() {
     if (!form.province) e.province = 'กรุณากรอกจังหวัด';
     if (!form.phone && !form.mobile) e.contact = 'กรุณากรอกเบอร์โทรศัพท์หรือมือถืออย่างน้อย 1 ช่อง';
     if (!editId && !disabilityTypeId && editPersonDisabilities.length === 0) e.disability = 'กรุณาเลือกประเภทความพิการ';
+    if (!form.batchId) e.batchId = 'กรุณาเลือกรุ่นที่เข้าร่วม';
     return e;
   };
 
@@ -498,8 +499,10 @@ export default function PersonList() {
                   options={[['ALIVE','มีชีวิต'],['DECEASED','เสียชีวิต']]} />
 
                 {/* รุ่นที่เข้าร่วม */}
-                <SelectField label="รุ่นที่เข้าร่วม" value={String(form.batchId || '')} onChange={(v) => setForm({ ...form, batchId: v })}
-                  options={[['', '— ไม่ระบุรุ่น —'], ...batches.map(b => [String(b.id), `รุ่นที่ ${b.batchNumber} ปี ${b.year}`])]} />
+                <SelectField label="รุ่นที่เข้าร่วม" required error={errors.batchId}
+                  value={String(form.batchId || '')}
+                  onChange={(v) => { setForm({ ...form, batchId: v }); if (errors.batchId) setErrors(p => ({...p, batchId: ''})); }}
+                  options={[['', '— เลือกรุ่น —'], ...batches.map(b => [String(b.id), `รุ่นที่ ${b.batchNumber} ปี ${b.year}`])]} />
 
                 {/* ประเภทความพิการ */}
                 <div className="col-span-2">
@@ -645,13 +648,16 @@ function FormField({ label, value, onChange, type = 'text', maxLength, numericOn
   );
 }
 
-function SelectField({ label, value, onChange, options }) {
+function SelectField({ label, value, onChange, options, required, error }) {
+  const hasError = error && error.trim() !== '';
   return (
     <div>
-      <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">{label}</label>
+      <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">
+        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
       <div className="relative">
         <select
-          className="w-full appearance-none rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all cursor-pointer pr-9"
+          className={`w-full appearance-none rounded-xl border px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 transition-all cursor-pointer pr-9 ${hasError ? 'border-red-400 bg-red-50 focus:ring-red-300/40' : 'border-gray-200 focus:ring-orange-400/40 focus:border-orange-400'}`}
           value={value ?? ''}
           onChange={(e) => onChange(e.target.value)}
         >
@@ -659,6 +665,7 @@ function SelectField({ label, value, onChange, options }) {
         </select>
         <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
       </div>
+      {hasError && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );
 }
