@@ -703,11 +703,8 @@ function CertificateTemplate({ person, certForm }) {
     <div className="max-w-2xl mx-auto text-center py-10 px-14"
       style={{ fontFamily: 'Sarabun, serif', minHeight: '500px' }}>
 
-      {/* Logo */}
-      <div className="flex justify-center mb-5">
-        <img src="/logo-kmutt-round.jpg" alt="KMUTT" className="h-24 w-24 object-contain"
-          onError={e => { e.target.style.display = 'none'; }} />
-      </div>
+      {/* เว้นพื้นที่ด้านบนสำหรับปั๊มตราโลโก้เอง */}
+      <div className="h-24 mb-2" />
 
       {/* University */}
       <p className="text-xl font-black mb-1">มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</p>
