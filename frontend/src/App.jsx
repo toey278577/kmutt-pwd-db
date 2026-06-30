@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { ToastProvider } from './context/ToastContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import ErrorBoundary, { ReconnectingBanner } from './components/ErrorBoundary';
@@ -74,10 +75,12 @@ export default function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <ThemeProvider>
-          <AuthProvider>
-            <ReconnectingBanner />
-            <AppRoutes />
-          </AuthProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <ReconnectingBanner />
+              <AppRoutes />
+            </AuthProvider>
+          </ToastProvider>
         </ThemeProvider>
       </BrowserRouter>
     </ErrorBoundary>

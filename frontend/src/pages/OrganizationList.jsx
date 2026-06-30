@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Plus, Pencil, Trash2, Building2 } from 'lucide-react';
 import { getOrganizations, createOrganization, updateOrganization, deleteOrganization } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const emptyForm = { orgName: '', businessType: '', address: '', contactName: '', phone: '', email: '', note: '' };
 const AVATAR_GRADIENTS = [
@@ -15,6 +16,7 @@ const labelCls = 'block text-xs font-bold text-gray-400 mb-1.5 uppercase trackin
 
 export default function OrganizationList() {
   const { canEdit } = useAuth();
+  const toast = useToast();
   const modalRef = useRef(null);
   const [orgs, setOrgs] = useState([]);
   const [form, setForm] = useState(emptyForm);
@@ -30,19 +32,23 @@ export default function OrganizationList() {
   };
 
   const handleSave = async () => {
-    if (!form.orgName.trim()) return alert('กรุณากรอกชื่อองค์กร');
+    if (!form.orgName.trim()) return toast.error('กรอกข้อมูลไม่ครบ', 'กรุณากรอกชื่อองค์กร');
     try {
       if (editId) await updateOrganization(editId, form);
       else await createOrganization(form);
       modalRef.current?.close();
       load();
-    } catch (err) { alert(err.response?.data?.error || 'เกิดข้อผิดพลาด'); }
+      toast.success(editId ? 'แก้ไขสำเร็จ!' : 'เพิ่มองค์กรสำเร็จ!');
+    } catch (err) { toast.error('บันทึกไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'); }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('ยืนยันลบ?')) return;
-    await deleteOrganization(id);
-    load();
+    if (!(await toast.confirm({ title: 'ลบองค์กรนี้?', message: 'ข้อมูลที่ลบแล้วไม่สามารถกู้คืนได้' }))) return;
+    try {
+      await deleteOrganization(id);
+      load();
+      toast.success('ลบสำเร็จ!');
+    } catch (err) { toast.error('ลบไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด'); }
   };
 
   return (

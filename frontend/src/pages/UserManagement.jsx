@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Plus, Pencil, Trash2, ChevronDown, Shield, Eye, UserCog, Users } from 'lucide-react';
 import { getUsers, createUser, updateUser, deleteUser } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const ROLES = {
   ADMIN:  { label: 'ผู้ดูแลระบบ', bg: 'bg-red-100 text-red-700 border-red-200',       icon: Shield,  grad: 'from-red-500 to-orange-500' },
@@ -15,6 +16,7 @@ const labelCls = 'block text-xs font-bold text-gray-400 mb-1.5 uppercase trackin
 
 export default function UserManagement() {
   const { user: me } = useAuth();
+  const toast = useToast();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(empty);
@@ -50,8 +52,10 @@ export default function UserManagement() {
       }
       modalRef.current?.close();
       load();
+      toast.success(editing ? 'แก้ไขผู้ใช้สำเร็จ!' : 'เพิ่มผู้ใช้สำเร็จ!');
     } catch (e) {
       setErr(e.response?.data?.error || 'เกิดข้อผิดพลาด');
+      toast.error('บันทึกไม่สำเร็จ', e.response?.data?.error || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง');
     } finally {
       setSaving(false);
     }
@@ -59,15 +63,21 @@ export default function UserManagement() {
 
   const handleToggle = async (u) => {
     if (u.id === me?.id) return;
-    await updateUser(u.id, { isActive: !u.isActive });
-    load();
+    try {
+      await updateUser(u.id, { isActive: !u.isActive });
+      load();
+      toast.success(u.isActive ? 'ปิดใช้งานบัญชีแล้ว' : 'เปิดใช้งานบัญชีแล้ว');
+    } catch (e) { toast.error('ทำรายการไม่สำเร็จ', e.response?.data?.error || 'เกิดข้อผิดพลาด'); }
   };
 
   const handleDelete = async (u) => {
     if (u.id === me?.id) return;
-    if (!confirm(`ยืนยันลบผู้ใช้ "${u.name}"?`)) return;
-    await deleteUser(u.id);
-    load();
+    if (!(await toast.confirm({ title: `ลบผู้ใช้ "${u.name}"?`, message: 'บัญชีนี้จะถูกลบถาวร กู้คืนไม่ได้' }))) return;
+    try {
+      await deleteUser(u.id);
+      load();
+      toast.success('ลบผู้ใช้สำเร็จ!');
+    } catch (e) { toast.error('ลบไม่สำเร็จ', e.response?.data?.error || 'เกิดข้อผิดพลาด'); }
   };
 
   const fmtDate = (iso) => iso?.slice(0, 10) || '—';

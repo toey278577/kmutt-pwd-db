@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown, Users, Camera, X, Layers } from 'lucide-react';
 import { getPersons, createPerson, updatePerson, deletePerson, getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo, getPersonPhotos, uploadPersonPhoto, getBatches } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
 const GENDER_BADGE = { MALE: 'bg-sky-100 text-sky-600 border-sky-200', FEMALE: 'bg-pink-100 text-pink-500 border-pink-200', OTHER: 'bg-gray-100 text-gray-500 border-gray-200' };
@@ -41,6 +42,7 @@ const emptyForm = {
 export default function PersonList() {
   const navigate = useNavigate();
   const { canEdit } = useAuth();
+  const toast = useToast();
   const modalRef = useRef(null);
   const [persons, setPersons] = useState([]);
   const [search, setSearch] = useState('');
@@ -127,7 +129,7 @@ export default function PersonList() {
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) return alert('รูปต้องมีขนาดไม่เกิน 5MB\nแนะนำ: JPG/PNG ขนาด 300×300 ถึง 600×600 px');
+    if (file.size > 5 * 1024 * 1024) return toast.error('ไฟล์ใหญ่เกินไป', 'รูปต้องไม่เกิน 5MB — แนะนำ JPG/PNG ขนาด 300×300 ถึง 600×600 px');
     const reader = new FileReader();
     reader.onload = (ev) => setPhotoBase64(ev.target.result);
     reader.readAsDataURL(file);
@@ -138,6 +140,7 @@ export default function PersonList() {
     if (Object.keys(e).length > 0) {
       setErrors(e);
       formBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      toast.error('กรอกข้อมูลไม่ครบ', 'กรุณากรอกช่องที่มีเครื่องหมาย * ให้ครบ');
       return;
     }
     setErrors({});
@@ -170,15 +173,21 @@ export default function PersonList() {
       }
       modalRef.current?.close();
       load(search);
+      toast.success(editId ? 'แก้ไขข้อมูลสำเร็จ!' : 'เพิ่มข้อมูลสำเร็จ!');
     } catch (err) {
-      alert(err.response?.data?.error || 'เกิดข้อผิดพลาด');
+      toast.error('บันทึกไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง');
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('ยืนยันลบข้อมูล?')) return;
-    await deletePerson(id);
-    load(search);
+    if (!(await toast.confirm({ title: 'ลบข้อมูลคนพิการนี้?', message: 'ข้อมูลทั้งหมดรวมประวัติจะถูกลบและกู้คืนไม่ได้' }))) return;
+    try {
+      await deletePerson(id);
+      load(search);
+      toast.success('ลบสำเร็จ!');
+    } catch (err) {
+      toast.error('ลบไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด');
+    }
   };
 
   const initials = (name = '') => name.slice(0, 2).toUpperCase();

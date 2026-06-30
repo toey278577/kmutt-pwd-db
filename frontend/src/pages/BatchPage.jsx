@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Layers, Plus, Pencil, Trash2, CheckCircle, Clock, X } from 'lucide-react';
 import { getBatches, createBatch, updateBatch, deleteBatch } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const STATUS_LABEL = { ACTIVE: 'กำลังดำเนินการ', COMPLETED: 'เสร็จสิ้น' };
 const STATUS_STYLE = {
@@ -26,6 +27,7 @@ const fmtDate = (iso) => {
 
 export default function BatchPage() {
   const { canEdit } = useAuth();
+  const toast = useToast();
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -72,7 +74,7 @@ export default function BatchPage() {
   };
 
   const handleSave = async () => {
-    if (!validate()) return;
+    if (!validate()) return toast.error('กรอกข้อมูลไม่ครบ', 'กรุณากรอกช่องที่มีเครื่องหมาย *');
     setSaving(true);
     try {
       if (editId) {
@@ -82,17 +84,23 @@ export default function BatchPage() {
       }
       setShowModal(false);
       load(true);
-    } catch {
-      /* ignore */
+      toast.success(editId ? 'แก้ไขรุ่นสำเร็จ!' : 'เพิ่มรุ่นสำเร็จ!');
+    } catch (err) {
+      toast.error('บันทึกไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง');
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('ลบรุ่นนี้? ข้อมูลผลประเมินในรุ่นนี้จะถูกลบด้วย')) return;
-    await deleteBatch(id).catch(() => {});
-    load(true);
+    if (!(await toast.confirm({ title: 'ลบรุ่นนี้?', message: 'ข้อมูลผลประเมินในรุ่นนี้จะถูกลบทั้งหมด กู้คืนไม่ได้' }))) return;
+    try {
+      await deleteBatch(id);
+      load(true);
+      toast.success('ลบรุ่นสำเร็จ!');
+    } catch (err) {
+      toast.error('ลบไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด');
+    }
   };
 
   const activeBatch = batches.find(b => b.status === 'ACTIVE');

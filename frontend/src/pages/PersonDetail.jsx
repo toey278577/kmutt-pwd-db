@@ -13,6 +13,7 @@ import {
   getAssessments, saveAssessment, deleteAssessment, getBatches,
 } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
 const MARITAL_LABELS = { SINGLE: 'โสด', MARRIED: 'สมรส', OTHER: 'อื่นๆ' };
@@ -59,6 +60,7 @@ export default function PersonDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { canEdit } = useAuth();
+  const toast = useToast();
   const modalRef = useRef(null);
   const [tab, setTab] = useState(0);
   const [person, setPerson] = useState(null);
@@ -119,26 +121,30 @@ export default function PersonDetail() {
   }, [assessBatchId, assessments]);
 
   const handleSaveAssessment = async () => {
-    if (!assessBatchId) return alert('กรุณาเลือกรุ่นก่อน');
+    if (!assessBatchId) return toast.error('ยังไม่ได้เลือกรุ่น', 'กรุณาเลือกรุ่นก่อนบันทึกผลประเมิน');
     setAssessSaving(true);
     try {
       await saveAssessment(id, { batchId: Number(assessBatchId), ...assessForm });
       const r = await getAssessments(id);
       setAssessments(r.data);
-    } catch { alert('บันทึกไม่สำเร็จ'); }
+      toast.success('บันทึกผลประเมินสำเร็จ!');
+    } catch { toast.error('บันทึกไม่สำเร็จ', 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'); }
     finally { setAssessSaving(false); }
   };
 
   const handleDeleteAssessment = async (aid) => {
-    if (!confirm('ลบข้อมูลประเมินนี้?')) return;
-    await deleteAssessment(id, aid).catch(() => {});
-    getAssessments(id).then(r => setAssessments(r.data));
+    if (!(await toast.confirm({ title: 'ลบข้อมูลประเมินนี้?', message: 'ข้อมูลที่ลบแล้วกู้คืนไม่ได้' }))) return;
+    try {
+      await deleteAssessment(id, aid);
+      getAssessments(id).then(r => setAssessments(r.data));
+      toast.success('ลบสำเร็จ!');
+    } catch { toast.error('ลบไม่สำเร็จ', 'เกิดข้อผิดพลาด'); }
   };
 
   const handlePhotoChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) return alert('รูปต้องมีขนาดไม่เกิน 5MB');
+    if (file.size > 5 * 1024 * 1024) return toast.error('ไฟล์ใหญ่เกินไป', 'รูปต้องมีขนาดไม่เกิน 5MB');
     const reader = new FileReader();
     reader.onload = async (ev) => {
       try {
@@ -147,15 +153,20 @@ export default function PersonDetail() {
           const p = r.data.find(x => x.photoType === 'profile');
           setProfilePhoto(p || null);
         });
-      } catch { alert('อัปโหลดรูปไม่สำเร็จ'); }
+        toast.success('อัปโหลดรูปสำเร็จ!');
+      } catch { toast.error('อัปโหลดรูปไม่สำเร็จ', 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'); }
     };
     reader.readAsDataURL(file);
   };
 
   const handleDeletePhoto = async () => {
     if (!profilePhoto) return;
-    await deletePersonPhoto(id, profilePhoto.id);
-    setProfilePhoto(null);
+    if (!(await toast.confirm({ title: 'ลบรูปนี้?', message: 'ลบรูปโปรไฟล์ของผู้เข้าร่วมคนนี้' }))) return;
+    try {
+      await deletePersonPhoto(id, profilePhoto.id);
+      setProfilePhoto(null);
+      toast.success('ลบรูปสำเร็จ!');
+    } catch { toast.error('ลบรูปไม่สำเร็จ', 'เกิดข้อผิดพลาด'); }
   };
 
   useEffect(() => { reloadAll(); }, [id]);
@@ -163,26 +174,17 @@ export default function PersonDetail() {
   const openDialog = (type) => { setForm({}); setDialogType(type); modalRef.current?.showModal(); };
 
   const handleSave = async () => {
-    if (dialogType === 'training' && !form.courseName?.trim())
-      return alert('กรุณากรอกชื่อหลักสูตร');
-    if (dialogType === 'workexp' && !form.organizationName?.trim())
-      return alert('กรุณากรอกชื่อองค์กร');
-    if (dialogType === 'workexp' && !form.workMode)
-      return alert('กรุณาเลือกรูปแบบงาน');
-    if (dialogType === 'followup' && !form.followUpDate)
-      return alert('กรุณากรอกวันที่ติดตาม');
-    if (dialogType === 'followup' && !form.employmentStatus)
-      return alert('กรุณาเลือกสถานะงาน');
-    if (dialogType === 'skill' && !form.skillName?.trim())
-      return alert('กรุณากรอกชื่อทักษะ');
-    if (dialogType === 'skill' && !form.skillLevel)
-      return alert('กรุณาเลือกระดับทักษะ');
-    if (dialogType === 'personorg' && !form.orgId)
-      return alert('กรุณาเลือกสถานประกอบการ');
-    if (dialogType === 'personorg' && !form.roleType)
-      return alert('กรุณาเลือกบทบาท');
-    if (dialogType === 'disability' && !form.disabilityTypeId)
-      return alert('กรุณาเลือกประเภทความพิการ');
+    const miss = (msg) => { toast.error('กรอกข้อมูลไม่ครบ', msg); return true; };
+    if (dialogType === 'training' && !form.courseName?.trim()) return miss('กรุณากรอกชื่อหลักสูตร');
+    if (dialogType === 'workexp' && !form.organizationName?.trim()) return miss('กรุณากรอกชื่อองค์กร');
+    if (dialogType === 'workexp' && !form.workMode) return miss('กรุณาเลือกรูปแบบงาน');
+    if (dialogType === 'followup' && !form.followUpDate) return miss('กรุณากรอกวันที่ติดตาม');
+    if (dialogType === 'followup' && !form.employmentStatus) return miss('กรุณาเลือกสถานะงาน');
+    if (dialogType === 'skill' && !form.skillName?.trim()) return miss('กรุณากรอกชื่อทักษะ');
+    if (dialogType === 'skill' && !form.skillLevel) return miss('กรุณาเลือกระดับทักษะ');
+    if (dialogType === 'personorg' && !form.orgId) return miss('กรุณาเลือกสถานประกอบการ');
+    if (dialogType === 'personorg' && !form.roleType) return miss('กรุณาเลือกบทบาท');
+    if (dialogType === 'disability' && !form.disabilityTypeId) return miss('กรุณาเลือกประเภทความพิการ');
     try {
       if (dialogType === 'training') { await createTraining(id, form); getTraining(id).then((r) => setTraining(r.data)); }
       else if (dialogType === 'workexp') { await createWorkExp(id, form); getWorkExp(id).then((r) => setWorkexp(r.data)); }
@@ -191,7 +193,15 @@ export default function PersonDetail() {
       else if (dialogType === 'personorg') { await createPersonOrg(id, form); getPersonOrgs(id).then((r) => setPersonOrgs(r.data)); }
       else if (dialogType === 'disability') { await createDisabilityInfo(id, form); getPerson(id).then((r) => setPerson(r.data)); }
       modalRef.current?.close();
-    } catch (err) { alert(err.response?.data?.error || 'เกิดข้อผิดพลาด'); }
+      toast.success('บันทึกสำเร็จ!');
+    } catch (err) { toast.error('บันทึกไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'); }
+  };
+
+  // ลบรายการ (มี popup ยืนยัน + toast)
+  const delWith = async (label, doDelete, reload) => {
+    if (!(await toast.confirm({ title: `ลบ${label}นี้?`, message: 'ข้อมูลที่ลบแล้วไม่สามารถกู้คืนได้' }))) return;
+    try { await doDelete(); reload(); toast.success('ลบสำเร็จ!'); }
+    catch (err) { toast.error('ลบไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด'); }
   };
 
   if (!person) return <div className="flex items-center justify-center h-96"><span className="loading loading-spinner loading-lg text-primary" /></div>;
@@ -308,7 +318,7 @@ export default function PersonDetail() {
                     {canEdit && (
                       <button
                         className="absolute top-2 right-2 text-red-300 hover:text-red-500 transition-colors"
-                        onClick={() => deleteDisabilityInfo(id, d.id).then(() => getPerson(id).then(r => setPerson(r.data)))}>
+                        onClick={() => delWith('ข้อมูลความพิการ', () => deleteDisabilityInfo(id, d.id), () => getPerson(id).then(r => setPerson(r.data)))}>
                         <Trash2 size={13} />
                       </button>
                     )}
@@ -345,7 +355,7 @@ export default function PersonDetail() {
                   <td>{t.trainingType && <span className="badge badge-sm bg-orange-100 text-orange-700 border-0">{t.trainingType}</span>}</td>
                   <td className="text-gray-600 max-w-xs truncate">{t.skillsGained || '—'}</td>
                   <td className="text-gray-600">{t.evaluationResult || '—'}</td>
-                  {canEdit && <td><DelBtn onClick={() => deleteTraining(id, t.id).then(() => getTraining(id).then(r => setTraining(r.data)))} /></td>}
+                  {canEdit && <td><DelBtn onClick={() => delWith('ประวัติอบรม', () => deleteTraining(id, t.id), () => getTraining(id).then(r => setTraining(r.data)))} /></td>}
                 </tr>
               ))}
               {training.length === 0 && <EmptyRow cols={canEdit ? 7 : 6} />}
@@ -370,7 +380,7 @@ export default function PersonDetail() {
                   <td className="font-medium text-gray-700">{w.income ? `฿${Number(w.income).toLocaleString()}` : '—'}</td>
                   <td><DateRange start={w.startDate} end={w.endDate} noEndLabel="ปัจจุบัน" /></td>
                   <td className="text-gray-600 max-w-xs truncate">{w.outcome || '—'}</td>
-                  {canEdit && <td><DelBtn onClick={() => deleteWorkExp(id, w.id).then(() => getWorkExp(id).then(r => setWorkexp(r.data)))} /></td>}
+                  {canEdit && <td><DelBtn onClick={() => delWith('ประสบการณ์งาน', () => deleteWorkExp(id, w.id), () => getWorkExp(id).then(r => setWorkexp(r.data)))} /></td>}
                 </tr>
               ))}
               {workexp.length === 0 && <EmptyRow cols={canEdit ? 7 : 6} />}
@@ -390,7 +400,7 @@ export default function PersonDetail() {
                     <span>{s.skillName}</span>
                     <span className="text-xs opacity-60">({s.skillLevel === 'BEGINNER' ? 'เริ่มต้น' : s.skillLevel === 'INTERMEDIATE' ? 'ปานกลาง' : 'เชี่ยวชาญ'})</span>
                     {canEdit && (
-                      <button className="hover:text-red-500 transition-colors ml-1" onClick={() => deleteSkill(id, s.id).then(() => getSkills(id).then(r => setSkills(r.data)))}>
+                      <button className="hover:text-red-500 transition-colors ml-1" onClick={() => delWith('ทักษะ', () => deleteSkill(id, s.id), () => getSkills(id).then(r => setSkills(r.data)))}>
                         <Trash2 size={11} />
                       </button>
                     )}
@@ -422,7 +432,7 @@ export default function PersonDetail() {
                   </td>
                   <td className="text-gray-600 text-xs">{f.satisfaction || '—'}</td>
                   <td className="text-gray-600 text-xs max-w-xs truncate">{f.issues || '—'}</td>
-                  {canEdit && <td><DelBtn onClick={() => deleteFollowUp(id, f.id).then(() => getFollowUp(id).then(r => setFollowup(r.data)))} /></td>}
+                  {canEdit && <td><DelBtn onClick={() => delWith('การติดตามผล', () => deleteFollowUp(id, f.id), () => getFollowUp(id).then(r => setFollowup(r.data)))} /></td>}
                 </tr>
               ))}
               {followup.length === 0 && <EmptyRow cols={canEdit ? 8 : 7} />}
@@ -446,7 +456,7 @@ export default function PersonDetail() {
                   <td><DateRange start={po.startDate} end={po.endDate} noEndLabel="—" /></td>
                   <td className="font-medium text-gray-700">{po.amount ? `฿${Number(po.amount).toLocaleString()}` : '—'}</td>
                   <td className="text-gray-600 text-xs max-w-xs truncate">{po.supportDetail || '—'}</td>
-                  {canEdit && <td><DelBtn onClick={() => deletePersonOrg(id, po.id).then(() => getPersonOrgs(id).then(r => setPersonOrgs(r.data)))} /></td>}
+                  {canEdit && <td><DelBtn onClick={() => delWith('สถานประกอบการ', () => deletePersonOrg(id, po.id), () => getPersonOrgs(id).then(r => setPersonOrgs(r.data)))} /></td>}
                 </tr>
               ))}
               {personOrgs.length === 0 && <EmptyRow cols={canEdit ? 6 : 5} />}
