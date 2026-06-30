@@ -273,7 +273,7 @@ export default function PersonList() {
             <thead className="sticky top-0 z-10">
               <tr className="bg-gray-50 border-b border-gray-200">
                 {['#','ชื่อ-นามสกุล','เลขบัตร','เพศ','จังหวัด','การศึกษา','สถานะ','จัดการ'].map((h, i) => (
-                  <th key={h} className={`px-4 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider ${i === 0 ? 'w-10' : ''} ${i === 7 ? 'text-center' : ''}`}>{h}</th>
+                  <th key={h} className={`px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider ${i === 0 ? 'w-10' : ''} ${i === 7 ? 'text-center w-28' : 'text-left'}`}>{h}</th>
                 ))}
               </tr>
             </thead>

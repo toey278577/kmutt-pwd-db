@@ -76,7 +76,7 @@ export default function OrganizationList() {
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
                 {['#', 'ชื่อองค์กร', 'ประเภทธุรกิจ', 'ผู้ติดต่อ', 'เบอร์โทร / Email', 'จัดการ'].map((h, i) => (
-                  <th key={h} className={`px-4 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wide ${i === 0 ? 'w-10' : ''} ${i === 5 ? 'text-center' : ''}`}>{h}</th>
+                  <th key={h} className={`px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wide ${i === 0 ? 'w-10' : ''} ${i === 5 ? 'text-center w-28' : 'text-left'}`}>{h}</th>
                 ))}
               </tr>
             </thead>
