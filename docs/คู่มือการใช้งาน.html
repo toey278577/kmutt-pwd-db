@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>คู่มือการใช้งาน ระบบฐานข้อมูลคนพิการ มจธ.</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Sarabun','Leelawadee UI','Tahoma',sans-serif; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body { color:#1c1917; font-size:14px; line-height:1.6; }
+
+  /* ---------- COVER ---------- */
+  .cover {
+    height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center;
+    text-align:center; color:#fff; padding:60px;
+    background:linear-gradient(150deg,#fb923c 0%,#ea580c 45%,#9a3412 100%);
+    page-break-after:always; position:relative; overflow:hidden;
+  }
+  .cover .badge { width:110px;height:110px;border-radius:30px;background:#fff;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 20px 50px rgba(0,0,0,.25); margin-bottom:34px; }
+  .cover .badge span { font-size:52px;font-weight:900;color:#ea580c;letter-spacing:-2px; }
+  .cover h1 { font-size:40px; font-weight:900; line-height:1.25; margin-bottom:16px; text-shadow:0 2px 10px rgba(0,0,0,.15); }
+  .cover h2 { font-size:20px; font-weight:600; opacity:.92; margin-bottom:40px; }
+  .cover .meta { font-size:15px; opacity:.85; line-height:2; border-top:1px solid rgba(255,255,255,.3); padding-top:24px; }
+  .cover .tag { display:inline-block; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35);
+    padding:6px 18px; border-radius:30px; font-size:14px; margin-top:18px; }
+
+  /* ---------- PAGE ---------- */
+  .page { padding:40px 48px 60px; }
+  .page-break { page-break-before:always; }
+
+  h2.sec { font-size:24px; font-weight:900; color:#9a3412; margin:6px 0 4px; }
+  .sec-wrap { display:flex; align-items:center; gap:16px; margin-bottom:18px; padding-bottom:16px; border-bottom:3px solid #fed7aa; }
+  .sec-num { flex:0 0 auto; width:52px;height:52px;border-radius:16px; background:linear-gradient(135deg,#fb923c,#ea580c);
+    color:#fff; font-size:24px; font-weight:900; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 16px rgba(234,88,12,.35); }
+  .sec-sub { color:#a8a29e; font-size:13px; font-weight:600; margin-top:2px; }
+
+  h3 { font-size:16px; font-weight:800; color:#c2410c; margin:22px 0 10px; display:flex; align-items:center; gap:8px; }
+  h3::before { content:''; width:8px;height:8px;border-radius:50%; background:#f97316; flex:0 0 auto; }
+
+  p { margin-bottom:10px; }
+  .lead { color:#57534e; margin-bottom:14px; }
+
+  ul { list-style:none; margin:8px 0 14px; }
+  ul li { position:relative; padding-left:26px; margin-bottom:7px; }
+  ul li::before { content:'✓'; position:absolute; left:0; top:0; color:#16a34a; font-weight:900; }
+
+  .steps { counter-reset:step; margin:10px 0 16px; }
+  .steps .step { position:relative; padding:10px 14px 10px 52px; margin-bottom:8px; background:#fff7ed; border:1px solid #fed7aa;
+    border-radius:14px; }
+  .steps .step::before { counter-increment:step; content:counter(step); position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    width:28px;height:28px;border-radius:50%; background:linear-gradient(135deg,#ea580c,#c2410c); color:#fff;
+    font-weight:900; font-size:14px; display:flex; align-items:center; justify-content:center; }
+
+  table { width:100%; border-collapse:collapse; margin:10px 0 16px; border-radius:12px; overflow:hidden; box-shadow:0 0 0 1px #fed7aa; }
+  th { background:#fff7ed; color:#9a3412; text-align:left; font-size:12px; font-weight:800; padding:9px 12px; text-transform:uppercase; letter-spacing:.4px; }
+  td { padding:9px 12px; border-top:1px solid #f5f0e8; font-size:13.5px; }
+  tr:nth-child(even) td { background:#fffaf5; }
+
+  .tip, .warn { display:flex; gap:12px; padding:13px 16px; border-radius:14px; margin:14px 0; font-size:13.5px; }
+  .tip { background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; }
+  .warn { background:#fffbeb; border:1px solid #fde68a; color:#92400e; }
+  .tip .ic, .warn .ic { font-size:18px; flex:0 0 auto; }
+
+  .chip { display:inline-block; padding:3px 12px; border-radius:30px; font-size:12px; font-weight:800; margin:2px 4px 2px 0; }
+  .c-orange { background:#ffedd5; color:#c2410c; } .c-green{background:#dcfce7;color:#15803d;}
+  .c-blue{background:#dbeafe;color:#1d4ed8;} .c-red{background:#fee2e2;color:#b91c1c;} .c-gray{background:#f3f4f6;color:#4b5563;}
+  .req { color:#dc2626; font-weight:900; }
+
+  .flow { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:16px 0; }
+  .flow .node { background:linear-gradient(135deg,#fff7ed,#ffedd5); border:1.5px solid #fdba74; color:#9a3412;
+    font-weight:800; font-size:12.5px; padding:9px 14px; border-radius:12px; }
+  .flow .arr { color:#fb923c; font-weight:900; font-size:16px; }
+
+  .footer { position:fixed; bottom:0; left:0; right:0; text-align:center; font-size:10px; color:#d6d3d1; padding:8px; }
+  .toc-item { display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px dashed #e7e0d6; }
+  .toc-item .n { width:30px;height:30px;border-radius:9px;background:#fff7ed;color:#ea580c;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 auto;}
+  .toc-item .t { font-weight:600; flex:1; }
+  .toc-item .pg { color:#a8a29e; font-size:12px; }
+</style>
+</head>
+<body>
+
+<!-- ======== COVER ======== -->
+<div class="cover">
+  <div class="badge"><span>มจธ</span></div>
+  <h1>คู่มือการใช้งาน<br>ระบบฐานข้อมูลคนพิการ</h1>
+  <h2>PWDs Database — มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</h2>
+  <div class="tag">โครงการฝึกอบรม–ฝึกงานคนพิการ เพื่อเตรียมความพร้อมเข้าทำงาน</div>
+  <div class="meta">
+    คู่มือการใช้งานฉบับสมบูรณ์ • ขั้นตอนตั้งแต่ต้นจนจบ<br>
+    เว็บไซต์: https://kmutt-pwd-db.vercel.app<br>
+    ปรับปรุงล่าสุด: มิถุนายน 2568
+  </div>
+</div>
+
+<!-- ======== สารบัญ ======== -->
+<div class="page">
+  <div class="sec-wrap"><div class="sec-num">≣</div><div><h2 class="sec">สารบัญ</h2><div class="sec-sub">ลำดับการใช้งาน “ต้นน้ำ → ปลายน้ำ”</div></div></div>
+
+  <div class="flow">
+    <span class="node">1. เข้าระบบ</span><span class="arr">→</span>
+    <span class="node">2. สร้างรุ่น</span><span class="arr">→</span>
+    <span class="node">3. เพิ่มคนพิการ</span><span class="arr">→</span>
+    <span class="node">4. อบรม/ทักษะ</span><span class="arr">→</span>
+    <span class="node">5. ประเมินทักษะ</span><span class="arr">→</span>
+    <span class="node">6. งาน/องค์กร</span><span class="arr">→</span>
+    <span class="node">7. ติดตามผล</span><span class="arr">→</span>
+    <span class="node">8. Dashboard</span><span class="arr">→</span>
+    <span class="node">9. ออกรายงาน</span>
+  </div>
+
+  <div class="toc-item"><div class="n">1</div><div class="t">เข้าสู่ระบบ (Login)</div><div class="pg">ต้นน้ำ</div></div>
+  <div class="toc-item"><div class="n">2</div><div class="t">สร้างรุ่น (Batch) — ต้องทำก่อนเสมอ</div><div class="pg">บังคับ</div></div>
+  <div class="toc-item"><div class="n">3</div><div class="t">เพิ่มข้อมูลคนพิการ + อัปโหลดรูปถ่าย</div><div class="pg"></div></div>
+  <div class="toc-item"><div class="n">4</div><div class="t">บันทึกการอบรม &amp; ทักษะ</div><div class="pg"></div></div>
+  <div class="toc-item"><div class="n">5</div><div class="t">ประเมินทักษะ (Pre / Post / Soft Skills)</div><div class="pg"></div></div>
+  <div class="toc-item"><div class="n">6</div><div class="t">ประสบการณ์ทำงาน &amp; ผูกสถานประกอบการ</div><div class="pg"></div></div>
+  <div class="toc-item"><div class="n">7</div><div class="t">ติดตามผลหลังจบโครงการ</div><div class="pg"></div></div>
+  <div class="toc-item"><div class="n">8</div><div class="t">Dashboard — ดูสถิติภาพรวม</div><div class="pg"></div></div>
+  <div class="toc-item"><div class="n">9</div><div class="t">ออกรายงาน 5 ประเภท (พิมพ์ / PDF)</div><div class="pg">ปลายน้ำ</div></div>
+  <div class="toc-item"><div class="n">10</div><div class="t">จัดการผู้ใช้งาน (เฉพาะ Admin)</div><div class="pg"></div></div>
+  <div class="toc-item"><div class="n">★</div><div class="t">ภาคผนวก: สิทธิ์ผู้ใช้ • รูปแบบวันที่ • เคล็ดลับ</div><div class="pg"></div></div>
+</div>
+
+<!-- ======== 1. LOGIN ======== -->
+<div class="page page-break">
+  <div class="sec-wrap"><div class="sec-num">1</div><div><h2 class="sec">เข้าสู่ระบบ</h2><div class="sec-sub">จุดเริ่มต้น — ต้นน้ำ</div></div></div>
+  <p class="lead">เปิดเว็บไซต์แล้วเข้าสู่ระบบด้วยอีเมลและรหัสผ่านที่ได้รับจากผู้ดูแลระบบ</p>
+
+  <h3>ขั้นตอน</h3>
+  <div class="steps">
+    <div class="step">เปิดเบราว์เซอร์ไปที่ <b>https://kmutt-pwd-db.vercel.app</b></div>
+    <div class="step">กรอก <b>อีเมล</b> และ <b>รหัสผ่าน</b></div>
+    <div class="step">กดปุ่ม <b>“เข้าสู่ระบบ”</b> ระบบจะพาเข้าหน้า Dashboard อัตโนมัติ</div>
+  </div>
+
+  <h3>บัญชีเริ่มต้น (ผู้ดูแลระบบ)</h3>
+  <table>
+    <tr><th>อีเมล</th><th>รหัสผ่าน</th><th>หมายเหตุ</th></tr>
+    <tr><td>admin@kmutt.ac.th</td><td>admin1234</td><td>ควรเปลี่ยนรหัสผ่านหลังใช้งานครั้งแรก</td></tr>
+  </table>
+
+  <div class="tip"><span class="ic">💡</span><div>ครั้งแรกที่เปิดเว็บหลังไม่ได้ใช้นาน เซิร์ฟเวอร์อาจตื่นช้าสัก 10–30 วินาที ระบบจะรอให้พร้อมเองแล้วค่อยเข้า — เป็นเรื่องปกติ</div></div>
+  <div class="warn"><span class="ic">⏱️</span><div>เซสชันมีอายุ 8 ชั่วโมง หลังจากนั้นต้องเข้าสู่ระบบใหม่ • ออกจากระบบได้ที่ไอคอนลูกศรมุมล่างซ้าย</div></div>
+</div>
+
+<!-- ======== 2. BATCH ======== -->
+<div class="page page-break">
+  <div class="sec-wrap"><div class="sec-num">2</div><div><h2 class="sec">สร้างรุ่น (Batch)</h2><div class="sec-sub">ขั้นบังคับ — ต้องทำก่อนเพิ่มคนพิการ</div></div></div>
+  <p class="lead">ระบบแบ่งผู้เข้าร่วมเป็น “รุ่น” ตามปี/รอบการอบรม เพื่อให้ติดตามและออกรายงานแยกแต่ละรุ่นได้</p>
+
+  <div class="warn"><span class="ic">⚠️</span><div><b>ต้องสร้างรุ่นก่อน</b> จึงจะเพิ่มข้อมูลคนพิการได้ เพราะช่อง “รุ่นที่เข้าร่วม” เป็นช่อง<span class="req"> บังคับ *</span></div></div>
+
+  <h3>ขั้นตอนเพิ่มรุ่น</h3>
+  <div class="steps">
+    <div class="step">ไปที่เมนู <b>“จัดการรุ่น”</b> ด้านซ้าย</div>
+    <div class="step">กดปุ่ม <b>“+ เพิ่มรุ่น”</b></div>
+    <div class="step">กรอก <b>รุ่นที่</b> (เช่น 1, 2, 3) และ <b>ปี พ.ศ.</b> <span class="req">*</span></div>
+    <div class="step">เลือก <b>สถานะ</b> และระบุช่วงวันที่ (ถ้ามี)</div>
+    <div class="step">กด <b>“บันทึก”</b></div>
+  </div>
+
+  <h3>สถานะของรุ่น</h3>
+  <p><span class="chip c-green">กำลังดำเนินการ (ACTIVE)</span> <span class="chip c-gray">เสร็จสิ้น (COMPLETED)</span></p>
+  <div class="tip"><span class="ic">⭐</span><div>รุ่นที่ตั้งสถานะ <b>“กำลังดำเนินการ”</b> จะถูกใช้เป็น <b>รุ่นปัจจุบัน</b> แสดงเด่นบนหน้า Dashboard</div></div>
+</div>
+
+<!-- ======== 3. PERSON ======== -->
+<div class="page page-break">
+  <div class="sec-wrap"><div class="sec-num">3</div><div><h2 class="sec">เพิ่มข้อมูลคนพิการ</h2><div class="sec-sub">หัวใจของระบบ + อัปโหลดรูปถ่าย</div></div></div>
+
+  <h3>ขั้นตอน</h3>
+  <div class="steps">
+    <div class="step">ไปที่เมนู <b>“ข้อมูลคนพิการ”</b> แล้วกด <b>“+ เพิ่มคนพิการ”</b></div>
+    <div class="step">อัปโหลดรูปถ่าย 1 นิ้ว (ถ้ามี) — กดที่กรอบรูปด้านบน</div>
+    <div class="step">กรอกข้อมูลส่วนตัวที่มีเครื่องหมาย <span class="req">*</span> ให้ครบ</div>
+    <div class="step">กรอกที่อยู่ปัจจุบัน + ข้อมูลติดต่อ (มือถือหรือโทรศัพท์อย่างน้อย 1 ช่อง)</div>
+    <div class="step">เลือก <b>รุ่นที่เข้าร่วม</b> <span class="req">*</span></div>
+    <div class="step">กด <b>“บันทึกข้อมูล”</b></div>
+  </div>
+
+  <h3>ช่องที่บังคับกรอก <span class="req">*</span></h3>
+  <table>
+    <tr><th>ช่อง</th><th>เงื่อนไข</th></tr>
+    <tr><td>ชื่อ–นามสกุล</td><td>บังคับ</td></tr>
+    <tr><td>เลขบัตรประชาชน / บัตรคนพิการ</td><td>บังคับ (13 หลัก)</td></tr>
+    <tr><td>วันเกิด</td><td>บังคับ (ต้องเป็นอดีต)</td></tr>
+    <tr><td>ระดับการศึกษา</td><td>บังคับ</td></tr>
+    <tr><td>ประเภทความพิการ</td><td>บังคับ (ตอนเพิ่มใหม่)</td></tr>
+    <tr><td>จังหวัด</td><td>บังคับ</td></tr>
+    <tr><td>มือถือ หรือ โทรศัพท์บ้าน</td><td>บังคับอย่างน้อย 1</td></tr>
+    <tr><td>รุ่นที่เข้าร่วม</td><td>บังคับ</td></tr>
+  </table>
+
+  <h3>รูปแบบการกรอกวันเกิด</h3>
+  <p><b>วว/ดด/ปปปป (พ.ศ.)</b> เช่น 15/06/2540</p>
+
+  <div class="tip"><span class="ic">🟢</span><div>กรอกครบกด “บันทึก” จะมีแถบ <b>สีเขียว</b> เด้งว่า “สำเร็จ” • ถ้ากรอกไม่ครบจะมีแถบ <b>สีแดง</b> บอกว่าขาดช่องไหน และช่องนั้นจะขึ้นกรอบแดง</div></div>
+  <div class="tip"><span class="ic">📷</span><div>รูปถ่าย: รองรับ JPG/PNG/WebP ขนาดไม่เกิน 5MB • เปลี่ยน/ลบรูปได้ภายหลังในหน้ารายละเอียด (เลื่อนเมาส์ที่รูป จะเห็นไอคอนกล้อง)</div></div>
+</div>
+
+<!-- ======== 4. TRAINING & SKILLS ======== -->
+<div class="page page-break">
+  <div class="sec-wrap"><div class="sec-num">4</div><div><h2 class="sec">บันทึกการอบรม &amp; ทักษะ</h2><div class="sec-sub">ในหน้ารายละเอียดของแต่ละคน (7 แท็บ)</div></div></div>
+  <p class="lead">เปิดรายละเอียดคนพิการได้โดยกดปุ่มดู (ไอคอนตา) หรือกดที่ชื่อในตาราง จะพบ 7 แท็บข้อมูล</p>
+
+  <h3>7 แท็บในหน้ารายละเอียด</h3>
+  <table>
+    <tr><th>แท็บ</th><th>เนื้อหา</th></tr>
+    <tr><td>ข้อมูลพื้นฐาน</td><td>ส่วนตัว ที่อยู่ ความพิการ</td></tr>
+    <tr><td>การอบรม</td><td>ประวัติหลักสูตร / ฝึกงาน</td></tr>
+    <tr><td>ประสบการณ์งาน</td><td>ประวัติการทำงาน รายได้</td></tr>
+    <tr><td>ทักษะ</td><td>ทักษะพร้อมระดับ</td></tr>
+    <tr><td>ประเมินทักษะ</td><td>Pre/Post + Soft Skills (ดูขั้นที่ 5)</td></tr>
+    <tr><td>ติดตามผล</td><td>สถานะงานหลังจบ</td></tr>
+    <tr><td>สถานประกอบการ</td><td>องค์กรที่ฝึก/ทำงาน</td></tr>
+  </table>
+
+  <h3>เพิ่มประวัติการอบรม</h3>
+  <div class="steps">
+    <div class="step">เปิดรายละเอียดคน → แท็บ <b>“การอบรม”</b> → กด <b>“+ เพิ่ม”</b></div>
+    <div class="step">กรอกชื่อหลักสูตร (บังคับ) วันที่ ผลประเมิน แล้วกดบันทึก</div>
+  </div>
+  <p><b>รูปแบบการอบรม:</b> <span class="chip c-orange">TRAIN — อบรม</span> <span class="chip c-orange">LEARN — เรียนรู้</span> <span class="chip c-orange">EARN — ฝึกงาน</span></p>
+
+  <h3>เพิ่มทักษะ</h3>
+  <div class="steps">
+    <div class="step">แท็บ <b>“ทักษะ”</b> → กด <b>“+ เพิ่ม”</b> → กรอกชื่อทักษะ + เลือกระดับ</div>
+  </div>
+  <p><b>ระดับทักษะ:</b> <span class="chip c-blue">เริ่มต้น</span> <span class="chip c-blue">ปานกลาง</span> <span class="chip c-blue">เชี่ยวชาญ</span></p>
+</div>
+
+<!-- ======== 5. ASSESSMENT ======== -->
+<div class="page page-break">
+  <div class="sec-wrap"><div class="sec-num">5</div><div><h2 class="sec">ประเมินทักษะ</h2><div class="sec-sub">Pre-test / Post-test / Soft Skills — แยกตามรุ่น</div></div></div>
+  <p class="lead">วัดพัฒนาการก่อน–หลังการอบรม บันทึกในแท็บ “ประเมินทักษะ” ของแต่ละคน</p>
+
+  <h3>คะแนนที่บันทึก</h3>
+  <table>
+    <tr><th>รายการ</th><th>คะแนนเต็ม</th><th>ความหมาย</th></tr>
+    <tr><td>Pre-test</td><td>100</td><td>ทดสอบก่อนอบรม</td></tr>
+    <tr><td>Post-test</td><td>100</td><td>ทดสอบหลังอบรม</td></tr>
+    <tr><td>Soft Skills (4 ด้าน)</td><td>5 ต่อด้าน</td><td>ทักษะทางสังคม</td></tr>
+  </table>
+
+  <h3>Soft Skills 4 ด้าน (ด้านละ 0–5)</h3>
+  <p><span class="chip c-orange">การสื่อสาร</span> <span class="chip c-blue">การบริหารเวลา</span> <span class="chip c-red">การจูงใจตนเอง</span> <span class="chip c-green">การทำงานตามหน้าที่</span></p>
+
+  <h3>ขั้นตอน</h3>
+  <div class="steps">
+    <div class="step">เปิดรายละเอียดคน → แท็บ <b>“ประเมินทักษะ”</b></div>
+    <div class="step">เลือก <b>รุ่น</b> (ค่าเริ่มต้น = รุ่นที่คนนั้นสังกัด)</div>
+    <div class="step">กรอกคะแนน Pre/Post และ Soft Skills 4 ด้าน</div>
+    <div class="step">กด <b>“บันทึก”</b> — 1 คน มี 1 ผลประเมินต่อ 1 รุ่น</div>
+  </div>
+  <div class="tip"><span class="ic">📈</span><div>ระบบจะแสดง <b>พัฒนาการ Pre → Post</b> ให้อัตโนมัติ (เพิ่มขึ้น/ลดลงกี่คะแนน) • กรอกเกินคะแนนเต็มระบบปรับให้อยู่ในช่วงที่ถูกต้องเอง</div></div>
+</div>
+
+<!-- ======== 6. WORK & ORG ======== -->
+<div class="page page-break">
+  <div class="sec-wrap"><div class="sec-num">6</div><div><h2 class="sec">ประสบการณ์งาน &amp; สถานประกอบการ</h2><div class="sec-sub">เชื่อมผู้เข้าร่วมกับองค์กร</div></div></div>
+
+  <h3>ก. เพิ่มประสบการณ์ทำงาน</h3>
+  <div class="steps">
+    <div class="step">แท็บ <b>“ประสบการณ์งาน”</b> → กด <b>“+ เพิ่ม”</b></div>
+    <div class="step">กรอกชื่อองค์กร เลือกรูปแบบงาน วันที่ รายได้ แล้วบันทึก</div>
+  </div>
+  <p><b>รูปแบบงาน:</b> <span class="chip c-orange">ฝึกงาน</span> <span class="chip c-orange">จ้างงาน</span> <span class="chip c-orange">อิสระ</span></p>
+
+  <h3>ข. เพิ่มสถานประกอบการ (ทำครั้งเดียว ใช้ร่วมกันได้)</h3>
+  <div class="steps">
+    <div class="step">เมนู <b>“สถานประกอบการ”</b> → กด <b>“+ เพิ่มองค์กร”</b></div>
+    <div class="step">กรอกชื่อองค์กร (บังคับ) ประเภทธุรกิจ ที่อยู่ ผู้ติดต่อ แล้วบันทึก</div>
+  </div>
+
+  <h3>ค. ผูกคนพิการกับสถานประกอบการ</h3>
+  <div class="steps">
+    <div class="step">เปิดรายละเอียดคน → แท็บ <b>“สถานประกอบการ”</b></div>
+    <div class="step">เลือกองค์กรจากรายการ + ระบุบทบาท ช่วงเวลา และเงินสนับสนุน (ถ้ามี)</div>
+  </div>
+  <p><b>บทบาท:</b> <span class="chip c-orange">ฝึกงาน</span> <span class="chip c-orange">จ้างงาน</span> <span class="chip c-gray">อื่นๆ</span></p>
+</div>
+
+<!-- ======== 7. FOLLOWUP ======== -->
+<div class="page page-break">
+  <div class="sec-wrap"><div class="sec-num">7</div><div><h2 class="sec">ติดตามผล</h2><div class="sec-sub">สถานะหลังจบโครงการ</div></div></div>
+  <p class="lead">บันทึกสถานะการทำงานหลังสำเร็จการฝึกงาน เพื่อติดตามความก้าวหน้าของผู้เข้าร่วม</p>
+
+  <h3>สถานะที่บันทึกได้</h3>
+  <p><span class="chip c-green">มีงานทำ</span> <span class="chip c-gray">ว่างงาน</span> <span class="chip c-blue">ศึกษาต่อ</span></p>
+
+  <h3>ข้อมูลที่บันทึก</h3>
+  <table>
+    <tr><th>ช่อง</th><th>สำคัญ</th></tr>
+    <tr><td>วันที่ติดตาม</td><td>บังคับ</td></tr>
+    <tr><td>สถานะงาน</td><td>บังคับ</td></tr>
+    <tr><td>ประเภทงาน / รายได้ / ทักษะตรงสาย / ความพึงพอใจ / ปัญหา</td><td>ไม่บังคับ</td></tr>
+  </table>
+
+  <h3>ขั้นตอน</h3>
+  <div class="steps">
+    <div class="step">เปิดรายละเอียดคน → แท็บ <b>“ติดตามผล”</b> → กด <b>“+ เพิ่ม”</b></div>
+    <div class="step">กรอกวันที่ + สถานะ แล้วกดบันทึก</div>
+  </div>
+  <div class="tip"><span class="ic">🗂️</span><div>เมนู <b>“ติดตามผล”</b> ด้านซ้าย รวมการติดตามของทุกคนไว้ในที่เดียว ดูภาพรวมได้ง่าย</div></div>
+</div>
+
+<!-- ======== 8. DASHBOARD ======== -->
+<div class="page page-break">
+  <div class="sec-wrap"><div class="sec-num">8</div><div><h2 class="sec">Dashboard</h2><div class="sec-sub">ดูสถิติภาพรวมแบบ Real-time</div></div></div>
+  <p class="lead">หน้าแรกของระบบ แสดงสถิติรวมทั้งหมด อัปเดตทุกครั้งที่เปิดหน้า</p>
+
+  <h3>สิ่งที่แสดง</h3>
+  <table>
+    <tr><th>ส่วน</th><th>เนื้อหา</th></tr>
+    <tr><td>รุ่นปัจจุบัน</td><td>รุ่นที่กำลังดำเนินการ + จำนวนผู้เข้าร่วม</td></tr>
+    <tr><td>การ์ดสรุป</td><td>จำนวนคนพิการ / สถานประกอบการ / การอบรม</td></tr>
+    <tr><td>กราฟแยกเพศ</td><td>ชาย / หญิง / อื่นๆ</td></tr>
+    <tr><td>กราฟประเภทความพิการ</td><td>7 ประเภท</td></tr>
+    <tr><td>กราฟสถานะงาน</td><td>มีงาน / ว่างงาน / ศึกษาต่อ</td></tr>
+    <tr><td>กราฟวุฒิการศึกษา / ช่วงอายุ / ภูมิภาค</td><td>แบ่งกลุ่มอัตโนมัติ</td></tr>
+  </table>
+  <div class="tip"><span class="ic">⚡</span><div>กราฟทั้งหมดคำนวณจากข้อมูลจริงในระบบ ยิ่งกรอกข้อมูลครบ กราฟยิ่งสมบูรณ์</div></div>
+</div>
+
+<!-- ======== 9. REPORTS ======== -->
+<div class="page page-break">
+  <div class="sec-wrap"><div class="sec-num">9</div><div><h2 class="sec">ออกรายงาน</h2><div class="sec-sub">ปลายน้ำ — พิมพ์ หรือบันทึกเป็น PDF</div></div></div>
+  <p class="lead">ระบบออกรายงานได้ 5 ประเภท เลือกกรองตามรุ่นได้ และพิมพ์/บันทึก PDF ได้ทันที</p>
+
+  <h3>5 ประเภทรายงาน</h3>
+  <table>
+    <tr><th>#</th><th>รายงาน</th><th>ใช้ทำอะไร</th></tr>
+    <tr><td>1</td><td>รายชื่อคนพิการ</td><td>สรุปรายชื่อผู้เข้าร่วม</td></tr>
+    <tr><td>2</td><td>แบบสังเกตพฤติกรรมรายบุคคล</td><td>ส่งให้วิทยากรก่อนอบรม</td></tr>
+    <tr><td>3</td><td>แบบประเมินรายวิชา (25 คะแนน)</td><td>ให้วิทยากรกรอกคะแนนรายวิชา</td></tr>
+    <tr><td>4</td><td>ใบ Certificate</td><td>ใบรับรองผลการอบรม (1 ใบ/คน)</td></tr>
+    <tr><td>5</td><td>รายงานส่งบริษัท</td><td>สรุปส่งบริษัทสนับสนุน</td></tr>
+  </table>
+
+  <h3>ขั้นตอน</h3>
+  <div class="steps">
+    <div class="step">ไปที่เมนู <b>“ออกรายงาน”</b></div>
+    <div class="step">เลือกประเภทรายงาน (5 ปุ่มด้านบน)</div>
+    <div class="step">เลือก <b>รุ่น</b> ที่ต้องการ (ถ้าต้องการกรองเฉพาะรุ่น)</div>
+    <div class="step">กรอกข้อมูลตั้งค่า (สำหรับ Certificate / ประเมินรายวิชา / รายงานบริษัท)</div>
+    <div class="step">เลือกรายชื่อ — หรือกด <b>“เลือกทั้งหมด”</b></div>
+    <div class="step">กด <b>“พิมพ์ / บันทึก PDF”</b> มุมขวาบน</div>
+    <div class="step">ในหน้าต่างพิมพ์ เลือกปลายทางเป็น <b>“Save as PDF”</b></div>
+  </div>
+  <div class="tip"><span class="ic">🖨️</span><div>ใบ Certificate ไม่มีตราโลโก้ในไฟล์ เผื่อพื้นที่ไว้ให้ <b>ปั๊มตราโลโก้เอง</b> ภายหลัง</div></div>
+</div>
+
+<!-- ======== 10. USERS ======== -->
+<div class="page page-break">
+  <div class="sec-wrap"><div class="sec-num">10</div><div><h2 class="sec">จัดการผู้ใช้งาน</h2><div class="sec-sub">เฉพาะผู้ดูแลระบบ (Admin)</div></div></div>
+  <p class="lead">เมนู “จัดการผู้ใช้” เปิดเฉพาะ Admin ใช้เพิ่ม/แก้ไข/เปิด–ปิด บัญชีผู้ใช้</p>
+
+  <h3>เพิ่มผู้ใช้ใหม่</h3>
+  <div class="steps">
+    <div class="step">กด <b>“+ เพิ่มผู้ใช้”</b></div>
+    <div class="step">กรอกชื่อ อีเมล รหัสผ่าน และเลือก <b>บทบาท</b></div>
+    <div class="step">กด <b>“เพิ่มผู้ใช้”</b></div>
+  </div>
+
+  <h3>ข้อควรรู้</h3>
+  <ul>
+    <li>แก้ไขผู้ใช้: เว้นช่องรหัสผ่านว่างไว้ถ้าไม่ต้องการเปลี่ยน</li>
+    <li>กดที่ป้ายสถานะเพื่อสลับ เปิด/ปิด การใช้งานบัญชี (บัญชีปิดเข้าระบบไม่ได้)</li>
+    <li>ไม่สามารถลบหรือปิดบัญชีของตัวเองได้</li>
+    <li>ควรเปลี่ยนรหัสผ่าน admin1234 หลังเริ่มใช้งาน</li>
+  </ul>
+</div>
+
+<!-- ======== APPENDIX ======== -->
+<div class="page page-break">
+  <div class="sec-wrap"><div class="sec-num">★</div><div><h2 class="sec">ภาคผนวก</h2><div class="sec-sub">สิ่งที่ควรรู้เพิ่มเติม</div></div></div>
+
+  <h3>สิทธิ์ผู้ใช้งาน 3 ระดับ</h3>
+  <table>
+    <tr><th>บทบาท</th><th>ทำอะไรได้</th></tr>
+    <tr><td><span class="chip c-red">ADMIN</span></td><td>ทำได้ทุกอย่าง + จัดการบัญชีผู้ใช้</td></tr>
+    <tr><td><span class="chip c-orange">STAFF</span></td><td>เพิ่ม/แก้/ลบ ข้อมูลทุกอย่าง ยกเว้นจัดการผู้ใช้</td></tr>
+    <tr><td><span class="chip c-blue">VIEWER</span></td><td>ดูข้อมูล + ออกรายงานได้ แต่แก้ไขไม่ได้</td></tr>
+  </table>
+
+  <h3>รูปแบบวันที่</h3>
+  <p>ทุกวันที่ในระบบใช้รูปแบบ <b>วัน/เดือน/ปี (พ.ศ.)</b> เช่น 30/06/2568 — กรอกเป็นตัวเลข ระบบใส่ “/” ให้เอง</p>
+
+  <h3>สัญญาณแจ้งเตือนในระบบ</h3>
+  <ul>
+    <li><b>แถบเขียว</b> = ทำรายการสำเร็จ (เพิ่ม/แก้/ลบ/บันทึก)</li>
+    <li><b>แถบแดง</b> = ไม่สำเร็จ หรือกรอกข้อมูลไม่ครบ (จะบอกว่าขาดอะไร)</li>
+    <li><b>กล่องยืนยันลบ</b> = เด้งถามก่อนลบทุกครั้ง กันลบพลาด</li>
+  </ul>
+
+  <h3>ลำดับการทำงานที่แนะนำ (สรุป)</h3>
+  <div class="flow">
+    <span class="node">สร้างรุ่น</span><span class="arr">→</span>
+    <span class="node">เพิ่มคนพิการ (ผูกรุ่น)</span><span class="arr">→</span>
+    <span class="node">บันทึกอบรม/ทักษะ</span><span class="arr">→</span>
+    <span class="node">ประเมิน Pre/Post</span><span class="arr">→</span>
+    <span class="node">ผูกงาน/องค์กร</span><span class="arr">→</span>
+    <span class="node">ติดตามผล</span><span class="arr">→</span>
+    <span class="node">ดู Dashboard</span><span class="arr">→</span>
+    <span class="node">ออกรายงาน</span>
+  </div>
+
+  <div class="tip"><span class="ic">✅</span><div>ทำตามลำดับนี้จะได้ข้อมูลครบถ้วน รายงานและกราฟจะสมบูรณ์ที่สุด</div></div>
+
+  <p style="text-align:center;color:#a8a29e;margin-top:40px;font-size:12px;">
+    — จบคู่มือการใช้งาน —<br>
+    ระบบฐานข้อมูลคนพิการ มจธ. • https://kmutt-pwd-db.vercel.app
+  </p>
+</div>
+
+</body>
+</html>
