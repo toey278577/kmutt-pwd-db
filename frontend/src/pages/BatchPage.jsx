@@ -220,16 +220,8 @@ export default function BatchPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelCls}>วันเริ่ม</label>
-                  <input type="date" className={inputCls}
-                    value={form.startDate} onChange={e => setForm({...form, startDate: e.target.value})} />
-                </div>
-                <div>
-                  <label className={labelCls}>วันสิ้นสุด</label>
-                  <input type="date" className={inputCls}
-                    value={form.endDate} onChange={e => setForm({...form, endDate: e.target.value})} />
-                </div>
+                <ThaiDate label="วันเริ่ม" value={form.startDate} onChange={v => setForm({...form, startDate: v})} />
+                <ThaiDate label="วันสิ้นสุด" value={form.endDate} onChange={v => setForm({...form, endDate: v})} />
               </div>
 
               <div>
@@ -255,6 +247,34 @@ export default function BatchPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ช่องวันที่แบบไทย วว/ดด/ปปปป (พ.ศ.) — เก็บค่าเป็น ISO yyyy-mm-dd */
+function ThaiDate({ label, value = '', onChange }) {
+  const toDisplay = (iso) => {
+    if (!iso) return '';
+    const [y, m, d] = iso.slice(0, 10).split('-');
+    if (!y || !m || !d) return '';
+    return `${d}/${m}/${parseInt(y) + 543}`;
+  };
+  const [display, setDisplay] = useState(() => toDisplay(value));
+  useEffect(() => { setDisplay(toDisplay(value)); }, [value]);
+  const handleChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 8);
+    const fmt = raw.length <= 2 ? raw : raw.length <= 4 ? `${raw.slice(0,2)}/${raw.slice(2)}` : `${raw.slice(0,2)}/${raw.slice(2,4)}/${raw.slice(4)}`;
+    setDisplay(fmt);
+    if (raw.length === 8) {
+      const yAD = parseInt(raw.slice(4, 8)) - 543;
+      onChange(`${yAD}-${raw.slice(2,4)}-${raw.slice(0,2)}`);
+    } else if (raw.length === 0) onChange('');
+  };
+  return (
+    <div>
+      <label className={labelCls}>{label}</label>
+      <input type="text" inputMode="numeric" placeholder="วว/ดด/ปปปป (พ.ศ.)" maxLength={10}
+        className={inputCls} value={display} onChange={handleChange} />
     </div>
   );
 }
