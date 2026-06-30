@@ -90,7 +90,7 @@ export default function UserManagement() {
             <UserCog size={22} className="text-orange-600" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-gray-800 leading-tight">จัดการผู้ใช้งาน</h1>
+            <h1 className="text-xl font-black page-title leading-tight">จัดการผู้ใช้งาน</h1>
             <p className="text-gray-400 text-sm mt-0.5">
               <span className="text-orange-600 font-bold">{users.length}</span> บัญชีในระบบ
             </p>

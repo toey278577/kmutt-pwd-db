@@ -138,7 +138,7 @@ export default function ReportPage() {
             <Printer size={22} className="text-orange-600" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-gray-800 leading-tight">ออกรายงาน / Report</h1>
+            <h1 className="text-xl font-black page-title leading-tight">ออกรายงาน / Report</h1>
             <p className="text-gray-400 text-sm mt-0.5">กด "พิมพ์ / บันทึก PDF" → เปลี่ยน Destination เป็น "Save as PDF" → Save</p>
           </div>
         </div>

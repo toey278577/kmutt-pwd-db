@@ -54,7 +54,7 @@ export default function OrganizationList() {
             <Building2 size={22} className="text-orange-600" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-gray-800 leading-tight">สถานประกอบการ</h1>
+            <h1 className="text-xl font-black page-title leading-tight">สถานประกอบการ</h1>
             <p className="text-gray-400 text-sm mt-0.5">
               <span className="text-orange-600 font-bold">{orgs.length}</span> แห่งในระบบ
             </p>

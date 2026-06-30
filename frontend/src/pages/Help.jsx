@@ -556,7 +556,7 @@ export default function Help() {
           <BookOpen size={22} className="text-orange-600" />
         </div>
         <div>
-          <h1 className="text-xl font-black text-gray-800 leading-tight">คู่มือการใช้งาน</h1>
+          <h1 className="text-xl font-black page-title leading-tight">คู่มือการใช้งาน</h1>
           <p className="text-gray-400 text-sm mt-0.5">ระบบฐานข้อมูลคนพิการ มจธ. — อัปเดต มิ.ย. 2568</p>
         </div>
       </div>

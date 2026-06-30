@@ -50,7 +50,7 @@ export default function FollowUpList() {
           <Target size={22} className="text-orange-600" />
         </div>
         <div>
-          <h1 className="text-xl font-black text-gray-800 leading-tight">ติดตามผล</h1>
+          <h1 className="text-xl font-black page-title leading-tight">ติดตามผล</h1>
           <p className="text-gray-400 text-sm mt-0.5">
             <span className="text-orange-600 font-bold">{rows.length}</span> รายการในระบบ
           </p>

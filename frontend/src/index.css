@@ -42,6 +42,10 @@ body {
 .page-fade { animation: pageFade .35s ease-out; }
 @keyframes pageFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
+/* หัวข้อหน้า — กำหนดสีเองทั้ง light/dark ไม่พึ่ง main-override (กันเบราว์เซอร์/ส่วนเสริมแทรก) */
+.page-title { color: #1c1917 !important; }
+html.dark .page-title { color: #f5f5f4 !important; }
+
 /* ─── Dark Mode — โทนเทาเข้มอบอุ่น (stone) สะอาด เข้ากับ sidebar ─── */
 html.dark body {
   background-color: #131110;
