@@ -24,10 +24,13 @@
 .animate-bounce-in { animation: bounce-in 0.35s ease-out forwards; }
 
 body {
-  background: #fff7ed;
+  background: #f4ede3;
   font-family: 'Sarabun', sans-serif;
   color: #1c1917;
 }
+
+/* Light mode — ลดความสว่างการ์ดขาวล้วน ให้นวลตา ไม่แสบ */
+html:not(.dark) main .bg-white { background-color: #fffdfa; }
 
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: transparent; }
