@@ -48,21 +48,21 @@ html.dark .page-title { color: #f5f5f4 !important; }
 
 /* ─── Dark Mode — โทนเทาเข้มอบอุ่น (stone) สะอาด เข้ากับ sidebar ─── */
 html.dark body {
-  background-color: #131110;
+  background-color: #1a1a1d;
   color: #f5f5f4;
 }
 
-html.dark ::-webkit-scrollbar-thumb { background: #44403c; }
-html.dark ::-webkit-scrollbar-thumb:hover { background: #57534e; }
+html.dark ::-webkit-scrollbar-thumb { background: #3a3a40; }
+html.dark ::-webkit-scrollbar-thumb:hover { background: #4a4a50; }
 
 @media not print {
   /* Surfaces — การ์ด/พื้นหลัง */
-  html.dark main .bg-white               { background-color: #1c1a18 !important; }
-  html.dark main [class*="bg-orange-50"] { background-color: #26211c !important; }
-  html.dark main .bg-gray-50             { background-color: #181613 !important; }
-  html.dark main .bg-gray-100            { background-color: #232020 !important; }
+  html.dark main .bg-white               { background-color: #242428 !important; }
+  html.dark main [class*="bg-orange-50"] { background-color: #28282d !important; }
+  html.dark main .bg-gray-50             { background-color: #1e1e22 !important; }
+  html.dark main .bg-gray-100            { background-color: #2a2a2f !important; }
   html.dark main .bg-gray-900            { background-color: #0a0a0a !important; }
-  html.dark main [class*="bg-amber-50"]  { background-color: #26211c !important; }
+  html.dark main [class*="bg-amber-50"]  { background-color: #28282d !important; }
   /* การ์ดสีพาสเทล (Pre/Post test, Soft Skills, badge สถานะ) — ปล่อยพาสเทลสว่าง
      เพื่อให้ตัวอักษรสีเข้มข้างในอ่านได้ (เหมือน chip) ไม่ทำให้เข้มจนมองไม่เห็น */
 
@@ -72,8 +72,8 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #57534e; }
   html.dark main .border-gray-50,
   html.dark main .border-gray-100,
   html.dark main .border-gray-200,
-  html.dark main [class*="border-slate-"] { border-color: #2e2a26 !important; }
-  html.dark main .border-gray-300        { border-color: #3a3530 !important; }
+  html.dark main [class*="border-slate-"] { border-color: #34343b !important; }
+  html.dark main .border-gray-300        { border-color: #40404a !important; }
 
   /* Text — บังคับหัวข้อสว่างชัด + รองเทาอ่านง่าย */
   html.dark main h1, html.dark main h2, html.dark main h3,
@@ -82,41 +82,41 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #57534e; }
   html.dark main .text-gray-700,
   html.dark main .text-orange-950        { color: #f5f5f4 !important; }
   html.dark main .text-gray-600,
-  html.dark main .text-gray-500          { color: #c4bfb8 !important; }
-  html.dark main .text-gray-400          { color: #a8a29e !important; }
-  html.dark main .text-gray-300          { color: #8c8681 !important; }
+  html.dark main .text-gray-500          { color: #bcbdc4 !important; }
+  html.dark main .text-gray-400          { color: #9b9ca4 !important; }
+  html.dark main .text-gray-300          { color: #7f8088 !important; }
   html.dark main .text-amber-700         { color: #fbbf24 !important; }
   html.dark main .text-orange-800        { color: #fb923c !important; }
   html.dark main .divide-gray-50,
-  html.dark main .divide-y               { border-color: #2e2a26 !important; }
+  html.dark main .divide-y               { border-color: #34343b !important; }
 
   /* Inputs & forms */
   html.dark main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]) {
-    background-color: #181613 !important;
-    border-color: #2e2a26 !important;
+    background-color: #1e1e22 !important;
+    border-color: #34343b !important;
     color: #f5f5f4 !important;
   }
-  html.dark main input::placeholder      { color: #57534e !important; }
-  html.dark main select                  { background-color: #181613 !important; border-color: #2e2a26 !important; color: #f5f5f4 !important; }
-  html.dark main textarea                { background-color: #181613 !important; border-color: #2e2a26 !important; color: #f5f5f4 !important; }
+  html.dark main input::placeholder      { color: #4a4a50 !important; }
+  html.dark main select                  { background-color: #1e1e22 !important; border-color: #34343b !important; color: #f5f5f4 !important; }
+  html.dark main textarea                { background-color: #1e1e22 !important; border-color: #34343b !important; color: #f5f5f4 !important; }
 
   /* Tables */
-  html.dark main tr.bg-white             { background-color: #1c1a18 !important; }
-  html.dark main tr.bg-gray-50           { background-color: #181613 !important; }
+  html.dark main tr.bg-white             { background-color: #242428 !important; }
+  html.dark main tr.bg-gray-50           { background-color: #1e1e22 !important; }
   html.dark main td, html.dark main th   { color: #f5f5f4 !important; }
-  html.dark main .bg-gray-50 th          { color: #a8a29e !important; }
+  html.dark main .bg-gray-50 th          { color: #9b9ca4 !important; }
 
   /* Dividers */
-  html.dark main .border-b               { border-color: #2e2a26 !important; }
-  html.dark main .border-t               { border-color: #2e2a26 !important; }
+  html.dark main .border-b               { border-color: #34343b !important; }
+  html.dark main .border-t               { border-color: #34343b !important; }
 
   /* Dashboard chart cards */
   html.dark main .chart-card {
-    border: 1px solid #2e2a26 !important;
+    border: 1px solid #34343b !important;
     box-shadow: 0 2px 12px rgba(0,0,0,0.4) !important;
   }
   html.dark main .chart-card-header {
-    border-bottom: 1px solid #2e2a26 !important;
+    border-bottom: 1px solid #34343b !important;
   }
   /* Shadows */
   html.dark main .shadow-sm,
@@ -124,12 +124,12 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #57534e; }
   html.dark main .shadow-md              { box-shadow: 0 4px 16px rgba(0,0,0,0.6) !important; }
 
   /* Recharts — grid & axis */
-  html.dark main .recharts-cartesian-grid line  { stroke: #2e2a26 !important; }
-  html.dark main .recharts-text tspan           { fill: #a8a29e !important; }
-  html.dark main .recharts-legend-item-text     { color: #a8a29e !important; fill: #a8a29e !important; }
+  html.dark main .recharts-cartesian-grid line  { stroke: #34343b !important; }
+  html.dark main .recharts-text tspan           { fill: #9b9ca4 !important; }
+  html.dark main .recharts-legend-item-text     { color: #9b9ca4 !important; fill: #9b9ca4 !important; }
   html.dark main .recharts-tooltip-wrapper .recharts-default-tooltip {
-    background: #1c1a18 !important;
-    border-color: #2e2a26 !important;
+    background: #242428 !important;
+    border-color: #34343b !important;
     color: #f5f5f4 !important;
   }
 }
