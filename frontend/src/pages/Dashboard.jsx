@@ -85,8 +85,8 @@ export default function Dashboard() {
             <h1 className="text-2xl md:text-3xl font-black leading-tight">ภาพรวมระบบ</h1>
             <p className="text-white/85 text-sm mt-1.5">ฐานข้อมูลคนพิการ · โครงการฝึกอบรม-ฝึกงาน เพื่อเตรียมความพร้อมสู่สถานประกอบการ</p>
           </div>
-          <div className="hidden md:flex w-16 h-16 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-sm items-center justify-center flex-shrink-0">
-            <img src="/logo-icon.png" className="h-11 w-11 object-contain" alt="KMUTT" onError={e => { e.target.style.display='none'; }} />
+          <div className="hidden md:flex w-20 h-20 rounded-2xl bg-white shadow-xl ring-4 ring-white/30 items-center justify-center flex-shrink-0">
+            <img src="/logo-icon.png" className="h-14 w-14 object-contain" alt="KMUTT" onError={e => { e.target.style.display='none'; }} />
           </div>
         </div>
       </div>
