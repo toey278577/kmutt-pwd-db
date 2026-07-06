@@ -158,7 +158,37 @@ export default function ReportPage() {
       return;
     }
 
-    // รายชื่อคนพิการ (list / behavior) และชนิดอื่น ๆ ใช้ตารางรายชื่อพื้นฐาน
+    if (activeType === 'behavior') {
+      const header = ['#', 'ชื่อ - สกุล', 'ชื่อเล่น', 'อายุ', 'ประเภทความพิการ', 'วุฒิการศึกษา', 'ทักษะด้านคอมพิวเตอร์', 'สาเหตุความพิการ'];
+      const rows = [
+        ['แบบบันทึกพฤติกรรมการปฏิบัติงานรายบุคคล'],
+        [],
+        header,
+        ...filteredPersons.map((p, i) => {
+          const computerSkills = p.skills?.filter(s =>
+            s.skillName.toLowerCase().includes('computer') ||
+            s.skillName.includes('คอมพิวเตอร์') ||
+            s.skillName.includes('word') ||
+            s.skillName.includes('excel')
+          ).map(s => s.skillName).join(', ') || '';
+          return [
+            i + 1,
+            p.fullName,
+            '',
+            calcAge(p.birthDate) ?? '',
+            p.disabilityInfos?.map(d => d.disabilityType?.typeName).join(', ') || '',
+            p.educationLevel || '',
+            computerSkills,
+            '',
+          ];
+        }),
+      ];
+      const cols = [{ wch: 4 }, { wch: 26 }, { wch: 10 }, { wch: 6 }, { wch: 18 }, { wch: 18 }, { wch: 22 }, { wch: 20 }];
+      saveWorkbook(rows, cols, 'แบบสังเกตพฤติกรรม', 'แบบสังเกตพฤติกรรมรายบุคคล');
+      return;
+    }
+
+    // รายชื่อคนพิการ (list) และชนิดอื่น ๆ ใช้ตารางรายชื่อพื้นฐาน
     const header = ['#', 'ชื่อ-นามสกุล', 'อายุ', 'วัน/เดือน/ปีเกิด', 'เลขบัตรประชาชน', 'ความพิการ', 'จังหวัด', 'เบอร์โทร'];
     const rows = [
       header,
