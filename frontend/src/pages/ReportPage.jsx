@@ -446,7 +446,7 @@ export default function ReportPage() {
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">#</th>
-                    <th className="border border-gray-300 px-2 py-1.5 text-left">ชื่อ-นามสกุล</th>
+                    <th className="border border-gray-300 px-2 py-1.5 text-left w-44">ชื่อ-นามสกุล</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-10">ชื่อเล่น</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">อายุ</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-20">วัน/เดือน/ปีเกิด</th>
@@ -564,7 +564,7 @@ export default function ReportPage() {
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">#</th>
                     <th className="border border-gray-300 px-1 py-1.5 text-center w-14">รูป</th>
-                    <th className="border border-gray-300 px-2 py-1.5 text-left">ชื่อ - สกุล</th>
+                    <th className="border border-gray-300 px-2 py-1.5 text-left w-40">ชื่อ - สกุล</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-10">ชื่อเล่น</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">อายุ</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center">ประเภทความพิการ</th>
