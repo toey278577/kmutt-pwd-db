@@ -446,7 +446,7 @@ export default function ReportPage() {
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">#</th>
-                    <th className="border border-gray-300 px-2 py-1.5 text-left">ชื่อ-นามสกุล</th>
+                    <th className="border border-gray-300 px-2 py-1.5 text-left whitespace-nowrap">ชื่อ-นามสกุล</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-10">ชื่อเล่น</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">อายุ</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-20">วัน/เดือน/ปีเกิด</th>
@@ -463,7 +463,7 @@ export default function ReportPage() {
                     return (
                       <tr key={p.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="border border-gray-300 px-2 py-1 text-center">{i + 1}</td>
-                        <td className="border border-gray-300 px-2 py-1">{p.fullName}</td>
+                        <td className="border border-gray-300 px-2 py-1 whitespace-nowrap">{p.fullName}</td>
                         <td className="border border-gray-300 px-2 py-1 text-center">—</td>
                         <td className="border border-gray-300 px-2 py-1 text-center">{age ?? '—'}</td>
                         <td className="border border-gray-300 px-2 py-1 text-center">{fmtDate(p.birthDate)}</td>
