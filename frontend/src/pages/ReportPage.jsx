@@ -442,11 +442,11 @@ export default function ReportPage() {
                 <p className="text-base font-bold">รายชื่อคนพิการ</p>
                 <p className="text-sm text-gray-500">โครงการฝึกอบรม-ฝึกงานคนพิการ มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</p>
               </div>
-              <table className="w-full text-xs border-collapse">
+              <table className="w-auto mx-auto text-xs border-collapse">
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">#</th>
-                    <th className="border border-gray-300 px-2 py-1.5 text-left w-44">ชื่อ-นามสกุล</th>
+                    <th className="border border-gray-300 px-2 py-1.5 text-left whitespace-nowrap">ชื่อ-นามสกุล</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-10">ชื่อเล่น</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">อายุ</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-20">วัน/เดือน/ปีเกิด</th>
