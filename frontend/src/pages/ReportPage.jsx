@@ -502,18 +502,18 @@ export default function ReportPage() {
                 <p className="text-xs mb-3">อาจารย์ผู้สอน <span className="font-bold">{courseEvalForm.teacher}</span></p>
               )}
               <p className="text-xs text-gray-500 mb-1">คำชี้แจง: โปรดระบุคะแนน 1-5 องค์ประกอบตรงกับพฤติกรรมที่เห็นจริง สามารถปรับเปลี่ยนตัวชี้ตัวเลขได้ เช่น "ขั้นงาน" ไม่มีการทำ "ขั้นนำเสนอ" ที่นั่งเรียน สามารถปรับรายละเอียดให้สอดคล้องกับเนื้อหาวิชาและการเรียนการสอน</p>
-              <table className="w-full text-xs border-collapse">
+              <table className="eval-table table-fixed w-full text-xs border-collapse">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border border-gray-300 px-2 py-2 text-center w-8">#</th>
-                    <th className="border border-gray-300 px-1 py-2 text-center w-14">รูป</th>
-                    <th className="border border-gray-300 px-2 py-2 text-left min-w-28">ชื่อ - สกุล</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-14">ความตั้งใจ/<br/>ความสนใจ</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-14">การตอบคำถาม/<br/>แสดงความคิดเห็น</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-14">การทำงาน<br/>ร่วมกับผู้อื่น/<br/>มีส่วนร่วม</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-14">ตรงต่อเวลา/<br/>ส่งงานครบ<br/>มอบหมาย</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-14">ขึ้น/<br/>ผลงาน</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-14">รวม<br/>(25 คะแนน)</th>
+                    <th className="border border-gray-300 px-1 py-2 text-center w-[4%]">#</th>
+                    <th className="border border-gray-300 px-1 py-2 text-center w-[8%]">รูป</th>
+                    <th className="border border-gray-300 px-2 py-2 text-left w-[22%]">ชื่อ - สกุล</th>
+                    <th className="border border-gray-300 px-1 py-2 text-center w-[11%]">ความตั้งใจ/<br/>ความสนใจ</th>
+                    <th className="border border-gray-300 px-1 py-2 text-center w-[11%]">การตอบคำถาม/<br/>แสดงความคิดเห็น</th>
+                    <th className="border border-gray-300 px-1 py-2 text-center w-[11%]">การทำงาน<br/>ร่วมกับผู้อื่น/<br/>มีส่วนร่วม</th>
+                    <th className="border border-gray-300 px-1 py-2 text-center w-[11%]">ตรงต่อเวลา/<br/>ส่งงานครบ<br/>มอบหมาย</th>
+                    <th className="border border-gray-300 px-1 py-2 text-center w-[10%]">ขึ้น/<br/>ผลงาน</th>
+                    <th className="border border-gray-300 px-1 py-2 text-center w-[12%]">รวม<br/>(25 คะแนน)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -712,6 +712,7 @@ export default function ReportPage() {
 
       {/* Print CSS */}
       <style>{`
+        ${activeType === 'course_eval' ? '@page { size: A4 landscape; margin: 12mm; }' : ''}
         /* เฉพาะบนจอ: ตารางรายชื่อกว้างพอดีเนื้อหา จัดกึ่งกลาง ไม่ยืดเต็มจอ (ตอนพิมพ์ไม่แตะ) */
         @media screen {
           .list-table { width: fit-content !important; max-width: 100%; margin-left: auto; margin-right: auto; }
@@ -722,6 +723,11 @@ export default function ReportPage() {
           .page-break { page-break-before: always; }
           img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          /* แบบประเมินรายวิชา — สไตล์เอกสารราชการ แนวนอน (เส้นดำคม หัวเทาอ่อน ช่องสูงพอเขียน) */
+          .eval-table { width: 100% !important; font-size: 12px !important; }
+          .eval-table th { border: 1px solid #000 !important; background: #e5e7eb !important; font-weight: 700; }
+          .eval-table td { border: 1px solid #000 !important; }
+          .eval-table tbody tr { height: 66px !important; }
         }
       `}</style>
     </div>
