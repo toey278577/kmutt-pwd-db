@@ -456,7 +456,7 @@ export default function ReportPage() {
                 <p className="text-sm text-gray-500">โครงการฝึกอบรม-ฝึกงานคนพิการ มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</p>
               </div>
               <div className="overflow-x-auto">
-              <table className="w-11/12 mx-auto text-xs border-collapse whitespace-nowrap">
+              <table className="w-auto mx-auto text-xs border-collapse whitespace-nowrap">
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">#</th>
@@ -733,6 +733,9 @@ export default function ReportPage() {
           .print-area { border: none !important; box-shadow: none !important; border-radius: 0 !important; }
           /* ตอนพิมพ์ต้องเห็นทุกคอลัมน์ ห้ามตัดข้อมูลทิ้ง */
           .overflow-x-auto { overflow: visible !important; }
+          /* บังคับเส้นขอบตารางให้แสดงตอนพิมพ์ (บาง browser ตัดขอบสีจางทิ้ง) */
+          .print-area table { border-collapse: collapse !important; }
+          .print-area table th, .print-area table td { border: 1px solid #4b5563 !important; }
           .page-break { page-break-before: always; }
           img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
