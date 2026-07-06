@@ -360,7 +360,8 @@ export default function ReportPage() {
                 <input className={inputCls} value={certForm.signTitle} onChange={e => setCertForm({...certForm, signTitle: e.target.value})} />
               </div>
             </div>
-            <PersonSelector persons={persons} selected={selectedPersonIds} onToggle={togglePerson} onAll={selectAllPersons} onClear={clearPersons} />
+            <BatchFilter batches={batches} value={batchFilter} onChange={changeBatch} />
+            <PersonSelector persons={batchPersons} selected={selectedPersonIds} onToggle={togglePerson} onAll={() => setSelectedPersonIds(batchPersons.map(p => p.id))} onClear={clearPersons} />
           </div>
         )}
 
