@@ -4,7 +4,7 @@ import * as XLSX from 'xlsx';
 import { getPersons, getOrganizations, getBatches } from '../api';
 
 const fmtDate = (iso) => {
-  if (!iso) return '—';
+  if (!iso) return '';
   const [y, m, d] = iso.slice(0, 10).split('-');
   return `${d}/${m}/${parseInt(y) + 543}`;
 };
@@ -459,18 +459,18 @@ export default function ReportPage() {
                 <tbody>
                   {filteredPersons.map((p, i) => {
                     const age = calcAge(p.birthDate);
-                    const disType = p.disabilityInfos?.map(d => d.disabilityType?.typeName).join(', ') || '—';
+                    const disType = p.disabilityInfos?.map(d => d.disabilityType?.typeName).join(', ') || '';
                     return (
                       <tr key={p.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="border border-gray-300 px-2 py-2 text-center align-middle">{i + 1}</td>
                         <td className="border border-gray-300 px-2 py-2 whitespace-nowrap align-middle">{p.fullName}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{p.nickname || '—'}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{age ?? '—'}</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{p.nickname || ''}</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{age ?? ''}</td>
                         <td className="border border-gray-300 px-2 py-2 text-center align-middle">{fmtDate(p.birthDate)}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-center font-mono align-middle">{p.thaiId || '—'}</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center font-mono align-middle">{p.thaiId || ''}</td>
                         <td className="border border-gray-300 px-2 py-2 align-middle">{disType}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{p.province || '—'}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{p.mobile || p.phone || '—'}</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{p.province || ''}</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{p.mobile || p.phone || ''}</td>
                       </tr>
                     );
                   })}
@@ -576,13 +576,13 @@ export default function ReportPage() {
                 <tbody>
                   {filteredPersons.map((p, i) => {
                     const age = calcAge(p.birthDate);
-                    const disType = p.disabilityInfos?.map(d => d.disabilityType?.typeName).join(', ') || '—';
+                    const disType = p.disabilityInfos?.map(d => d.disabilityType?.typeName).join(', ') || '';
                     const computerSkills = p.skills?.filter(s =>
                       s.skillName.toLowerCase().includes('computer') ||
                       s.skillName.includes('คอมพิวเตอร์') ||
                       s.skillName.includes('word') ||
                       s.skillName.includes('excel')
-                    ).map(s => s.skillName).join(', ') || '—';
+                    ).map(s => s.skillName).join(', ') || '';
                     return (
                       <tr key={p.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="border border-gray-300 px-2 py-2 text-center align-middle">{i + 1}</td>
@@ -593,10 +593,10 @@ export default function ReportPage() {
                           }
                         </td>
                         <td className="border border-gray-300 px-2 py-2 align-middle">{p.fullName}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{p.nickname || '—'}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{age ?? '—'}</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{p.nickname || ''}</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{age ?? ''}</td>
                         <td className="border border-gray-300 px-2 py-2 align-middle">{disType}</td>
-                        <td className="border border-gray-300 px-2 py-2 align-middle">{p.educationLevel || '—'}</td>
+                        <td className="border border-gray-300 px-2 py-2 align-middle">{p.educationLevel || ''}</td>
                         <td className="border border-gray-300 px-2 py-2 align-middle">{computerSkills}</td>
                         <td className="border border-gray-300 px-2 py-2 align-middle"></td>
                       </tr>
@@ -682,15 +682,15 @@ export default function ReportPage() {
                 <tbody>
                   {filteredPersons.map((p, i) => {
                     const age = calcAge(p.birthDate);
-                    const disType = p.disabilityInfos?.map(d => d.disabilityType?.typeName).join(', ') || '—';
+                    const disType = p.disabilityInfos?.map(d => d.disabilityType?.typeName).join(', ') || '';
                     return (
                       <tr key={p.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="border border-gray-300 px-2 py-1 text-center">{i + 1}</td>
                         <td className="border border-gray-300 px-2 py-1">{p.fullName}</td>
-                        <td className="border border-gray-300 px-2 py-1 text-center">{age ?? '—'}</td>
+                        <td className="border border-gray-300 px-2 py-1 text-center">{age ?? ''}</td>
                         <td className="border border-gray-300 px-2 py-1">{disType}</td>
-                        <td className="border border-gray-300 px-2 py-1">{p.educationLevel || '—'}</td>
-                        <td className="border border-gray-300 px-2 py-1 text-center">{p.mobile || p.phone || '—'}</td>
+                        <td className="border border-gray-300 px-2 py-1">{p.educationLevel || ''}</td>
+                        <td className="border border-gray-300 px-2 py-1 text-center">{p.mobile || p.phone || ''}</td>
                       </tr>
                     );
                   })}
