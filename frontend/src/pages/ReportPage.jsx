@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Printer, FileText, Award, Building2, Users, ChevronDown, X, Layers } from 'lucide-react';
+import { Printer, FileText, Award, Building2, Users, ChevronDown, X, Layers, FileSpreadsheet } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { getPersons, getOrganizations, getBatches } from '../api';
 
 const fmtDate = (iso) => {
@@ -123,6 +124,59 @@ export default function ReportPage() {
     window.print();
   };
 
+  // ── Export เป็นไฟล์ Excel (.xlsx) ตามชนิดรายงานที่เลือกอยู่ ──
+  const saveWorkbook = (rows, cols, sheetName, fileName) => {
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    if (cols) ws['!cols'] = cols;
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    const stamp = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `${fileName}-${stamp}.xlsx`);
+  };
+
+  const handleExportExcel = () => {
+    if (activeType === 'course_eval') {
+      const header = [
+        '#', 'ชื่อ - สกุล',
+        'ความตั้งใจ/ความสนใจ',
+        'การตอบคำถาม/แสดงความคิดเห็น',
+        'การทำงานร่วมกับผู้อื่น/มีส่วนร่วม',
+        'ตรงต่อเวลา/ส่งงานครบมอบหมาย',
+        'ผลงาน',
+        'รวม (25 คะแนน)',
+      ];
+      const rows = [
+        ['แบบประเมินรายวิชา — บันทึกพฤติกรรมการปฏิบัติงานรายบุคคล'],
+        [`รายวิชา: ${courseEvalForm.subject || '-'}`, '', `วันที่: ${courseEvalForm.date || '-'}`,
+          '', courseEvalForm.teacher ? `อาจารย์ผู้สอน: ${courseEvalForm.teacher}` : ''],
+        [],
+        header,
+        ...filteredPersons.map((p, i) => [i + 1, p.fullName, '', '', '', '', '', '']),
+      ];
+      const cols = [{ wch: 4 }, { wch: 26 }, { wch: 16 }, { wch: 18 }, { wch: 18 }, { wch: 16 }, { wch: 12 }, { wch: 14 }];
+      saveWorkbook(rows, cols, 'แบบประเมินรายวิชา', 'แบบประเมินรายวิชา');
+      return;
+    }
+
+    // รายชื่อคนพิการ (list / behavior) และชนิดอื่น ๆ ใช้ตารางรายชื่อพื้นฐาน
+    const header = ['#', 'ชื่อ-นามสกุล', 'อายุ', 'วัน/เดือน/ปีเกิด', 'เลขบัตรประชาชน', 'ความพิการ', 'จังหวัด', 'เบอร์โทร'];
+    const rows = [
+      header,
+      ...filteredPersons.map((p, i) => [
+        i + 1,
+        p.fullName,
+        calcAge(p.birthDate) ?? '',
+        fmtDate(p.birthDate),
+        p.thaiId || '',
+        p.disabilityInfos?.map(d => d.disabilityType?.typeName).join(', ') || '',
+        p.province || '',
+        p.mobile || p.phone || '',
+      ]),
+    ];
+    const cols = [{ wch: 4 }, { wch: 28 }, { wch: 6 }, { wch: 14 }, { wch: 18 }, { wch: 20 }, { wch: 12 }, { wch: 14 }];
+    saveWorkbook(rows, cols, 'รายชื่อคนพิการ', 'รายชื่อคนพิการ');
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center h-96">
       <span className="loading loading-spinner loading-lg text-primary" />
@@ -142,11 +196,20 @@ export default function ReportPage() {
             <p className="text-gray-400 text-sm mt-0.5">กด "พิมพ์ / บันทึก PDF" → เปลี่ยน Destination เป็น "Save as PDF" → Save</p>
           </div>
         </div>
-        <button
-          onClick={handlePrint}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm flex-shrink-0">
-          <Printer size={16} /> พิมพ์ / บันทึก PDF
-        </button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {(activeType === 'list' || activeType === 'behavior' || activeType === 'course_eval') && (
+            <button
+              onClick={handleExportExcel}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 active:scale-95 transition-all shadow-sm">
+              <FileSpreadsheet size={16} /> Excel
+            </button>
+          )}
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm">
+            <Printer size={16} /> พิมพ์ / บันทึก PDF
+          </button>
+        </div>
       </div>
 
       {/* Report Type Selector */}
@@ -414,13 +477,13 @@ export default function ReportPage() {
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 px-2 py-2 text-center w-8">#</th>
                     <th className="border border-gray-300 px-1 py-2 text-center w-14">รูป</th>
-                    <th className="border border-gray-300 px-2 py-2 text-left min-w-28">ชื่อ - สกุล</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-14">ความตั้งใจ/<br/>ความสนใจ</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-14">การตอบคำถาม/<br/>แสดงความคิดเห็น</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-14">การทำงาน<br/>ร่วมกับผู้อื่น/<br/>มีส่วนร่วม</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-14">ตรงต่อเวลา/<br/>ส่งงานครบ<br/>มอบหมาย</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-14">ขึ้น/<br/>ผลงาน</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-14">รวม<br/>(25 คะแนน)</th>
+                    <th className="border border-gray-300 px-2 py-2 text-left w-24">ชื่อ - สกุล</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-16">ความตั้งใจ/<br/>ความสนใจ</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-16">การตอบคำถาม/<br/>แสดงความคิดเห็น</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-16">การทำงาน<br/>ร่วมกับผู้อื่น/<br/>มีส่วนร่วม</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-16">ตรงต่อเวลา/<br/>ส่งงานครบ<br/>มอบหมาย</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-16">ขึ้น/<br/>ผลงาน</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-16">รวม<br/>(25 คะแนน)</th>
                   </tr>
                 </thead>
                 <tbody>
