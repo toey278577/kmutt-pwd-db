@@ -442,7 +442,7 @@ export default function ReportPage() {
                 <p className="text-base font-bold">รายชื่อคนพิการ</p>
                 <p className="text-sm text-gray-500">โครงการฝึกอบรม-ฝึกงานคนพิการ มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</p>
               </div>
-              <table className="w-full text-xs border-collapse">
+              <table className="list-table w-full text-xs border-collapse">
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">#</th>
@@ -712,6 +712,10 @@ export default function ReportPage() {
 
       {/* Print CSS */}
       <style>{`
+        /* เฉพาะบนจอ: ตารางรายชื่อกว้างพอดีเนื้อหา จัดกึ่งกลาง ไม่ยืดเต็มจอ (ตอนพิมพ์ไม่แตะ) */
+        @media screen {
+          .list-table { width: fit-content !important; max-width: 100%; margin-left: auto; margin-right: auto; }
+        }
         @media print {
           .no-print { display: none !important; }
           .print-area { border: none !important; box-shadow: none !important; border-radius: 0 !important; }
