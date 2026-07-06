@@ -462,15 +462,15 @@ export default function ReportPage() {
                     const disType = p.disabilityInfos?.map(d => d.disabilityType?.typeName).join(', ') || '—';
                     return (
                       <tr key={p.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                        <td className="border border-gray-300 px-2 py-1 text-center">{i + 1}</td>
-                        <td className="border border-gray-300 px-2 py-1 whitespace-nowrap">{p.fullName}</td>
-                        <td className="border border-gray-300 px-2 py-1 text-center">—</td>
-                        <td className="border border-gray-300 px-2 py-1 text-center">{age ?? '—'}</td>
-                        <td className="border border-gray-300 px-2 py-1 text-center">{fmtDate(p.birthDate)}</td>
-                        <td className="border border-gray-300 px-2 py-1 text-center font-mono">{p.thaiId || '—'}</td>
-                        <td className="border border-gray-300 px-2 py-1">{disType}</td>
-                        <td className="border border-gray-300 px-2 py-1 text-center">{p.province || '—'}</td>
-                        <td className="border border-gray-300 px-2 py-1 text-center">{p.mobile || p.phone || '—'}</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{i + 1}</td>
+                        <td className="border border-gray-300 px-2 py-2 whitespace-nowrap align-middle">{p.fullName}</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">—</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{age ?? '—'}</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{fmtDate(p.birthDate)}</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center font-mono align-middle">{p.thaiId || '—'}</td>
+                        <td className="border border-gray-300 px-2 py-2 align-middle">{disType}</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{p.province || '—'}</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{p.mobile || p.phone || '—'}</td>
                       </tr>
                     );
                   })}
