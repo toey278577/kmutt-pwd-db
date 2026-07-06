@@ -29,6 +29,19 @@ const DISABILITY_ABBR = {
   'ออทิสติก': 'ออทิสติก',
 };
 
+// ย่อชื่อประเภทความพิการให้สั้น พอดีตารางแนวตั้ง บรรทัดเดียว (ความหมายเดิม)
+const shortDisability = (name) => {
+  if (!name) return '—';
+  if (name.includes('มองเห็น') || name.includes('การเห็น') || name.includes('สายตา')) return 'การเห็น';
+  if (name.includes('ได้ยิน') || name.includes('สื่อความหมาย')) return 'การได้ยิน';
+  if (name.includes('ร่างกาย') || name.includes('เคลื่อนไหว')) return 'ร่างกาย';
+  if (name.includes('จิตใจ') || name.includes('พฤติกรรม')) return 'จิตใจ';
+  if (name.includes('สติปัญญา')) return 'สติปัญญา';
+  if (name.includes('เรียนรู้')) return 'การเรียนรู้';
+  if (name.includes('ออทิสติก')) return 'ออทิสติก';
+  return name.replace(/^ความพิการทาง/, '');
+};
+
 const REPORT_TYPES = [
   { id: 'list', label: 'รายชื่อคนพิการ', icon: Users, desc: 'ตารางรายชื่อพร้อมข้อมูลพื้นฐาน' },
   { id: 'behavior', label: 'แบบสังเกตพฤติกรรมรายบุคคล', icon: FileText, desc: 'ส่งให้วิทยากรก่อนการอบรม' },
@@ -460,7 +473,7 @@ export default function ReportPage() {
                 <tbody>
                   {filteredPersons.map((p, i) => {
                     const age = calcAge(p.birthDate);
-                    const disType = p.disabilityInfos?.map(d => d.disabilityType?.typeName).join(', ') || '—';
+                    const disType = [...new Set((p.disabilityInfos || []).map(d => shortDisability(d.disabilityType?.typeName)))].join(', ') || '—';
                     return (
                       <tr key={p.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="border border-gray-300 px-2 py-1 text-center">{i + 1}</td>
@@ -714,9 +727,12 @@ export default function ReportPage() {
 
       {/* Print CSS */}
       <style>{`
+        @page { size: A4 portrait; margin: 12mm; }
         @media print {
           .no-print { display: none !important; }
           .print-area { border: none !important; box-shadow: none !important; border-radius: 0 !important; }
+          /* ตอนพิมพ์ต้องเห็นทุกคอลัมน์ ห้ามตัดข้อมูลทิ้ง */
+          .overflow-x-auto { overflow: visible !important; }
           .page-break { page-break-before: always; }
           img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
