@@ -29,19 +29,6 @@ const DISABILITY_ABBR = {
   'ออทิสติก': 'ออทิสติก',
 };
 
-// ย่อชื่อประเภทความพิการให้สั้น พอดีตารางแนวตั้ง บรรทัดเดียว (ความหมายเดิม)
-const shortDisability = (name) => {
-  if (!name) return '—';
-  if (name.includes('มองเห็น') || name.includes('การเห็น') || name.includes('สายตา')) return 'การเห็น';
-  if (name.includes('ได้ยิน') || name.includes('สื่อความหมาย')) return 'การได้ยิน';
-  if (name.includes('ร่างกาย') || name.includes('เคลื่อนไหว')) return 'ร่างกาย';
-  if (name.includes('จิตใจ') || name.includes('พฤติกรรม')) return 'จิตใจ';
-  if (name.includes('สติปัญญา')) return 'สติปัญญา';
-  if (name.includes('เรียนรู้')) return 'การเรียนรู้';
-  if (name.includes('ออทิสติก')) return 'ออทิสติก';
-  return name.replace(/^ความพิการทาง/, '');
-};
-
 const REPORT_TYPES = [
   { id: 'list', label: 'รายชื่อคนพิการ', icon: Users, desc: 'ตารางรายชื่อพร้อมข้อมูลพื้นฐาน' },
   { id: 'behavior', label: 'แบบสังเกตพฤติกรรมรายบุคคล', icon: FileText, desc: 'ส่งให้วิทยากรก่อนการอบรม' },
@@ -455,8 +442,7 @@ export default function ReportPage() {
                 <p className="text-base font-bold">รายชื่อคนพิการ</p>
                 <p className="text-sm text-gray-500">โครงการฝึกอบรม-ฝึกงานคนพิการ มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</p>
               </div>
-              <div className="overflow-x-auto">
-              <table className="list-report-table w-auto mx-auto text-xs border-collapse whitespace-nowrap">
+              <table className="w-full text-xs border-collapse">
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">#</th>
@@ -473,7 +459,7 @@ export default function ReportPage() {
                 <tbody>
                   {filteredPersons.map((p, i) => {
                     const age = calcAge(p.birthDate);
-                    const disType = [...new Set((p.disabilityInfos || []).map(d => shortDisability(d.disabilityType?.typeName)))].join(', ') || '—';
+                    const disType = p.disabilityInfos?.map(d => d.disabilityType?.typeName).join(', ') || '—';
                     return (
                       <tr key={p.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="border border-gray-300 px-2 py-1 text-center">{i + 1}</td>
@@ -490,7 +476,6 @@ export default function ReportPage() {
                   })}
                 </tbody>
               </table>
-              </div>
               <p className="text-xs text-gray-400 mt-4 text-right">พิมพ์วันที่ {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             </div>
           </div>
@@ -522,13 +507,13 @@ export default function ReportPage() {
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 px-2 py-2 text-center w-8">#</th>
                     <th className="border border-gray-300 px-1 py-2 text-center w-14">รูป</th>
-                    <th className="border border-gray-300 px-2 py-2 text-left w-24">ชื่อ - สกุล</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-16">ความตั้งใจ/<br/>ความสนใจ</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-16">การตอบคำถาม/<br/>แสดงความคิดเห็น</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-16">การทำงาน<br/>ร่วมกับผู้อื่น/<br/>มีส่วนร่วม</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-16">ตรงต่อเวลา/<br/>ส่งงานครบ<br/>มอบหมาย</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-16">ขึ้น/<br/>ผลงาน</th>
-                    <th className="border border-gray-300 px-2 py-2 text-center w-16">รวม<br/>(25 คะแนน)</th>
+                    <th className="border border-gray-300 px-2 py-2 text-left min-w-28">ชื่อ - สกุล</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-14">ความตั้งใจ/<br/>ความสนใจ</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-14">การตอบคำถาม/<br/>แสดงความคิดเห็น</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-14">การทำงาน<br/>ร่วมกับผู้อื่น/<br/>มีส่วนร่วม</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-14">ตรงต่อเวลา/<br/>ส่งงานครบ<br/>มอบหมาย</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-14">ขึ้น/<br/>ผลงาน</th>
+                    <th className="border border-gray-300 px-2 py-2 text-center w-14">รวม<br/>(25 คะแนน)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -579,7 +564,7 @@ export default function ReportPage() {
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">#</th>
                     <th className="border border-gray-300 px-1 py-1.5 text-center w-14">รูป</th>
-                    <th className="border border-gray-300 px-2 py-1.5 text-left w-40">ชื่อ - สกุล</th>
+                    <th className="border border-gray-300 px-2 py-1.5 text-left">ชื่อ - สกุล</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-10">ชื่อเล่น</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">อายุ</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center">ประเภทความพิการ</th>
@@ -727,18 +712,9 @@ export default function ReportPage() {
 
       {/* Print CSS */}
       <style>{`
-        @page { size: A4 portrait; margin: 12mm; }
         @media print {
           .no-print { display: none !important; }
           .print-area { border: none !important; box-shadow: none !important; border-radius: 0 !important; }
-          /* ตอนพิมพ์ต้องเห็นทุกคอลัมน์ ห้ามตัดข้อมูลทิ้ง */
-          .overflow-x-auto { overflow: visible !important; }
-          /* บังคับเส้นขอบตารางให้แสดงตอนพิมพ์ (บาง browser ตัดขอบสีจางทิ้ง) */
-          .print-area table { border-collapse: collapse !important; border: 1px solid #4b5563 !important; }
-          .print-area table th, .print-area table td { border: 1px solid #4b5563 !important; }
-          /* ตารางรายชื่อ: กว้าง 10/12 (~83%) จัดกึ่งกลาง ใหญ่อ่านง่าย + กรอบนอกครบทุกด้าน (กันบั๊ก Chrome ตัดขอบขวา) */
-          .list-report-table { width: 83.333% !important; margin: 0 auto !important; font-size: 12px !important; table-layout: auto; outline: 1px solid #4b5563; }
-          .list-report-table th, .list-report-table td { padding: 4px 6px !important; }
           .page-break { page-break-before: always; }
           img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
