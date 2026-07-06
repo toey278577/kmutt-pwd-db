@@ -456,7 +456,7 @@ export default function ReportPage() {
                 <p className="text-sm text-gray-500">โครงการฝึกอบรม-ฝึกงานคนพิการ มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</p>
               </div>
               <div className="overflow-x-auto">
-              <table className="w-auto mx-auto text-xs border-collapse whitespace-nowrap">
+              <table className="w-11/12 mx-auto text-xs border-collapse whitespace-nowrap">
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">#</th>
