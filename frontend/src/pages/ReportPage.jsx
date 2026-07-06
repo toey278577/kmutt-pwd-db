@@ -442,11 +442,12 @@ export default function ReportPage() {
                 <p className="text-base font-bold">รายชื่อคนพิการ</p>
                 <p className="text-sm text-gray-500">โครงการฝึกอบรม-ฝึกงานคนพิการ มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</p>
               </div>
-              <table className="w-auto mx-auto text-xs border-collapse">
+              <div className="overflow-x-auto">
+              <table className="w-auto mx-auto text-xs border-collapse whitespace-nowrap">
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">#</th>
-                    <th className="border border-gray-300 px-2 py-1.5 text-left whitespace-nowrap">ชื่อ-นามสกุล</th>
+                    <th className="border border-gray-300 px-2 py-1.5 text-left">ชื่อ-นามสกุล</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-10">ชื่อเล่น</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">อายุ</th>
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-20">วัน/เดือน/ปีเกิด</th>
@@ -476,6 +477,7 @@ export default function ReportPage() {
                   })}
                 </tbody>
               </table>
+              </div>
               <p className="text-xs text-gray-400 mt-4 text-right">พิมพ์วันที่ {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             </div>
           </div>
