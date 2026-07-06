@@ -644,15 +644,15 @@ export default function ReportPage() {
                 </div>
                 <p className="text-base font-bold">รายงานส่งผลการดำเนินงาน</p>
                 <p className="text-sm font-semibold">โครงการฝึกอบรม-ฝึกงานคนพิการ เพื่อเตรียมความพร้อมเข้าสู่สถานประกอบการ</p>
-                {companyForm.batch && <p className="text-sm">รุ่นที่ {companyForm.batch} ประจำปี {companyForm.year || '—'}</p>}
+                {companyForm.batch && <p className="text-sm">รุ่นที่ {companyForm.batch} ประจำปี {companyForm.year || ''}</p>}
               </div>
 
               {/* Summary */}
               <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
                 <div className="border rounded-lg p-3">
                   <p className="font-bold text-gray-600 mb-1">ข้อมูลการอบรม</p>
-                  <p>หลักสูตร: {companyForm.courseName || '—'}</p>
-                  <p>ระยะเวลา: {companyForm.startDate || '—'} ถึง {companyForm.endDate || '—'}</p>
+                  <p>หลักสูตร: {companyForm.courseName || ''}</p>
+                  <p>ระยะเวลา: {companyForm.startDate || ''} ถึง {companyForm.endDate || ''}</p>
                   <p>จำนวนผู้เข้าร่วม: {filteredPersons.length} คน</p>
                   {companyForm.totalBudget && <p>งบประมาณ: {Number(companyForm.totalBudget).toLocaleString()} บาท</p>}
                 </div>
@@ -662,7 +662,7 @@ export default function ReportPage() {
                     ? filteredOrgs.map((o, i) => (
                         <p key={o.id}>{i + 1}. {o.orgName}</p>
                       ))
-                    : <p className="text-gray-400">—</p>
+                    : <p className="text-gray-400"></p>
                   }
                 </div>
               </div>
