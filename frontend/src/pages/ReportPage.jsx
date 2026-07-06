@@ -456,7 +456,7 @@ export default function ReportPage() {
                 <p className="text-sm text-gray-500">โครงการฝึกอบรม-ฝึกงานคนพิการ มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</p>
               </div>
               <div className="overflow-x-auto">
-              <table className="list-report-table w-10/12 mx-auto text-xs border-collapse whitespace-nowrap">
+              <table className="list-report-table w-auto mx-auto text-xs border-collapse whitespace-nowrap">
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">#</th>
@@ -734,11 +734,11 @@ export default function ReportPage() {
           /* ตอนพิมพ์ต้องเห็นทุกคอลัมน์ ห้ามตัดข้อมูลทิ้ง */
           .overflow-x-auto { overflow: visible !important; }
           /* บังคับเส้นขอบตารางให้แสดงตอนพิมพ์ (บาง browser ตัดขอบสีจางทิ้ง) */
-          .print-area table { border-collapse: collapse !important; }
+          .print-area table { border-collapse: collapse !important; border: 1px solid #4b5563 !important; }
           .print-area table th, .print-area table td { border: 1px solid #4b5563 !important; }
-          /* ตารางรายชื่อ: กว้าง 10/12 (~83%) จัดกึ่งกลาง ครบทุกคอลัมน์ บรรทัดเดียว อ่านง่าย ไม่ล้นขอบ */
-          .list-report-table { width: 83.333% !important; margin: 0 auto !important; font-size: 11px !important; table-layout: auto; }
-          .list-report-table th, .list-report-table td { padding: 4px 5px !important; }
+          /* ตารางรายชื่อ: กว้าง 10/12 (~83%) จัดกึ่งกลาง ใหญ่อ่านง่าย + กรอบนอกครบทุกด้าน (กันบั๊ก Chrome ตัดขอบขวา) */
+          .list-report-table { width: 83.333% !important; margin: 0 auto !important; font-size: 12px !important; table-layout: auto; outline: 1px solid #4b5563; }
+          .list-report-table th, .list-report-table td { padding: 4px 6px !important; }
           .page-break { page-break-before: always; }
           img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
