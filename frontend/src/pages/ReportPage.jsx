@@ -736,9 +736,9 @@ export default function ReportPage() {
           /* บังคับเส้นขอบตารางให้แสดงตอนพิมพ์ (บาง browser ตัดขอบสีจางทิ้ง) */
           .print-area table { border-collapse: collapse !important; }
           .print-area table th, .print-area table td { border: 1px solid #4b5563 !important; }
-          /* ตารางรายชื่อ: บีบให้พอดีหน้าแนวตั้ง ครบทุกคอลัมน์ บรรทัดเดียว ไม่ล้นขอบ */
-          .list-report-table { width: 100% !important; font-size: 8.5px !important; table-layout: auto; }
-          .list-report-table th, .list-report-table td { padding: 2px 3px !important; }
+          /* ตารางรายชื่อ: เต็มความกว้างหน้า ครบทุกคอลัมน์ บรรทัดเดียว อ่านง่าย ไม่ล้นขอบ */
+          .list-report-table { width: 100% !important; font-size: 11px !important; table-layout: auto; }
+          .list-report-table th, .list-report-table td { padding: 4px 5px !important; }
           .page-break { page-break-before: always; }
           img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
