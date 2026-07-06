@@ -713,9 +713,10 @@ export default function ReportPage() {
       {/* Print CSS */}
       <style>{`
         ${activeType === 'course_eval' ? '@page { size: A4 landscape; margin: 12mm; }' : ''}
-        /* เฉพาะบนจอ: ตารางรายชื่อกว้างพอดีเนื้อหา จัดกึ่งกลาง ไม่ยืดเต็มจอ (ตอนพิมพ์ไม่แตะ) */
+        /* เฉพาะบนจอ: ตารางรายงานกว้างพอดี จัดกึ่งกลาง ไม่ยืดเต็มจอ ให้ดูสวยเหมือนกันทุกรายงาน (ตอนพิมพ์ไม่แตะ) */
         @media screen {
-          .list-table { width: fit-content !important; max-width: 100%; margin-left: auto; margin-right: auto; }
+          .list-table, .behavior-table { width: fit-content !important; max-width: 100%; margin-left: auto; margin-right: auto; }
+          .eval-table { max-width: 1000px !important; margin-left: auto; margin-right: auto; }
         }
         @media print {
           .no-print { display: none !important; }
