@@ -29,7 +29,7 @@ const splitPrefix = (fullName = '') => {
 };
 
 const emptyForm = {
-  fullName: '', thaiId: '', gender: 'MALE', birthDate: '',
+  fullName: '', nickname: '', thaiId: '', gender: 'MALE', birthDate: '',
   phone: '', mobile: '', email: '', landmark: '',
   houseNo: '', moo: '', building: '', floor: '',
   soi: '', road: '', subDistrict: '', district: '',
@@ -147,6 +147,7 @@ export default function PersonList() {
     const fullName = `${prefix}${prefix ? ' ' : ''}${nameOnly.trim()}`;
     const payload = {
       fullName,
+      nickname: form.nickname,
       thaiId: form.thaiId, gender: form.gender, birthDate: form.birthDate,
       phone: form.phone, mobile: form.mobile, email: form.email, landmark: form.landmark,
       houseNo: form.houseNo, moo: form.moo, building: form.building, floor: form.floor,
@@ -491,6 +492,7 @@ export default function PersonList() {
                   </div>
                   {errors.nameOnly && <p className="text-xs text-red-500 mt-1">{errors.nameOnly}</p>}
                 </div>
+                <FormField label="ชื่อเล่น" value={form.nickname} onChange={(v) => setForm({ ...form, nickname: v })} />
                 <FormField label="เลขบัตรประชาชน / บัตรคนพิการ" required value={form.thaiId} error={errors.thaiId}
                   onChange={(v) => { setForm({ ...form, thaiId: v }); if (errors.thaiId) setErrors(p => ({...p, thaiId: ''})); }} numericOnly maxLength={13} />
                 <ThaiDateField label="วันเกิด" required value={form.birthDate} error={errors.birthDate}

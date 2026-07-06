@@ -174,7 +174,7 @@ export default function ReportPage() {
           return [
             i + 1,
             p.fullName,
-            '',
+            p.nickname || '',
             calcAge(p.birthDate) ?? '',
             p.disabilityInfos?.map(d => d.disabilityType?.typeName).join(', ') || '',
             p.educationLevel || '',
@@ -464,7 +464,7 @@ export default function ReportPage() {
                       <tr key={p.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="border border-gray-300 px-2 py-2 text-center align-middle">{i + 1}</td>
                         <td className="border border-gray-300 px-2 py-2 whitespace-nowrap align-middle">{p.fullName}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">—</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{p.nickname || '—'}</td>
                         <td className="border border-gray-300 px-2 py-2 text-center align-middle">{age ?? '—'}</td>
                         <td className="border border-gray-300 px-2 py-2 text-center align-middle">{fmtDate(p.birthDate)}</td>
                         <td className="border border-gray-300 px-2 py-2 text-center font-mono align-middle">{p.thaiId || '—'}</td>
@@ -593,7 +593,7 @@ export default function ReportPage() {
                           }
                         </td>
                         <td className="border border-gray-300 px-2 py-2 align-middle">{p.fullName}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">—</td>
+                        <td className="border border-gray-300 px-2 py-2 text-center align-middle">{p.nickname || '—'}</td>
                         <td className="border border-gray-300 px-2 py-2 text-center align-middle">{age ?? '—'}</td>
                         <td className="border border-gray-300 px-2 py-2 align-middle">{disType}</td>
                         <td className="border border-gray-300 px-2 py-2 align-middle">{p.educationLevel || '—'}</td>

@@ -83,7 +83,7 @@ router.get('/', async (req, res) => {
     if (batchId) where.batchId = parseInt(batchId);
 
     const select = {
-      id: true, fullName: true, thaiId: true, gender: true,
+      id: true, fullName: true, nickname: true, thaiId: true, gender: true,
       birthDate: true, phone: true, mobile: true, province: true,
       educationLevel: true, lifeStatus: true, createdAt: true, batchId: true,
       disabilityInfos: { select: { id: true, disabilityType: { select: { typeName: true } } } },
@@ -129,10 +129,11 @@ router.post('/', async (req, res) => {
       birthDate, maritalStatus, gender, lifeStatus,
       thaiId, phone, email, address, province, nationality, religion, educationLevel,
       mobile, landmark, houseNo, moo, building, floor, soi, road, subDistrict, district, postalCode,
-      fullName, batchId,
+      fullName, nickname, batchId,
     } = req.body;
     const data = {
       fullName,
+      nickname: nickname || null,
       phone: phone || null,
       email: email || null,
       address: address || null,
@@ -170,12 +171,12 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const {
-      fullName, thaiId, phone, mobile, email, landmark,
+      fullName, nickname, thaiId, phone, mobile, email, landmark,
       houseNo, moo, building, floor, soi, road, subDistrict, district, province, postalCode,
       address, nationality, religion, educationLevel, birthDate, maritalStatus, gender, lifeStatus, batchId,
     } = req.body;
     const data = {
-      fullName, phone, mobile: mobile || null, email, landmark: landmark || null,
+      fullName, nickname: nickname || null, phone, mobile: mobile || null, email, landmark: landmark || null,
       houseNo: houseNo || null, moo: moo || null, building: building || null, floor: floor || null,
       soi: soi || null, road: road || null, subDistrict: subDistrict || null, district: district || null,
       province, postalCode: postalCode || null, address, nationality, religion, educationLevel,

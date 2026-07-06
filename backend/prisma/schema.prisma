@@ -10,6 +10,7 @@ model Person {
   id               Int      @id @default(autoincrement())
   thaiId           String?  @unique @map("thai_id") @db.VarChar(13)
   fullName         String   @map("full_name") @db.VarChar(255)
+  nickname         String?  @db.VarChar(100)
   gender           Gender
   birthDate        DateTime? @map("birth_date") @db.Date
   phone            String?  @db.VarChar(20)
