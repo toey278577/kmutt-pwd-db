@@ -559,7 +559,7 @@ export default function ReportPage() {
                 <p className="text-sm text-gray-600">โครงการฝึกอบรม-ฝึกงาน เพื่อเตรียมความพร้อมเข้าสู่สถานประกอบการ</p>
                 <p className="text-sm text-gray-600">หลักสูตร "เจ้าหน้าที่ที่ประจำสำนักงาน"</p>
               </div>
-              <table className="w-full text-xs border-collapse">
+              <table className="behavior-table w-full text-xs border-collapse">
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 px-2 py-1.5 text-center w-8">#</th>
@@ -723,10 +723,15 @@ export default function ReportPage() {
           .page-break { page-break-before: always; }
           img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          /* แบบประเมินรายวิชา — สไตล์เอกสารราชการ แนวนอน (เส้นดำคม หัวเทาอ่อน ช่องสูงพอเขียน) */
+          /* ===== สไตล์เอกสารราชการ (ใช้ทุกตารางในรายงาน): เส้นดำคม หัวตารางเทาตัวหนา ===== */
+          .print-area table { border: 1px solid #000 !important; }
+          .print-area table th { border: 1px solid #000 !important; background: #e5e7eb !important; font-weight: 700 !important; }
+          .print-area table td { border: 1px solid #000 !important; }
+          /* รายชื่อ + แบบสังเกต — แนวตั้ง บีบให้พอดีหน้า ครบทุกคอลัมน์ ไม่ตกขอบ */
+          .list-table, .behavior-table { width: 100% !important; font-size: 10px !important; table-layout: auto; }
+          .list-table th, .list-table td, .behavior-table th, .behavior-table td { padding: 3px 4px !important; }
+          /* แบบประเมินรายวิชา — แนวนอน ช่องสูงพอเขียนคะแนน */
           .eval-table { width: 100% !important; font-size: 12px !important; }
-          .eval-table th { border: 1px solid #000 !important; background: #e5e7eb !important; font-weight: 700; }
-          .eval-table td { border: 1px solid #000 !important; }
           .eval-table tbody tr { height: 66px !important; }
         }
       `}</style>
