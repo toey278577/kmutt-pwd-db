@@ -32,7 +32,7 @@ const DISABILITY_ABBR = {
 const REPORT_TYPES = [
   { id: 'list', label: 'รายชื่อคนพิการ', icon: Users, desc: 'ตารางรายชื่อพร้อมข้อมูลพื้นฐาน' },
   { id: 'behavior', label: 'แบบสังเกตพฤติกรรมรายบุคคล', icon: FileText, desc: 'ส่งให้วิทยากรก่อนการอบรม' },
-  { id: 'course_eval', label: 'แบบประเมินรายวิชา', icon: Layers, desc: 'ตารางให้คะแนน 5 หัวข้อ 25 คะแนน' },
+  { id: 'course_eval', label: 'แบบประเมินรายวิชา / Transcript', icon: Layers, desc: 'ตารางให้คะแนน 5 หัวข้อ 25 คะแนน', future: true },
   { id: 'certificate', label: 'ใบ Certificate', icon: Award, desc: 'ใบรับรองผลการอบรม มจธ.' },
   { id: 'company', label: 'รายงานส่งบริษัท', icon: Building2, desc: 'รายงานผลการดำเนินงาน' },
 ];
@@ -244,21 +244,26 @@ export default function ReportPage() {
 
       {/* Report Type Selector */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5 no-print">
-        {REPORT_TYPES.map(({ id, label, icon: Icon, desc }) => (
+        {REPORT_TYPES.map(({ id, label, icon: Icon, desc, future }) => (
           <button key={id}
             onClick={() => setActiveType(id)}
             className={`rounded-2xl p-4 text-left border transition-all ${
-              activeType === id
-                ? 'border-orange-400 bg-orange-50 shadow-md'
-                : 'border-orange-100 bg-white hover:border-orange-300 hover:bg-orange-50/50'
+              future
+                ? `border-dashed border-gray-300 bg-white ${activeType === id ? 'opacity-80' : 'opacity-50 hover:opacity-75'}`
+                : (activeType === id
+                    ? 'border-orange-400 bg-orange-50 shadow-md'
+                    : 'border-orange-100 bg-white hover:border-orange-300 hover:bg-orange-50/50')
             }`}>
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-2 ${
-              activeType === id ? 'bg-orange-500' : 'bg-orange-100'
+              future ? 'bg-gray-200' : (activeType === id ? 'bg-orange-500' : 'bg-orange-100')
             }`}>
-              <Icon size={18} className={activeType === id ? 'text-white' : 'text-orange-500'} />
+              <Icon size={18} className={future ? 'text-gray-400' : (activeType === id ? 'text-white' : 'text-orange-500')} />
             </div>
-            <p className={`font-bold text-sm ${activeType === id ? 'text-orange-700' : 'text-gray-700'}`}>{label}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+            <p className={`font-bold text-sm ${future ? 'text-gray-400' : (activeType === id ? 'text-orange-700' : 'text-gray-700')}`}>
+              {label}
+              {future && <span className="ml-1.5 text-[10px] font-normal text-gray-400 border border-gray-300 rounded px-1 py-0.5 align-middle">ยังไม่เปิดใช้</span>}
+            </p>
+            <p className="text-xs text-gray-400 mt-0.5">{future ? 'สำหรับใช้ในอนาคต' : desc}</p>
           </button>
         ))}
       </div>
