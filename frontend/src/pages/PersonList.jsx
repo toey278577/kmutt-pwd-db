@@ -252,26 +252,24 @@ export default function PersonList() {
           </button>
         </div>
 
-        {/* Batch filter — รายชื่อแยกรุ่น */}
+        {/* Batch filter — รายชื่อแยกรุ่น (Dropdown) */}
         {batches.length > 0 && (
-          <div className="flex items-center gap-2 mt-3 flex-wrap">
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 mr-1">
+          <div className="flex items-center gap-2 mt-3">
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-400">
               <Layers size={13} className="text-orange-400" /> แยกรุ่น:
             </span>
-            <button onClick={() => handleBatchFilter('')}
-              className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
-                !batchFilter ? 'bg-orange-500 text-white border-orange-500 shadow-sm' : 'bg-white text-gray-500 border-gray-200 hover:border-orange-300'
-              }`}>
-              ทุกรุ่น
-            </button>
-            {batches.map(b => (
-              <button key={b.id} onClick={() => handleBatchFilter(String(b.id))}
-                className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
-                  batchFilter === String(b.id) ? 'bg-orange-500 text-white border-orange-500 shadow-sm' : 'bg-white text-gray-500 border-gray-200 hover:border-orange-300'
-                }`}>
-                รุ่นที่ {b.batchNumber}/{b.year}
-              </button>
-            ))}
+            <div className="relative">
+              <select
+                value={batchFilter}
+                onChange={(e) => handleBatchFilter(e.target.value)}
+                className="appearance-none text-sm font-semibold rounded-xl border border-orange-200 bg-white text-gray-700 pl-3 pr-9 py-2 hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 cursor-pointer transition-all">
+                <option value="">ทุกรุ่น</option>
+                {batches.map(b => (
+                  <option key={b.id} value={String(b.id)}>รุ่นที่ {b.batchNumber}/{b.year}</option>
+                ))}
+              </select>
+              <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-orange-400 pointer-events-none" />
+            </div>
           </div>
         )}
       </div>
