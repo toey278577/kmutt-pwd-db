@@ -64,6 +64,7 @@ export const getPersons = (params) => {
 };
 export const getPerson = (id) => cached(`person:${id}`, () => api.get(`/persons/${id}`), 20_000);
 export const createPerson = (data) => api.post('/persons', data).then(r => { invalidatePrefix('persons:'); return r; });
+export const importPersons = (persons) => api.post('/persons/import', { persons }).then(r => { invalidatePrefix('persons:'); return r; });
 export const updatePerson = (id, data) => api.put(`/persons/${id}`, data).then(r => { invalidatePrefix('persons:'); invalidate(`person:${id}`); return r; });
 export const deletePerson = (id) => api.delete(`/persons/${id}`).then(r => { invalidatePrefix('persons:'); invalidate(`person:${id}`); return r; });
 

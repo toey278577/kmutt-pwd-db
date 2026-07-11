@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown, Users, Camera, X, Layers } from 'lucide-react';
-import { getPersons, createPerson, updatePerson, deletePerson, getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo, getPersonPhotos, uploadPersonPhoto, getBatches } from '../api';
+import * as XLSX from 'xlsx';
+import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown, Users, Camera, X, Layers, FileSpreadsheet, Download, Upload } from 'lucide-react';
+import { getPersons, createPerson, importPersons, updatePerson, deletePerson, getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo, getPersonPhotos, uploadPersonPhoto, getBatches } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
@@ -74,6 +75,10 @@ export default function PersonList() {
   const formBodyRef = useRef(null);
   const [batches, setBatches] = useState([]);
   const [batchFilter, setBatchFilter] = useState('');
+  const [importModal, setImportModal] = useState(false);
+  const [importRows, setImportRows] = useState([]);
+  const [importing, setImporting] = useState(false);
+  const importInputRef = useRef(null);
 
   const PAGE_SIZE = 10;
   const totalPages = Math.ceil(persons.length / PAGE_SIZE);
@@ -207,6 +212,95 @@ export default function PersonList() {
 
   const initials = (name = '') => name.slice(0, 2).toUpperCase();
 
+  // ── นำเข้า Excel ──
+  const parseGender = (v) => {
+    const s = String(v || '').trim();
+    if (['MALE', 'FEMALE', 'OTHER'].includes(s)) return s;
+    if (s.includes('หญิง')) return 'FEMALE';
+    if (s.includes('ชาย')) return 'MALE';
+    return 'MALE';
+  };
+  const parseBirth = (v) => {
+    if (!v) return '';
+    if (v instanceof Date) return v.toISOString().slice(0, 10);
+    const s = String(v).trim();
+    const m = s.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})$/);
+    if (m) { let y = parseInt(m[3]); if (y > 2400) y -= 543; return `${y}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; }
+    const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m2) return `${m2[1]}-${m2[2]}-${m2[3]}`;
+    return '';
+  };
+  const resolveBatch = (numRaw, yearRaw) => {
+    if (!numRaw) return '';
+    const num = parseInt(String(numRaw).replace(/\D/g, ''));
+    const yr = yearRaw ? parseInt(String(yearRaw).replace(/\D/g, '')) : null;
+    const found = batches.find(b => b.batchNumber === num && (yr ? b.year === yr : true));
+    return found ? String(found.id) : '';
+  };
+
+  const downloadTemplate = () => {
+    const headers = ['ชื่อ-นามสกุล', 'ชื่อเล่น', 'เลขบัตรประชาชน', 'เพศ', 'วันเกิด', 'เบอร์โทร', 'จังหวัด', 'ระดับการศึกษา', 'รุ่นที่', 'ปี'];
+    const example = ['นาย สมชาย ใจดี', 'ชาย', '1234567890123', 'ชาย', '15/05/2540', '0812345678', 'กรุงเทพมหานคร', 'ปริญญาตรี', '13', '2569'];
+    const ws = XLSX.utils.aoa_to_sheet([headers, example]);
+    ws['!cols'] = headers.map(() => ({ wch: 18 }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'นำเข้าคนพิการ');
+    XLSX.writeFile(wb, 'เทมเพลตนำเข้าคนพิการ.xlsx');
+  };
+
+  const handleImportFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const wb = XLSX.read(ev.target.result, { type: 'array', cellDates: true });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+        const mapped = json.map((row, idx) => ({
+          __row: idx + 2,
+          fullName: String(row['ชื่อ-นามสกุล'] || row['ชื่อ-สกุล'] || row['ชื่อ'] || '').trim(),
+          nickname: String(row['ชื่อเล่น'] || '').trim(),
+          thaiId: String(row['เลขบัตรประชาชน'] || row['เลขบัตร'] || '').trim(),
+          gender: parseGender(row['เพศ']),
+          birthDate: parseBirth(row['วันเกิด']),
+          mobile: String(row['เบอร์โทร'] || row['เบอร์โทรศัพท์'] || '').trim(),
+          province: String(row['จังหวัด'] || '').trim(),
+          educationLevel: String(row['ระดับการศึกษา'] || row['วุฒิการศึกษา'] || '').trim(),
+          batchId: resolveBatch(row['รุ่นที่'], row['ปี']),
+        })).filter(r => r.fullName);
+        if (mapped.length === 0) return toast.error('ไม่พบข้อมูล', 'ไฟล์ไม่มีแถวที่มีชื่อ-นามสกุล หรือหัวคอลัมน์ไม่ตรงเทมเพลต');
+        setImportRows(mapped);
+      } catch {
+        toast.error('อ่านไฟล์ไม่ได้', 'กรุณาใช้ไฟล์ Excel (.xlsx/.xls) ตามเทมเพลต');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    e.target.value = '';
+  };
+
+  const handleImport = async () => {
+    if (importRows.length === 0) return;
+    setImporting(true);
+    try {
+      const res = await importPersons(importRows);
+      const { created, failed, errors } = res.data;
+      setImportModal(false);
+      setImportRows([]);
+      load(search);
+      if (failed > 0) {
+        toast.error(`นำเข้า ${created} สำเร็จ, ${failed} ไม่สำเร็จ`,
+          errors.slice(0, 3).map(er => `แถว ${er.row}: ${er.error}`).join(' • ') + (errors.length > 3 ? ' …' : ''));
+      } else {
+        toast.success(`นำเข้าสำเร็จ ${created} รายการ!`);
+      }
+    } catch (err) {
+      toast.error('นำเข้าไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด');
+    } finally {
+      setImporting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col" style={{ height: 'calc(100vh - 56px)' }}>
       {/* Header */}
@@ -223,11 +317,18 @@ export default function PersonList() {
           </div>
         </div>
         {canEdit && (
-          <button
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm flex-shrink-0"
-            onClick={() => openModal()}>
-            <Plus size={16} /> เพิ่มคนพิการ
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 active:scale-95 transition-all shadow-sm"
+              onClick={() => { setImportRows([]); setImportModal(true); }}>
+              <FileSpreadsheet size={16} /> นำเข้า Excel
+            </button>
+            <button
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm"
+              onClick={() => openModal()}>
+              <Plus size={16} /> เพิ่มคนพิการ
+            </button>
+          </div>
         )}
       </div>
 
@@ -641,6 +742,93 @@ export default function PersonList() {
         </div>
         <form method="dialog" className="modal-backdrop"><button>close</button></form>
       </dialog>
+
+      {/* Import Excel Modal */}
+      {importModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col" style={{ maxHeight: '90vh' }}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
+              <h2 className="font-bold text-gray-800 flex items-center gap-2">
+                <FileSpreadsheet size={18} className="text-green-600" /> นำเข้าข้อมูลจาก Excel
+              </h2>
+              <button onClick={() => setImportModal(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+            </div>
+
+            <div className="px-6 py-5 overflow-y-auto">
+              {/* Step 1: template */}
+              <div className="flex items-start gap-3 mb-4 p-3 rounded-xl bg-orange-50 border border-orange-100">
+                <div className="w-7 h-7 rounded-full bg-orange-500 text-white text-sm font-bold flex items-center justify-center flex-shrink-0">1</div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-700">ดาวน์โหลดเทมเพลต แล้วกรอกข้อมูล</p>
+                  <p className="text-xs text-gray-500 mt-0.5">คอลัมน์: ชื่อ-นามสกุล*, ชื่อเล่น, เลขบัตรประชาชน, เพศ, วันเกิด (วว/ดด/ปปปป พ.ศ.), เบอร์โทร, จังหวัด, ระดับการศึกษา, รุ่นที่, ปี</p>
+                  <button onClick={downloadTemplate}
+                    className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-orange-600 bg-white border border-orange-200 hover:bg-orange-50">
+                    <Download size={13} /> ดาวน์โหลดเทมเพลต
+                  </button>
+                </div>
+              </div>
+
+              {/* Step 2: upload */}
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-7 h-7 rounded-full bg-orange-500 text-white text-sm font-bold flex items-center justify-center flex-shrink-0">2</div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-700 mb-2">เลือกไฟล์ Excel ที่กรอกแล้ว</p>
+                  <input ref={importInputRef} type="file" accept=".xlsx,.xls" onChange={handleImportFile} className="hidden" />
+                  <button onClick={() => importInputRef.current?.click()}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white bg-green-600 hover:bg-green-700 active:scale-95 transition-all">
+                    <Upload size={15} /> เลือกไฟล์
+                  </button>
+                </div>
+              </div>
+
+              {/* Preview */}
+              {importRows.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-sm font-bold text-gray-700 mb-2">ตัวอย่างข้อมูล ({importRows.length} รายการ)</p>
+                  <div className="border border-gray-200 rounded-xl overflow-auto" style={{ maxHeight: '260px' }}>
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50 sticky top-0">
+                        <tr className="text-gray-500">
+                          <th className="px-2 py-2 text-left">#</th>
+                          <th className="px-2 py-2 text-left">ชื่อ-นามสกุล</th>
+                          <th className="px-2 py-2 text-left">ชื่อเล่น</th>
+                          <th className="px-2 py-2 text-left">เลขบัตร</th>
+                          <th className="px-2 py-2 text-center">เพศ</th>
+                          <th className="px-2 py-2 text-left">จังหวัด</th>
+                          <th className="px-2 py-2 text-left">รุ่น</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {importRows.slice(0, 50).map((r, i) => (
+                          <tr key={i} className="border-t border-gray-100">
+                            <td className="px-2 py-1.5 text-gray-400">{i + 1}</td>
+                            <td className="px-2 py-1.5 text-gray-700">{r.fullName}</td>
+                            <td className="px-2 py-1.5 text-gray-500">{r.nickname}</td>
+                            <td className="px-2 py-1.5 text-gray-500 font-mono">{r.thaiId}</td>
+                            <td className="px-2 py-1.5 text-center text-gray-500">{r.gender === 'FEMALE' ? 'หญิง' : r.gender === 'OTHER' ? 'อื่นๆ' : 'ชาย'}</td>
+                            <td className="px-2 py-1.5 text-gray-500">{r.province}</td>
+                            <td className="px-2 py-1.5 text-gray-500">{r.batchId ? (batches.find(b => String(b.id) === r.batchId)?.batchNumber ?? '—') : '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {importRows.length > 50 && <p className="text-xs text-gray-400 mt-1">แสดง 50 แถวแรก จากทั้งหมด {importRows.length} แถว</p>}
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-100 flex gap-2 justify-end flex-shrink-0">
+              <button onClick={() => setImportModal(false)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-100">ยกเลิก</button>
+              <button onClick={handleImport} disabled={importRows.length === 0 || importing}
+                className="px-5 py-2 rounded-xl text-sm font-bold text-white bg-green-600 hover:bg-green-700 active:scale-95 transition-all disabled:opacity-50">
+                {importing ? 'กำลังนำเข้า...' : `นำเข้า ${importRows.length} รายการ`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -169,6 +169,46 @@ router.post('/', async (req, res) => {
   }
 });
 
+// POST /api/persons/import — นำเข้าหลายคนจากไฟล์ Excel (frontend map ฟิลด์มาแล้ว)
+router.post('/import', async (req, res) => {
+  try {
+    const rows = Array.isArray(req.body.persons) ? req.body.persons : [];
+    if (rows.length === 0) return res.status(400).json({ error: 'ไม่มีข้อมูลให้นำเข้า' });
+    let created = 0;
+    const errors = [];
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
+      const rowNo = r.__row || (i + 1);
+      const fullName = String(r.fullName || '').trim();
+      if (!fullName) { errors.push({ row: rowNo, error: 'ไม่มีชื่อ-นามสกุล' }); continue; }
+      const thaiId = r.thaiId ? String(r.thaiId).replace(/\D/g, '') : '';
+      if (thaiId && thaiId.length !== 13) { errors.push({ row: rowNo, error: 'เลขบัตรไม่ครบ 13 หลัก' }); continue; }
+      const gender = ['MALE', 'FEMALE', 'OTHER'].includes(r.gender) ? r.gender : 'MALE';
+      try {
+        await prisma.person.create({
+          data: {
+            fullName,
+            nickname: r.nickname ? String(r.nickname).trim() : null,
+            thaiId: thaiId || null,
+            gender,
+            birthDate: toDate(r.birthDate),
+            mobile: r.mobile ? String(r.mobile).trim() : null,
+            province: r.province ? String(r.province).trim() : null,
+            educationLevel: r.educationLevel ? String(r.educationLevel).trim() : null,
+            batchId: r.batchId ? parseInt(r.batchId) : null,
+          },
+        });
+        created++;
+      } catch (err) {
+        errors.push({ row: rowNo, error: err.code === 'P2002' ? 'เลขบัตรนี้มีในระบบแล้ว (ซ้ำ)' : err.message });
+      }
+    }
+    res.json({ created, failed: errors.length, errors });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.put('/:id', async (req, res) => {
   try {
     const {
