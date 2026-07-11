@@ -753,21 +753,17 @@ function BatchFilter({ batches, value, onChange }) {
       <p className="text-xs font-bold text-gray-400 mb-2 flex items-center gap-1.5">
         <Layers size={13} className="text-orange-400" /> แยกตามรุ่น (ไม่บังคับ)
       </p>
-      <div className="flex flex-wrap gap-2">
-        <button onClick={() => onChange('')}
-          className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
-            !value ? 'bg-orange-500 text-white border-orange-500 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300'
-          }`}>
-          ทุกรุ่น
-        </button>
-        {batches.map(b => (
-          <button key={b.id} onClick={() => onChange(String(b.id))}
-            className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
-              value === String(b.id) ? 'bg-orange-500 text-white border-orange-500 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300'
-            }`}>
-            รุ่นที่ {b.batchNumber} ปี {b.year}
-          </button>
-        ))}
+      <div className="relative inline-block">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="appearance-none text-sm font-semibold rounded-xl border border-orange-200 bg-white text-gray-700 pl-3 pr-9 py-2 hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 cursor-pointer transition-all">
+          <option value="">ทุกรุ่น</option>
+          {batches.map(b => (
+            <option key={b.id} value={String(b.id)}>รุ่นที่ {b.batchNumber} ปี {b.year}</option>
+          ))}
+        </select>
+        <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-orange-400 pointer-events-none" />
       </div>
     </div>
   );
