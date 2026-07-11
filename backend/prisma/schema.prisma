@@ -34,10 +34,12 @@ model Person {
   educationLevel   String?  @map("education_level") @db.VarChar(100)
   lifeStatus       LifeStatus @default(ALIVE) @map("life_status")
   batchId          Int?     @map("batch_id")
+  courseId         Int?     @map("course_id")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
   batch            TrainingBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  course           Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull)
   photos           PersonPhoto[]
   disabilityInfos  DisabilityInfo[]
   trainingRecords  TrainingRecord[]
@@ -48,6 +50,7 @@ model Person {
   assessments      PersonAssessment[]
 
   @@index([batchId])
+  @@index([courseId])
   @@index([province])
   @@map("persons")
 }
@@ -259,8 +262,22 @@ model TrainingBatch {
 
   assessments PersonAssessment[]
   persons     Person[]
+  courses     Course[]
 
   @@map("training_batches")
+}
+
+model Course {
+  id        Int      @id @default(autoincrement())
+  batchId   Int      @map("batch_id")
+  name      String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  batch     TrainingBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  persons   Person[]
+
+  @@index([batchId])
+  @@map("courses")
 }
 
 model PersonAssessment {

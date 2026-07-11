@@ -49,7 +49,7 @@ const emptyForm = {
   province: '', postalCode: '',
   address: '',
   nationality: 'ไทย', religion: 'พุทธ', maritalStatus: 'SINGLE',
-  educationLevel: '', lifeStatus: 'ALIVE', batchId: '',
+  educationLevel: '', lifeStatus: 'ALIVE', batchId: '', courseId: '',
 };
 
 export default function PersonList() {
@@ -170,6 +170,7 @@ export default function PersonList() {
       nationality: form.nationality, religion: form.religion,
       maritalStatus: form.maritalStatus, educationLevel: form.educationLevel, lifeStatus: form.lifeStatus,
       batchId: form.batchId || null,
+      courseId: form.courseId || null,
     };
     if (!payload.birthDate) delete payload.birthDate;
     try {
@@ -523,8 +524,17 @@ export default function PersonList() {
                 {/* รุ่นที่เข้าร่วม */}
                 <SelectField label="รุ่นที่เข้าร่วม" required error={errors.batchId}
                   value={String(form.batchId || '')}
-                  onChange={(v) => { setForm({ ...form, batchId: v }); if (errors.batchId) setErrors(p => ({...p, batchId: ''})); }}
+                  onChange={(v) => { setForm({ ...form, batchId: v, courseId: '' }); if (errors.batchId) setErrors(p => ({...p, batchId: ''})); }}
                   options={[['', '— เลือกรุ่น —'], ...batches.map(b => [String(b.id), `รุ่นที่ ${b.batchNumber} ปี ${b.year}`])]} />
+
+                {/* หลักสูตร (ตามรุ่นที่เลือก) */}
+                <SelectField label="หลักสูตร"
+                  value={String(form.courseId || '')}
+                  onChange={(v) => setForm({ ...form, courseId: v })}
+                  options={[
+                    ['', form.batchId ? '— เลือกหลักสูตร —' : '— เลือกรุ่นก่อน —'],
+                    ...((batches.find(b => String(b.id) === String(form.batchId))?.courses) || []).map(c => [String(c.id), c.name]),
+                  ]} />
 
                 {/* ประเภทความพิการ */}
                 <div className="col-span-2">

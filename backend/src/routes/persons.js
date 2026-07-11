@@ -129,11 +129,12 @@ router.post('/', async (req, res) => {
       birthDate, maritalStatus, gender, lifeStatus,
       thaiId, phone, email, address, province, nationality, religion, educationLevel,
       mobile, landmark, houseNo, moo, building, floor, soi, road, subDistrict, district, postalCode,
-      fullName, nickname, batchId,
+      fullName, nickname, batchId, courseId,
     } = req.body;
     const data = {
       fullName,
       nickname: nickname || null,
+      courseId: courseId ? parseInt(courseId) : null,
       phone: phone || null,
       email: email || null,
       address: address || null,
@@ -173,10 +174,11 @@ router.put('/:id', async (req, res) => {
     const {
       fullName, nickname, thaiId, phone, mobile, email, landmark,
       houseNo, moo, building, floor, soi, road, subDistrict, district, province, postalCode,
-      address, nationality, religion, educationLevel, birthDate, maritalStatus, gender, lifeStatus, batchId,
+      address, nationality, religion, educationLevel, birthDate, maritalStatus, gender, lifeStatus, batchId, courseId,
     } = req.body;
     const data = {
-      fullName, nickname: nickname || null, phone, mobile: mobile || null, email, landmark: landmark || null,
+      fullName, nickname: nickname || null, courseId: courseId ? parseInt(courseId) : null,
+      phone, mobile: mobile || null, email, landmark: landmark || null,
       houseNo: houseNo || null, moo: moo || null, building: building || null, floor: floor || null,
       soi: soi || null, road: road || null, subDistrict: subDistrict || null, district: district || null,
       province, postalCode: postalCode || null, address, nationality, religion, educationLevel,

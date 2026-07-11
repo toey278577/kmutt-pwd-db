@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Layers, Plus, Pencil, Trash2, CheckCircle, Clock, X } from 'lucide-react';
-import { getBatches, createBatch, updateBatch, deleteBatch } from '../api';
+import { Layers, Plus, Pencil, Trash2, CheckCircle, Clock, X, Users, BookOpen, Check } from 'lucide-react';
+import { getBatches, createBatch, updateBatch, deleteBatch, addCourse, updateCourse, deleteCourse } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
@@ -35,6 +35,8 @@ export default function BatchPage() {
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
+  const [courseInputs, setCourseInputs] = useState({});   // { [batchId]: ชื่อหลักสูตรที่กำลังพิมพ์ }
+  const [editingCourse, setEditingCourse] = useState(null); // { id, name }
 
   const load = (silent = false) => {
     if (!silent) setLoading(true);
@@ -98,6 +100,44 @@ export default function BatchPage() {
       await deleteBatch(id);
       load(true);
       toast.success('ลบรุ่นสำเร็จ!');
+    } catch (err) {
+      toast.error('ลบไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด');
+    }
+  };
+
+  // ── หลักสูตร ──
+  const handleAddCourse = async (batchId) => {
+    const name = (courseInputs[batchId] || '').trim();
+    if (!name) return;
+    try {
+      await addCourse(batchId, { name });
+      setCourseInputs(prev => ({ ...prev, [batchId]: '' }));
+      load(true);
+      toast.success('เพิ่มหลักสูตรสำเร็จ!');
+    } catch (err) {
+      toast.error('เพิ่มไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด');
+    }
+  };
+
+  const handleSaveCourseEdit = async (batchId) => {
+    const name = (editingCourse?.name || '').trim();
+    if (!name) return;
+    try {
+      await updateCourse(batchId, editingCourse.id, { name });
+      setEditingCourse(null);
+      load(true);
+      toast.success('แก้ไขหลักสูตรสำเร็จ!');
+    } catch (err) {
+      toast.error('แก้ไขไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด');
+    }
+  };
+
+  const handleDeleteCourse = async (batchId, course) => {
+    if (!(await toast.confirm({ title: 'ลบหลักสูตรนี้?', message: `"${course.name}" — คนในหลักสูตรนี้จะถูกปลดออกจากหลักสูตร (ยังอยู่ในรุ่นเดิม)` }))) return;
+    try {
+      await deleteCourse(batchId, course.id);
+      load(true);
+      toast.success('ลบหลักสูตรสำเร็จ!');
     } catch (err) {
       toast.error('ลบไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด');
     }
@@ -180,14 +220,71 @@ export default function BatchPage() {
                   </div>
                 )}
               </div>
-              <div className="border-t border-orange-50 px-5 py-3 flex items-center gap-4 text-xs text-gray-400">
+              <div className="border-t border-orange-50 px-5 py-3 flex items-center gap-3 text-xs text-gray-400 flex-wrap">
                 <span className="flex items-center gap-1">
                   <Clock size={12} />
                   {fmtDate(b.startDate)} — {fmtDate(b.endDate)}
                 </span>
-                <span className="ml-auto font-semibold text-orange-500">
-                  {b._count?.assessments ?? 0} คนที่มีข้อมูลประเมิน
+                <span className="flex items-center gap-1 font-semibold text-gray-600">
+                  <Users size={12} className="text-orange-400" /> รวม {b._count?.persons ?? 0} คน
                 </span>
+                <span className="flex items-center gap-1 font-semibold text-gray-600">
+                  <BookOpen size={12} className="text-orange-400" /> {b.courses?.length ?? 0} หลักสูตร
+                </span>
+                <span className="ml-auto font-semibold text-orange-500">
+                  {b._count?.assessments ?? 0} คนมีผลประเมิน
+                </span>
+              </div>
+
+              {/* หลักสูตรในรุ่น */}
+              <div className="border-t border-orange-50 bg-orange-50/30 px-5 py-3">
+                <p className="text-xs font-bold text-gray-500 mb-2 flex items-center gap-1.5">
+                  <BookOpen size={13} className="text-orange-400" /> หลักสูตร <span className="text-gray-400 font-normal">({b.courses?.length ?? 0}/4)</span>
+                </p>
+                <div className="space-y-1.5">
+                  {(b.courses || []).map((c, i) => (
+                    <div key={c.id} className="flex items-center gap-2 text-sm">
+                      {editingCourse?.id === c.id ? (
+                        <>
+                          <input autoFocus className="flex-1 rounded-lg border border-orange-300 px-2.5 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40"
+                            value={editingCourse.name}
+                            onChange={e => setEditingCourse({ ...editingCourse, name: e.target.value })}
+                            onKeyDown={e => e.key === 'Enter' && handleSaveCourseEdit(b.id)} />
+                          <button onClick={() => handleSaveCourseEdit(b.id)} className="w-7 h-7 rounded-lg flex items-center justify-center bg-emerald-50 text-emerald-500 hover:bg-emerald-100"><Check size={14} /></button>
+                          <button onClick={() => setEditingCourse(null)} className="w-7 h-7 rounded-lg flex items-center justify-center bg-gray-100 text-gray-400 hover:bg-gray-200"><X size={14} /></button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="w-5 h-5 rounded-md bg-orange-100 text-orange-600 text-[11px] font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
+                          <span className="flex-1 text-gray-700 truncate">{c.name}</span>
+                          <span className="text-xs font-semibold text-orange-500 flex-shrink-0">{c._count?.persons ?? 0} คน</span>
+                          {canEdit && (
+                            <>
+                              <button onClick={() => setEditingCourse({ id: c.id, name: c.name })} className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:bg-orange-100 hover:text-orange-500"><Pencil size={12} /></button>
+                              <button onClick={() => handleDeleteCourse(b.id, c)} className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:bg-red-100 hover:text-red-400"><Trash2 size={12} /></button>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ))}
+                  {(b.courses?.length ?? 0) === 0 && (
+                    <p className="text-xs text-gray-400 italic">ยังไม่มีหลักสูตร</p>
+                  )}
+                </div>
+                {canEdit && (b.courses?.length ?? 0) < 4 && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <input className="flex-1 rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400"
+                      placeholder="เพิ่มชื่อหลักสูตร..."
+                      value={courseInputs[b.id] || ''}
+                      onChange={e => setCourseInputs(prev => ({ ...prev, [b.id]: e.target.value }))}
+                      onKeyDown={e => e.key === 'Enter' && handleAddCourse(b.id)} />
+                    <button onClick={() => handleAddCourse(b.id)}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 active:scale-95 transition-all">
+                      <Plus size={13} /> เพิ่ม
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

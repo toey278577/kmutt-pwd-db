@@ -121,6 +121,11 @@ export const createBatch = (data) => api.post('/batches', data).then(r => { inva
 export const updateBatch = (id, data) => api.put(`/batches/${id}`, data).then(r => { invalidate('batches'); return r; });
 export const deleteBatch = (id) => api.delete(`/batches/${id}`).then(r => { invalidate('batches'); return r; });
 
+// หลักสูตรในแต่ละรุ่น (1-4 หลักสูตร/รุ่น)
+export const addCourse = (batchId, data) => api.post(`/batches/${batchId}/courses`, data).then(r => { invalidate('batches'); return r; });
+export const updateCourse = (batchId, courseId, data) => api.put(`/batches/${batchId}/courses/${courseId}`, data).then(r => { invalidate('batches'); return r; });
+export const deleteCourse = (batchId, courseId) => api.delete(`/batches/${batchId}/courses/${courseId}`).then(r => { invalidate('batches'); return r; });
+
 // assessments (ประเมินทักษะ)
 export const getAssessments = (personId) => api.get(`/persons/${personId}/assessments`);
 export const saveAssessment = (personId, data) => api.post(`/persons/${personId}/assessments`, data);
