@@ -21,6 +21,19 @@ const EDUCATION_OPTS = [
   'อื่นๆ',
 ];
 
+// 77 จังหวัดของไทย (สำหรับ dropdown เลือกจังหวัด)
+const THAI_PROVINCES = [
+  'กรุงเทพมหานคร', 'กระบี่', 'กาญจนบุรี', 'กาฬสินธุ์', 'กำแพงเพชร', 'ขอนแก่น', 'จันทบุรี', 'ฉะเชิงเทรา',
+  'ชลบุรี', 'ชัยนาท', 'ชัยภูมิ', 'ชุมพร', 'เชียงราย', 'เชียงใหม่', 'ตรัง', 'ตราด', 'ตาก', 'นครนายก',
+  'นครปฐม', 'นครพนม', 'นครราชสีมา', 'นครศรีธรรมราช', 'นครสวรรค์', 'นนทบุรี', 'นราธิวาส', 'น่าน', 'บึงกาฬ',
+  'บุรีรัมย์', 'ปทุมธานี', 'ประจวบคีรีขันธ์', 'ปราจีนบุรี', 'ปัตตานี', 'พระนครศรีอยุธยา', 'พะเยา', 'พังงา',
+  'พัทลุง', 'พิจิตร', 'พิษณุโลก', 'เพชรบุรี', 'เพชรบูรณ์', 'แพร่', 'ภูเก็ต', 'มหาสารคาม', 'มุกดาหาร',
+  'แม่ฮ่องสอน', 'ยโสธร', 'ยะลา', 'ร้อยเอ็ด', 'ระนอง', 'ระยอง', 'ราชบุรี', 'ลพบุรี', 'ลำปาง', 'ลำพูน', 'เลย',
+  'ศรีสะเกษ', 'สกลนคร', 'สงขลา', 'สตูล', 'สมุทรปราการ', 'สมุทรสงคราม', 'สมุทรสาคร', 'สระแก้ว', 'สระบุรี',
+  'สิงห์บุรี', 'สุโขทัย', 'สุพรรณบุรี', 'สุราษฎร์ธานี', 'สุรินทร์', 'หนองคาย', 'หนองบัวลำภู', 'อ่างทอง',
+  'อำนาจเจริญ', 'อุดรธานี', 'อุตรดิตถ์', 'อุทัยธานี', 'อุบลราชธานี',
+];
+
 const splitPrefix = (fullName = '') => {
   for (const p of PREFIXES) {
     if (fullName.startsWith(p)) return { prefix: p, nameOnly: fullName.slice(p.length).trim() };
@@ -574,8 +587,13 @@ export default function PersonList() {
                   <FormField label="เขต / อำเภอ" value={form.district} onChange={(v) => setForm({ ...form, district: v })} />
                 </div>
                 <div className="col-span-2">
-                  <FormField label="จังหวัด" required value={form.province} error={errors.province}
-                    onChange={(v) => { setForm({ ...form, province: v }); if (errors.province) setErrors(p => ({...p, province: ''})); }} />
+                  <SelectField label="จังหวัด" required value={form.province} error={errors.province}
+                    onChange={(v) => { setForm({ ...form, province: v }); if (errors.province) setErrors(p => ({...p, province: ''})); }}
+                    options={[
+                      ['', '— เลือกจังหวัด —'],
+                      ...(form.province && !THAI_PROVINCES.includes(form.province) ? [[form.province, `${form.province} (เดิม)`]] : []),
+                      ...THAI_PROVINCES.map(pv => [pv, pv]),
+                    ]} />
                 </div>
                 <div className="col-span-2">
                   <FormField label="รหัสไปรษณีย์" value={form.postalCode} onChange={(v) => setForm({ ...form, postalCode: v })} numericOnly maxLength={5} />
