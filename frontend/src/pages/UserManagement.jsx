@@ -216,8 +216,10 @@ export default function UserManagement() {
             </div>
             <div>
               <label className={labelCls}>{editing ? 'รหัสผ่านใหม่ (เว้นว่างถ้าไม่เปลี่ยน)' : 'รหัสผ่าน *'}</label>
-              <input type="password" className={inputCls} placeholder="รหัสผ่าน" value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })} />
+              {/* กันพิมพ์ภาษาไทย — อนุญาตเฉพาะอังกฤษ ตัวเลข และสัญลักษณ์ (ASCII) */}
+              <input type="password" className={inputCls} placeholder="รหัสผ่าน (ภาษาอังกฤษ/ตัวเลขเท่านั้น)"
+                autoComplete="new-password" value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value.replace(/[^\x21-\x7E]/g, '') })} />
             </div>
             <div>
               <label className={labelCls}>บทบาท</label>
