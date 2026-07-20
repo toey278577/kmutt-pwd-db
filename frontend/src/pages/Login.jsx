@@ -123,16 +123,22 @@ export default function Login() {
               <p className="text-white/85 text-sm font-medium">{text}</p>
             </div>
           ))}
-          {/* ป้ายเวอร์ชัน + สถานะระบบ */}
-          <div className="flex items-center gap-2.5 pt-5 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
-              <span className="relative flex h-1.5 w-1.5">
+          {/* ป้ายเวอร์ชัน — LIVE + แสงวิ่งผ่าน */}
+          <div className="flex items-center gap-3 pt-5 flex-wrap">
+            <span className="relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full
+              bg-white/10 border border-white/25 backdrop-blur-md overflow-hidden animate-glow-pulse">
+              {/* แสงวิ่งผ่าน */}
+              <span className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shine pointer-events-none" />
+              {/* จุดเขียวเต้น */}
+              <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"
+                  style={{ boxShadow: '0 0 8px 2px rgba(52,211,153,0.8)' }} />
               </span>
-              <span className="text-white/90 text-[11px] font-bold tracking-wider">v{__APP_VERSION__}</span>
+              <span className="relative text-emerald-200 text-[10px] font-black tracking-[0.2em]">LIVE</span>
+              <span className="relative w-px h-3.5 bg-white/25" />
+              <span className="relative text-white text-xs font-black tracking-wider">v{__APP_VERSION__}</span>
             </span>
-            <span className="text-white/30 text-xs">•</span>
             <p className="text-white/40 text-xs">Developed by Suthat Srisawat · 2026</p>
           </div>
         </div>
