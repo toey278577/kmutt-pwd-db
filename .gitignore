@@ -7,3 +7,6 @@ backend/backend.log
 
 # Env files (each subfolder has its own .gitignore for .env)
 .env
+
+# ไฟล์สำรองฐานข้อมูล — มีข้อมูลส่วนบุคคล ห้ามขึ้น repo
+backend/backups/
