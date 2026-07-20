@@ -123,7 +123,18 @@ export default function Login() {
               <p className="text-white/85 text-sm font-medium">{text}</p>
             </div>
           ))}
-          <p className="text-white/40 text-xs pt-5">Developed by Suthat Srisawat · 2026</p>
+          {/* ป้ายเวอร์ชัน + สถานะระบบ */}
+          <div className="flex items-center gap-2.5 pt-5 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+              </span>
+              <span className="text-white/90 text-[11px] font-bold tracking-wider">v{__APP_VERSION__}</span>
+            </span>
+            <span className="text-white/30 text-xs">•</span>
+            <p className="text-white/40 text-xs">Developed by Suthat Srisawat · 2026</p>
+          </div>
         </div>
       </div>
 
@@ -220,9 +231,12 @@ export default function Login() {
             </div>
           )}
 
-          {/* Mobile credit */}
+          {/* Mobile credit + เวอร์ชัน */}
           <p className="lg:hidden text-center text-xs text-gray-300 mt-2">
             Developed by Suthat Srisawat · 2026
+          </p>
+          <p className="lg:hidden text-center text-[11px] text-gray-400 font-bold tracking-wider mt-1">
+            v{__APP_VERSION__}
           </p>
         </div>
       </div>
