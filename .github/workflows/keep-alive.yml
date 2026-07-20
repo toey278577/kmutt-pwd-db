@@ -11,10 +11,11 @@ jobs:
     steps:
       - name: Ping Render backend
         run: |
+          # ใช้ /api/ping (ไม่แตะ DB) เพื่อให้ Neon auto-suspend ได้ ไม่เผาโควต้า compute
           # --max-time 90 รอ cold start ได้ (~50s), --retry กันยิงพลาดตอนกำลังตื่น
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             --max-time 90 --retry 2 --retry-delay 15 --retry-all-errors \
-            https://kmutt-pwd-backend.onrender.com/api/health)
+            https://kmutt-pwd-backend.onrender.com/api/ping)
           echo "Health check status: $STATUS"
           if [ "$STATUS" != "200" ]; then
             echo "Warning: backend returned $STATUS"

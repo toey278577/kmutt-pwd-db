@@ -48,6 +48,11 @@ app.use('/api/users', usersRouter);
 app.use('/api/batches', authenticate, batchesRouter);
 app.use('/api/persons', authenticate, assessmentsRouter);
 
+// ping เบา ๆ สำหรับ keep-alive (ไม่แตะ DB) — ให้ Neon auto-suspend ได้ ประหยัดโควต้า compute
+app.get('/api/ping', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 app.get('/api/health', async (req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;   // ยืนยันว่า DB พร้อมด้วย ไม่ใช่แค่ server ตื่น
