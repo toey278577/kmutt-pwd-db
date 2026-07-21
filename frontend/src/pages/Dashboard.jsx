@@ -91,17 +91,24 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ═══ STAT CARDS ═══ */}
+      {/* ═══ STAT CARDS — การ์ดไล่สีเต็มใบ + แสงวิ่ง ═══ */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {statCards.map(({ key, label, icon: Icon, grad }) => (
-          <div key={key} className="group bg-white border border-orange-100 rounded-2xl shadow-sm p-5 flex items-center gap-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform"
-              style={{ background: grad }}>
-              <Icon size={22} className="text-white" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-3xl font-black text-gray-800 leading-none tracking-tight">{stats[key]}</p>
-              <p className="text-gray-400 text-sm mt-1.5">{label}</p>
+          <div key={key} className="group relative overflow-hidden rounded-2xl p-5 text-white shadow-lg hover:-translate-y-1 hover:shadow-2xl transition-all duration-300"
+            style={{ background: grad }}>
+            {/* decorative glows */}
+            <div className="absolute -top-9 -right-9 w-28 h-28 rounded-full bg-white/15 blur-2xl pointer-events-none" />
+            <div className="absolute -bottom-10 -left-6 w-24 h-24 rounded-full bg-black/10 blur-2xl pointer-events-none" />
+            {/* shine sweep on hover */}
+            <span className="pointer-events-none absolute top-0 -left-full h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:left-[130%] transition-all duration-700 ease-out" />
+            <div className="relative flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[2.6rem] font-black leading-none tracking-tight drop-shadow-sm">{stats[key]}</p>
+                <p className="text-white/85 text-sm mt-2 font-semibold">{label}</p>
+              </div>
+              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/25 flex items-center justify-center flex-shrink-0 shadow-inner group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                <Icon size={26} className="text-white" />
+              </div>
             </div>
           </div>
         ))}
