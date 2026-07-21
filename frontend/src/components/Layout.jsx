@@ -19,7 +19,11 @@ const ROLE_LABEL = { ADMIN: 'ผู้ดูแลระบบ', STAFF: 'เจ�
 const ROLE_COLOR = { ADMIN: 'from-rose-400 to-red-500', STAFF: 'from-amber-300 to-orange-500', VIEWER: 'from-sky-300 to-cyan-500' };
 const ROLE_BADGE = 'bg-white/20 text-white border-white/30';
 
-const SIDEBAR_BG = 'linear-gradient(170deg,#fb923c 0%,#ea580c 45%,#c2410c 100%)';
+// ไล่สีเข้มพรีเมียม + ลายจุดจางๆ + แสงเรืองมุมบน (รวมใน background เดียว — ปลอดภัย ไม่เพิ่ม DOM)
+const SIDEBAR_BG = `
+  radial-gradient(circle at 1px 1px, rgba(255,255,255,0.07) 1px, transparent 0) 0 0 / 22px 22px,
+  radial-gradient(130% 55% at 100% 0%, rgba(253,230,138,0.20), transparent 62%),
+  linear-gradient(168deg,#7c2d12 0%,#9a3412 46%,#c2410c 100%)`;
 
 export default function Layout({ children }) {
   const navigate = useNavigate();
@@ -37,12 +41,14 @@ export default function Layout({ children }) {
     return (
       <button onClick={() => handleNav(path)}
         className={`group relative w-full flex items-center gap-3 pl-4 pr-3 py-2.5 rounded-xl text-left transition-all duration-200
-          ${active ? 'bg-white/20 text-white shadow-sm' : 'text-white/75 hover:text-white hover:bg-white/10'}`}>
-        {/* active left bar */}
+          ${active
+            ? 'bg-white text-orange-600 shadow-lg shadow-orange-950/25'
+            : 'text-white/80 hover:text-white hover:bg-white/12 hover:translate-x-0.5'}`}>
+        {/* active accent bar */}
         <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-200
-          ${active ? 'h-5 bg-white' : 'h-0 bg-transparent'}`} />
-        <Icon size={17} className={`flex-shrink-0 transition-colors ${active ? 'text-white' : 'text-white/60 group-hover:text-white'}`} />
-        <span className={`text-sm flex-1 ${active ? 'font-semibold' : 'font-normal'}`}>{label}</span>
+          ${active ? 'h-6 bg-orange-500' : 'h-0 bg-transparent'}`} />
+        <Icon size={17} className={`flex-shrink-0 transition-colors ${active ? 'text-orange-600' : 'text-white/60 group-hover:text-white'}`} />
+        <span className={`text-sm flex-1 ${active ? 'font-bold' : 'font-normal'}`}>{label}</span>
       </button>
     );
   };
