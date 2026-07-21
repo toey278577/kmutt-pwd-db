@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, BookOpen, Printer, Menu, X, Sun, Moon, Layers } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, BookOpen, Printer, Menu, X, Sun, Moon, Layers, UserRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -137,18 +137,24 @@ export default function Layout({ children }) {
 
         {/* ── User Card ── */}
         <div className="p-3 border-t border-white/15" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
-          <div className="flex items-center gap-3 px-3 py-3 rounded-2xl bg-white/15 border border-white/20">
-            <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${ROLE_COLOR[user?.role] || 'from-amber-300 to-orange-500'} flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow`}>
-              {initials}
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
+            {/* avatar เป็นไอคอนคน + จุดออนไลน์ */}
+            <div className="relative flex-shrink-0">
+              <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${ROLE_COLOR[user?.role] || 'from-amber-300 to-orange-500'} flex items-center justify-center shadow-md ring-2 ring-white/40`}>
+                <UserRound size={19} className="text-white" strokeWidth={2.4} />
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-orange-600"
+                style={{ boxShadow: '0 0 6px rgba(52,211,153,0.9)' }} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-bold leading-none truncate">{user?.name}</p>
-              <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border ${ROLE_BADGE}`}>
+              <p className="text-white text-sm font-bold leading-tight truncate">{user?.name}</p>
+              <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/25 text-white border border-white/30">
+                <span className="w-1 h-1 rounded-full bg-white/90" />
                 {ROLE_LABEL[user?.role] || 'เจ้าหน้าที่'}
               </span>
             </div>
             <button onClick={handleLogout} title="ออกจากระบบ"
-              className="text-white/70 hover:text-white transition-colors p-1.5 rounded-xl hover:bg-white/15 flex-shrink-0">
+              className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-white/10 text-white/80 hover:bg-red-500 hover:text-white transition-all active:scale-90">
               <LogOut size={15} />
             </button>
           </div>
