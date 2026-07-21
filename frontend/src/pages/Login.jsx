@@ -153,11 +153,8 @@ export default function Login() {
           style={{ background: 'radial-gradient(circle,#fdba74,transparent 70%)' }} />
 
         <div className="w-full max-w-sm relative z-10 animate-[cardIn_.5s_ease-out]">
-          {/* Card — glowing animated border */}
+          {/* Card */}
           <div className="relative">
-            {/* rotating soft aura (blurred → นุ่ม ไม่เห็นเหลี่ยม) */}
-            <div className="absolute -inset-2 rounded-[2.4rem] opacity-55 blur-2xl pointer-events-none animate-[spinSlow_8s_linear_infinite]"
-              style={{ background: 'conic-gradient(from 0deg,#fb923c,#fbbf24,#f97316,#ea580c,#fdba74,#fb923c)' }} />
             {/* static gradient ring (ขอบไล่สีคม สะอาด) */}
             <div className="absolute -inset-[1.5px] rounded-[2rem] pointer-events-none"
               style={{ background: 'linear-gradient(135deg,#fdba74,#f97316,#ea580c,#fb923c)' }} />
