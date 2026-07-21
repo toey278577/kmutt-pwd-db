@@ -155,12 +155,12 @@ export default function Login() {
         <div className="w-full max-w-sm relative z-10 animate-[cardIn_.5s_ease-out]">
           {/* Card — glowing animated border */}
           <div className="relative">
-            {/* rotating conic glow (soft, behind) */}
-            <div className="absolute -inset-[3px] rounded-[2rem] opacity-70 blur-[11px] pointer-events-none animate-[spinSlow_7s_linear_infinite]"
+            {/* rotating soft aura (blurred → นุ่ม ไม่เห็นเหลี่ยม) */}
+            <div className="absolute -inset-2 rounded-[2.4rem] opacity-55 blur-2xl pointer-events-none animate-[spinSlow_8s_linear_infinite]"
               style={{ background: 'conic-gradient(from 0deg,#fb923c,#fbbf24,#f97316,#ea580c,#fdba74,#fb923c)' }} />
-            {/* sharp gradient ring (edge) */}
-            <div className="absolute -inset-[1.5px] rounded-[2rem] pointer-events-none animate-[spinSlow_7s_linear_infinite]"
-              style={{ background: 'conic-gradient(from 0deg,#fb923c,#fbbf24,#f97316,#ea580c,#fdba74,#fb923c)' }} />
+            {/* static gradient ring (ขอบไล่สีคม สะอาด) */}
+            <div className="absolute -inset-[1.5px] rounded-[2rem] pointer-events-none"
+              style={{ background: 'linear-gradient(135deg,#fdba74,#f97316,#ea580c,#fb923c)' }} />
 
             <div className="relative rounded-[1.9rem] bg-white/95 backdrop-blur-xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(234,88,12,0.35)]">
               {/* top sheen line */}
