@@ -19,11 +19,11 @@ const ROLE_LABEL = { ADMIN: 'ผู้ดูแลระบบ', STAFF: 'เจ�
 const ROLE_COLOR = { ADMIN: 'from-rose-400 to-red-500', STAFF: 'from-amber-300 to-orange-500', VIEWER: 'from-sky-300 to-cyan-500' };
 const ROLE_BADGE = 'bg-white/20 text-white border-white/30';
 
-// โทนส้มสว่างสดใส + ลายจุดจางๆ + แสงเรืองมุมบน (รวมใน background เดียว — ปลอดภัย ไม่เพิ่ม DOM)
+// โทนส้มสว่าง (ลดสว่างลงนิด อิ่มขึ้น) + ลายจุดจางๆ + แสงเรืองมุมบน (รวมใน background เดียว — ปลอดภัย ไม่เพิ่ม DOM)
 const SIDEBAR_BG = `
-  radial-gradient(circle at 1px 1px, rgba(255,255,255,0.10) 1px, transparent 0) 0 0 / 22px 22px,
-  radial-gradient(125% 55% at 100% 0%, rgba(255,255,255,0.22), transparent 60%),
-  linear-gradient(165deg,#fdba74 0%,#fb923c 40%,#f97316 72%,#ea580c 100%)`;
+  radial-gradient(circle at 1px 1px, rgba(255,255,255,0.09) 1px, transparent 0) 0 0 / 22px 22px,
+  radial-gradient(125% 55% at 100% 0%, rgba(255,255,255,0.16), transparent 60%),
+  linear-gradient(165deg,#fb923c 0%,#f97316 42%,#ea580c 74%,#c2410c 100%)`;
 
 export default function Layout({ children }) {
   const navigate = useNavigate();
