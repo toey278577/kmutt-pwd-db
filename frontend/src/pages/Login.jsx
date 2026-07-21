@@ -153,75 +153,102 @@ export default function Login() {
           style={{ background: 'radial-gradient(circle,#fdba74,transparent 70%)' }} />
 
         <div className="w-full max-w-sm relative z-10 animate-[cardIn_.5s_ease-out]">
-          {/* Card */}
-          <div className="rounded-[1.75rem] bg-white border border-orange-100/80 shadow-[0_20px_60px_-15px_rgba(234,88,12,0.25)] overflow-hidden">
+          {/* Card — glowing animated border */}
+          <div className="relative">
+            {/* rotating conic glow (soft, behind) */}
+            <div className="absolute -inset-[3px] rounded-[2rem] opacity-70 blur-[11px] pointer-events-none animate-[spinSlow_7s_linear_infinite]"
+              style={{ background: 'conic-gradient(from 0deg,#fb923c,#fbbf24,#f97316,#ea580c,#fdba74,#fb923c)' }} />
+            {/* sharp gradient ring (edge) */}
+            <div className="absolute -inset-[1.5px] rounded-[2rem] pointer-events-none animate-[spinSlow_7s_linear_infinite]"
+              style={{ background: 'conic-gradient(from 0deg,#fb923c,#fbbf24,#f97316,#ea580c,#fdba74,#fb923c)' }} />
 
-            {/* Header */}
-            <div className="px-8 pt-8 pb-6 text-center">
-              <div className="w-[4.5rem] h-[4.5rem] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg ring-1 ring-orange-100"
-                style={{ background: 'linear-gradient(135deg,#fff7ed,#ffedd5)' }}>
-                <img src="/logo-kmutt-round.jpg" alt="KMUTT" className="h-14 w-14 object-contain rounded-full"
-                  onError={e => { e.target.style.display='none'; }} />
+            <div className="relative rounded-[1.9rem] bg-white/95 backdrop-blur-xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(234,88,12,0.35)]">
+              {/* top sheen line */}
+              <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-orange-300/70 to-transparent" />
+
+              {/* Header */}
+              <div className="px-8 pt-9 pb-6 text-center">
+                <div className="relative mx-auto mb-5 w-[4.75rem] h-[4.75rem]">
+                  {/* pulsing glow behind logo */}
+                  <div className="absolute inset-0 rounded-[1.4rem] blur-xl opacity-70 animate-[pulseGlow_3.2s_ease-in-out_infinite]"
+                    style={{ background: 'radial-gradient(circle,#fb923c,transparent 70%)' }} />
+                  {/* floating logo */}
+                  <div className="relative w-[4.75rem] h-[4.75rem] rounded-[1.4rem] flex items-center justify-center shadow-xl ring-1 ring-orange-100 animate-[floaty_5s_ease-in-out_infinite]"
+                    style={{ background: 'linear-gradient(135deg,#ffffff,#fff7ed)' }}>
+                    <img src="/logo-kmutt-round.jpg" alt="KMUTT" className="h-14 w-14 object-contain rounded-full"
+                      onError={e => { e.target.style.display='none'; }} />
+                  </div>
+                </div>
+                <h2 className="font-black text-[1.7rem] leading-tight mb-1.5"
+                  style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                    backgroundImage: 'linear-gradient(120deg,#9a3412,#ea580c 55%,#f97316)' }}>
+                  ยินดีต้อนรับ 👋
+                </h2>
+                <p className="text-gray-400 text-sm">เข้าสู่ระบบเพื่อเริ่มใช้งาน</p>
               </div>
-              <h2 className="text-gray-800 font-black text-2xl leading-tight mb-1.5">ยินดีต้อนรับ 👋</h2>
-              <p className="text-gray-400 text-sm">เข้าสู่ระบบเพื่อเริ่มใช้งาน</p>
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-4">
+                {/* Email */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-1.5 ml-1">อีเมล</label>
+                  <div className="group relative">
+                    <Mail size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-300 group-focus-within:text-orange-500 group-focus-within:scale-110 transition-all pointer-events-none z-10" />
+                    <input
+                      type="email"
+                      placeholder="example@kmutt.ac.th"
+                      value={form.email}
+                      onChange={e => setForm({ ...form, email: e.target.value })}
+                      required
+                      autoComplete="email"
+                      className="w-full rounded-2xl border border-gray-200 pl-11 pr-4 py-3.5 text-sm text-gray-800 placeholder:text-gray-300 bg-gray-50/80 hover:bg-white focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-400/20 focus:border-orange-400 focus:shadow-[0_6px_22px_-8px_rgba(234,88,12,0.5)] transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-1.5 ml-1">รหัสผ่าน</label>
+                  <div className="group relative">
+                    <Lock size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-300 group-focus-within:text-orange-500 group-focus-within:scale-110 transition-all pointer-events-none z-10" />
+                    <input
+                      type={showPw ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      value={form.password}
+                      onChange={e => setForm({ ...form, password: e.target.value })}
+                      required
+                      autoComplete="current-password"
+                      className="w-full rounded-2xl border border-gray-200 pl-11 pr-11 py-3.5 text-sm text-gray-800 placeholder:text-gray-300 bg-gray-50/80 hover:bg-white focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-400/20 focus:border-orange-400 focus:shadow-[0_6px_22px_-8px_rgba(234,88,12,0.5)] transition-all"
+                    />
+                    <button type="button" onClick={() => setShowPw(!showPw)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-orange-500 transition-colors z-10">
+                      {showPw ? <EyeOff size={17} /> : <Eye size={17} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Submit — shine sweep */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="group relative w-full overflow-hidden py-3.5 rounded-2xl text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_34px_-6px_rgba(234,88,12,0.6)] active:scale-[0.98] disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none !mt-6"
+                  style={{
+                    background: loading ? '#9a3412' : 'linear-gradient(135deg,#fb923c,#ea580c 55%,#c2410c)',
+                    boxShadow: loading ? 'none' : '0 6px 22px -4px rgba(234,88,12,0.55)',
+                  }}>
+                  {/* periodic light sweep */}
+                  {!loading && (
+                    <span className="pointer-events-none absolute top-0 -left-1/3 h-full w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/45 to-transparent animate-[btnShine_3.5s_ease-in-out_infinite]" />
+                  )}
+                  <span className="relative flex items-center justify-center gap-2.5">
+                    {loading
+                      ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />กำลังเข้าสู่ระบบ...</>
+                      : <><LogIn size={16} className="group-hover:translate-x-0.5 transition-transform" />เข้าสู่ระบบ</>
+                    }
+                  </span>
+                </button>
+              </form>
             </div>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-4">
-              {/* Email */}
-              <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1.5 ml-1">อีเมล</label>
-                <div className="relative">
-                  <Mail size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-300 pointer-events-none" />
-                  <input
-                    type="email"
-                    placeholder="example@kmutt.ac.th"
-                    value={form.email}
-                    onChange={e => setForm({ ...form, email: e.target.value })}
-                    required
-                    autoComplete="email"
-                    className="w-full rounded-2xl border border-gray-200 pl-11 pr-4 py-3 text-sm text-gray-800 placeholder:text-gray-300 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
-                  />
-                </div>
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1.5 ml-1">รหัสผ่าน</label>
-                <div className="relative">
-                  <Lock size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-300 pointer-events-none" />
-                  <input
-                    type={showPw ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    value={form.password}
-                    onChange={e => setForm({ ...form, password: e.target.value })}
-                    required
-                    autoComplete="current-password"
-                    className="w-full rounded-2xl border border-gray-200 pl-11 pr-11 py-3 text-sm text-gray-800 placeholder:text-gray-300 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
-                  />
-                  <button type="button" onClick={() => setShowPw(!showPw)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-orange-500 transition-colors">
-                    {showPw ? <EyeOff size={17} /> : <Eye size={17} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl text-sm font-bold text-white transition-all hover:shadow-[0_8px_30px_rgba(234,88,12,0.5)] active:scale-[0.98] disabled:opacity-60 disabled:hover:shadow-none !mt-6"
-                style={{
-                  background: loading ? '#9a3412' : 'linear-gradient(135deg,#f97316,#ea580c,#c2410c)',
-                  boxShadow: loading ? 'none' : '0 4px 20px rgba(234,88,12,0.4)',
-                }}>
-                {loading
-                  ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />กำลังเข้าสู่ระบบ...</>
-                  : <><LogIn size={16} />เข้าสู่ระบบ</>
-                }
-              </button>
-            </form>
           </div>
 
           {/* Footer note */}
@@ -251,8 +278,18 @@ export default function Login() {
       <style>{`
         @keyframes float1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,-20px) scale(1.08); } }
         @keyframes float2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-25px,20px) scale(1.1); } }
-        @keyframes cardIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(16px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes toastIn { from { opacity: 0; transform: translate(-50%,-12px); } to { opacity: 1; transform: translate(-50%,0); } }
+        @keyframes spinSlow { to { transform: rotate(360deg); } }
+        @keyframes pulseGlow { 0%,100% { opacity: .5; transform: scale(.92); } 50% { opacity: .85; transform: scale(1.06); } }
+        @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        @keyframes btnShine { 0% { left: -33%; } 55%,100% { left: 130%; } }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-\\[spinSlow_7s_linear_infinite\\],
+          .animate-\\[pulseGlow_3\\.2s_ease-in-out_infinite\\],
+          .animate-\\[floaty_5s_ease-in-out_infinite\\],
+          .animate-\\[btnShine_3\\.5s_ease-in-out_infinite\\] { animation: none !important; }
+        }
       `}</style>
     </div>
   );
