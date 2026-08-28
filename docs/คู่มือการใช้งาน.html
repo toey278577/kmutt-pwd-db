@@ -2,416 +2,784 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>คู่มือการใช้งาน ระบบฐานข้อมูลคนพิการ มจธ.</title>
+<title>คู่มือการใช้งาน — ระบบฐานข้อมูลคนพิการ มจธ.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Sarabun','Leelawadee UI','Tahoma',sans-serif; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  body { color:#1c1917; font-size:14px; line-height:1.6; }
-
-  /* ---------- COVER ---------- */
-  .cover {
-    height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center;
-    text-align:center; color:#fff; padding:60px;
-    background:linear-gradient(150deg,#fb923c 0%,#ea580c 45%,#9a3412 100%);
-    page-break-after:always; position:relative; overflow:hidden;
+  @page { size: A4; margin: 0; }
+  * { margin:0; padding:0; box-sizing:border-box;
+      font-family:'Sarabun','Leelawadee UI','Tahoma',sans-serif;
+      -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  :root{
+    --o50:#fff7ed; --o100:#ffedd5; --o200:#fed7aa; --o300:#fdba74;
+    --o400:#fb923c; --o500:#f97316; --o600:#ea580c; --o700:#c2410c;
+    --o800:#9a3412; --o900:#7c2d12;
+    --ink:#1c1917; --mut:#78716c; --line:#f0e6dc;
   }
-  .cover .badge { width:110px;height:110px;border-radius:30px;background:#fff;display:flex;align-items:center;justify-content:center;
-    box-shadow:0 20px 50px rgba(0,0,0,.25); margin-bottom:34px; }
-  .cover .badge span { font-size:52px;font-weight:900;color:#ea580c;letter-spacing:-2px; }
-  .cover h1 { font-size:40px; font-weight:900; line-height:1.25; margin-bottom:16px; text-shadow:0 2px 10px rgba(0,0,0,.15); }
-  .cover h2 { font-size:20px; font-weight:600; opacity:.92; margin-bottom:40px; }
-  .cover .meta { font-size:15px; opacity:.85; line-height:2; border-top:1px solid rgba(255,255,255,.3); padding-top:24px; }
-  .cover .tag { display:inline-block; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35);
-    padding:6px 18px; border-radius:30px; font-size:14px; margin-top:18px; }
+  body { color:var(--ink); font-size:13.5px; line-height:1.56; background:#fff; }
 
-  /* ---------- PAGE ---------- */
-  .page { padding:40px 48px 60px; }
-  .page-break { page-break-before:always; }
+  /* ============ COVER ============ */
+  .cover{
+    width:210mm; height:297mm; position:relative; overflow:hidden; color:#fff;
+    background:linear-gradient(155deg,#fb923c 0%,#f97316 30%,#ea580c 60%,#9a3412 100%);
+    display:flex; flex-direction:column; page-break-after:always;
+  }
+  .cover .blob{ position:absolute; border-radius:50%; }
+  .b1{ width:520px;height:520px; right:-190px; top:-170px; background:rgba(255,255,255,.10); }
+  .b2{ width:330px;height:330px; left:-130px; top:270px; background:rgba(255,255,255,.07); }
+  .b3{ width:640px;height:640px; left:-180px; bottom:-330px; background:rgba(124,45,18,.22); }
+  .b4{ width:16px;height:16px; right:120px; top:330px; background:rgba(255,255,255,.5); }
+  .b5{ width:9px;height:9px; right:175px; top:378px; background:rgba(255,255,255,.4); }
+  .cover-inner{ position:relative; z-index:2; flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center; padding:0 54px; }
+  .logo-ring{ width:150px;height:150px; border-radius:50%; background:#fff; padding:9px;
+    box-shadow:0 26px 60px rgba(60,20,0,.35), 0 0 0 12px rgba(255,255,255,.14); margin-bottom:34px; }
+  .logo-ring img{ width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; }
+  .kicker{ font-size:14px; font-weight:600; letter-spacing:5px; opacity:.9; margin-bottom:16px; }
+  .cover h1{ font-size:47px; font-weight:800; line-height:1.2; letter-spacing:-.5px;
+    text-shadow:0 3px 18px rgba(90,30,0,.28); }
+  .cover .rule{ width:88px; height:4px; border-radius:4px; background:rgba(255,255,255,.75); margin:24px 0; }
+  .cover h2{ font-size:21px; font-weight:600; opacity:.95; line-height:1.5; }
+  .cover .org{ font-size:16px; opacity:.86; margin-top:6px; }
+  .cover .url{ display:inline-block; margin-top:38px; background:rgba(255,255,255,.16);
+    border:1.5px solid rgba(255,255,255,.4); padding:11px 26px; border-radius:40px;
+    font-size:15px; font-weight:600; letter-spacing:.3px; }
+  .cover-foot{ position:relative; z-index:2; padding:26px 0 34px; display:flex;
+    justify-content:space-between; align-items:flex-end; font-size:13px;
+    border-top:1px solid rgba(255,255,255,.25); margin:0 54px; }
+  .cover-foot b{ font-weight:700; font-size:14px; display:block; }
+  .cover-foot span{ opacity:.8; }
 
-  h2.sec { font-size:24px; font-weight:900; color:#9a3412; margin:6px 0 4px; }
-  .sec-wrap { display:flex; align-items:center; gap:16px; margin-bottom:18px; padding-bottom:16px; border-bottom:3px solid #fed7aa; }
-  .sec-num { flex:0 0 auto; width:52px;height:52px;border-radius:16px; background:linear-gradient(135deg,#fb923c,#ea580c);
-    color:#fff; font-size:24px; font-weight:900; display:flex; align-items:center; justify-content:center;
-    box-shadow:0 6px 16px rgba(234,88,12,.35); }
-  .sec-sub { color:#a8a29e; font-size:13px; font-weight:600; margin-top:2px; }
+  /* ============ PAGE ============ */
+  .page{ width:210mm; min-height:297mm; padding:13mm 15mm 8mm; page-break-after:always;
+    display:flex; flex-direction:column; position:relative; }
+  .page:last-child{ page-break-after:auto; }
+  .run-head{ display:flex; justify-content:space-between; align-items:center;
+    font-size:10.5px; color:#c4b8ae; letter-spacing:.6px; padding-bottom:7px;
+    border-bottom:1px solid var(--line); margin-bottom:15px; }
+  .run-head .rh-r{ color:var(--o400); font-weight:700; }
+  .body-area{ flex:1; }
+  .run-foot{ margin-top:12px; padding-top:8px; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center; font-size:10.5px; color:#c4b8ae; }
+  .pg-no{ width:26px;height:26px;border-radius:50%; background:var(--o50); color:var(--o600);
+    font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--o200); }
 
-  h3 { font-size:16px; font-weight:800; color:#c2410c; margin:22px 0 10px; display:flex; align-items:center; gap:8px; }
-  h3::before { content:''; width:8px;height:8px;border-radius:50%; background:#f97316; flex:0 0 auto; }
+  /* section header */
+  .sec-wrap{ display:flex; align-items:center; gap:14px; margin-bottom:14px;
+    padding-bottom:10px; border-bottom:2.5px solid var(--o100); }
+  .sec-num{ flex:0 0 auto; width:48px;height:48px;border-radius:16px;
+    background:linear-gradient(140deg,#fb923c,#ea580c); color:#fff; font-size:23px; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 20px rgba(234,88,12,.32); }
+  h2.sec{ font-size:23px; font-weight:800; color:var(--o800); line-height:1.25; letter-spacing:-.3px; }
+  .sec-sub{ color:#b0a69c; font-size:12.5px; font-weight:600; margin-top:3px; }
 
-  p { margin-bottom:10px; }
-  .lead { color:#57534e; margin-bottom:14px; }
+  h3{ font-size:15.5px; font-weight:700; color:var(--o700); margin:15px 0 7px;
+    display:flex; align-items:center; gap:9px; }
+  h3::before{ content:''; width:7px;height:19px;border-radius:4px;
+    background:linear-gradient(180deg,var(--o400),var(--o600)); flex:0 0 auto; }
+  .body-area > h3:first-child{ margin-top:0; }
+  p{ margin-bottom:9px; }
+  .lead{ color:#6b625a; font-size:13.8px; margin-bottom:11px; }
+  b, strong{ font-weight:700; color:#3b322c; }
+  .req{ color:#dc2626; font-weight:800; }
 
-  ul { list-style:none; margin:8px 0 14px; }
-  ul li { position:relative; padding-left:26px; margin-bottom:7px; }
-  ul li::before { content:'✓'; position:absolute; left:0; top:0; color:#16a34a; font-weight:900; }
+  ul{ list-style:none; margin:6px 0 12px; }
+  ul li{ position:relative; padding-left:24px; margin-bottom:5px; }
+  ul li::before{ content:''; position:absolute; left:5px; top:8px; width:7px;height:7px;
+    border-radius:50%; background:var(--o300); }
 
-  .steps { counter-reset:step; margin:10px 0 16px; }
-  .steps .step { position:relative; padding:10px 14px 10px 52px; margin-bottom:8px; background:#fff7ed; border:1px solid #fed7aa;
-    border-radius:14px; }
-  .steps .step::before { counter-increment:step; content:counter(step); position:absolute; left:12px; top:50%; transform:translateY(-50%);
-    width:28px;height:28px;border-radius:50%; background:linear-gradient(135deg,#ea580c,#c2410c); color:#fff;
-    font-weight:900; font-size:14px; display:flex; align-items:center; justify-content:center; }
+  /* steps */
+  .steps{ counter-reset:step; margin:8px 0 11px; }
+  .steps .step{ position:relative; padding:6px 15px 6px 48px; margin-bottom:4.5px;
+    background:linear-gradient(90deg,#fff9f4,#fffdfb); border:1px solid var(--o100);
+    border-left:3px solid var(--o300); border-radius:12px; font-size:13.5px; }
+  .steps .step::before{ counter-increment:step; content:counter(step); position:absolute;
+    left:13px; top:50%; transform:translateY(-50%); width:26px;height:26px;border-radius:50%;
+    background:linear-gradient(140deg,var(--o500),var(--o700)); color:#fff; font-weight:800; font-size:13px;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 3px 8px rgba(234,88,12,.3); }
 
-  table { width:100%; border-collapse:collapse; margin:10px 0 16px; border-radius:12px; overflow:hidden; box-shadow:0 0 0 1px #fed7aa; }
-  th { background:#fff7ed; color:#9a3412; text-align:left; font-size:12px; font-weight:800; padding:9px 12px; text-transform:uppercase; letter-spacing:.4px; }
-  td { padding:9px 12px; border-top:1px solid #f5f0e8; font-size:13.5px; }
-  tr:nth-child(even) td { background:#fffaf5; }
+  /* table */
+  table{ width:100%; border-collapse:separate; border-spacing:0; margin:8px 0 11px;
+    border:1px solid var(--o200); border-radius:12px; overflow:hidden; }
+  th{ background:linear-gradient(180deg,#fff4ea,#ffece0); color:var(--o800); text-align:left;
+    font-size:11.5px; font-weight:800; padding:7px 13px; letter-spacing:.5px;
+    border-bottom:1px solid var(--o200); }
+  td{ padding:5.5px 13px; border-top:1px solid #f7f0e9; font-size:12.8px; vertical-align:top; }
+  tr:nth-child(even) td{ background:#fffcf9; }
+  td:first-child{ font-weight:600; color:#4a423b; }
 
-  .tip, .warn { display:flex; gap:12px; padding:13px 16px; border-radius:14px; margin:14px 0; font-size:13.5px; }
-  .tip { background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; }
-  .warn { background:#fffbeb; border:1px solid #fde68a; color:#92400e; }
-  .tip .ic, .warn .ic { font-size:18px; flex:0 0 auto; }
+  /* callouts */
+  .tip,.warn,.note{ display:flex; gap:11px; padding:10px 15px; border-radius:12px;
+    margin:8px 0; font-size:12.8px; line-height:1.5; }
+  .tip{ background:#f0fdf4; border:1px solid #bbf7d0; color:#14532d; }
+  .warn{ background:#fffbeb; border:1px solid #fde68a; color:#78350f; }
+  .note{ background:#eff6ff; border:1px solid #bfdbfe; color:#1e3a5f; }
+  .ic{ font-size:17px; flex:0 0 auto; line-height:1.3; }
 
-  .chip { display:inline-block; padding:3px 12px; border-radius:30px; font-size:12px; font-weight:800; margin:2px 4px 2px 0; }
-  .c-orange { background:#ffedd5; color:#c2410c; } .c-green{background:#dcfce7;color:#15803d;}
-  .c-blue{background:#dbeafe;color:#1d4ed8;} .c-red{background:#fee2e2;color:#b91c1c;} .c-gray{background:#f3f4f6;color:#4b5563;}
-  .req { color:#dc2626; font-weight:900; }
+  /* chips */
+  .chip{ display:inline-block; padding:3px 12px; border-radius:20px; font-size:12px;
+    font-weight:700; margin:2px 4px 2px 0; border:1px solid; }
+  .c-orange{ background:var(--o50); color:var(--o700); border-color:var(--o200); }
+  .c-green { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
+  .c-blue  { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
+  .c-red   { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
+  .c-gray  { background:#f8f7f6; color:#6b625a; border-color:#e7e2dd; }
+  .c-violet{ background:#f5f3ff; color:#6d28d9; border-color:#ddd6fe; }
 
-  .flow { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:16px 0; }
-  .flow .node { background:linear-gradient(135deg,#fff7ed,#ffedd5); border:1.5px solid #fdba74; color:#9a3412;
-    font-weight:800; font-size:12.5px; padding:9px 14px; border-radius:12px; }
-  .flow .arr { color:#fb923c; font-weight:900; font-size:16px; }
+  /* flow */
+  .flow{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:11px 0 4px; }
+  .node{ background:#fff; border:1.5px solid var(--o200); color:var(--o700); font-weight:700;
+    font-size:11px; padding:5.5px 11px; border-radius:9px; box-shadow:0 2px 5px rgba(234,88,12,.07); }
+  .node.hi{ background:linear-gradient(140deg,var(--o500),var(--o700)); color:#fff; border-color:transparent; }
+  .arr{ color:var(--o300); font-weight:800; font-size:13px; }
 
-  .footer { position:fixed; bottom:0; left:0; right:0; text-align:center; font-size:10px; color:#d6d3d1; padding:8px; }
-  .toc-item { display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px dashed #e7e0d6; }
-  .toc-item .n { width:30px;height:30px;border-radius:9px;background:#fff7ed;color:#ea580c;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 auto;}
-  .toc-item .t { font-weight:600; flex:1; }
-  .toc-item .pg { color:#a8a29e; font-size:12px; }
+  /* TOC */
+  .toc-hero{ background:linear-gradient(135deg,#fff7ed,#ffedd5); border:1px solid var(--o200);
+    border-radius:16px; padding:13px 20px; margin-bottom:12px; }
+  .toc-hero h4{ font-size:15px; font-weight:800; color:var(--o800); margin-bottom:4px; }
+  .toc-hero p{ font-size:12.5px; color:#8a7f75; margin:0; }
+  .toc-item{ display:flex; align-items:center; gap:13px; padding:5px 14px; margin-bottom:4px;
+    border:1px solid var(--line); border-radius:12px; background:#fff; }
+  .toc-item .n{ width:27px;height:27px;border-radius:8px; background:var(--o50); color:var(--o700);
+    font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center;
+    flex:0 0 auto; border:1px solid var(--o200); }
+  .toc-item .t{ flex:1; font-size:13px; font-weight:600; color:#3b322c; line-height:1.35; }
+  .toc-item .t small{ display:block; font-weight:400; color:#a89e94; font-size:11px; }
+  .toc-item .pg{ font-size:11px; color:#c4b8ae; font-weight:700; }
+  .toc-item.star .n{ background:linear-gradient(140deg,var(--o500),var(--o700)); color:#fff; border-color:transparent; }
+
+  /* UI mock */
+  .mock{ display:flex; gap:14px; margin:12px 0 14px; }
+  .mock-side{ width:195px; flex:0 0 auto; background:linear-gradient(170deg,#7c2d12,#9a3412);
+    border-radius:14px; padding:11px 10px; color:#fff; }
+  .mock-side .ms-t{ font-size:10.5px; font-weight:700; opacity:.65; letter-spacing:1.2px; margin-bottom:9px; padding-left:6px; }
+  .mock-side .mi{ display:flex; align-items:center; gap:8px; font-size:11.5px; padding:3px 9px;
+    border-radius:9px; margin-bottom:3px; opacity:.92; }
+  .mock-side .mi.on{ background:#fff; color:var(--o700); font-weight:800; opacity:1; }
+  .mock-note{ flex:1; font-size:12.5px; color:#6b625a; }
+  .mock-note div{ margin-bottom:5px; padding-left:16px; position:relative; }
+  .mock-note div::before{ content:'>'; position:absolute; left:0; color:var(--o400); font-weight:800; }
+
+  /* grid cards */
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:9px 0 11px; }
+  .card{ border:1px solid var(--o100); border-radius:13px; padding:10px 14px; background:#fffdfb; }
+  .card h5{ font-size:13.5px; font-weight:800; color:var(--o700); margin-bottom:4px; }
+  .card p{ font-size:12.5px; color:#6b625a; margin:0; line-height:1.5; }
+
+  .end{ text-align:center; color:#c4b8ae; font-size:12px; margin-top:30px; line-height:1.9; }
+
 </style>
 </head>
 <body>
-
-<!-- ======== COVER ======== -->
+<!-- ============ COVER ============ -->
 <div class="cover">
-  <div class="badge"><span>มจธ</span></div>
-  <h1>คู่มือการใช้งาน<br>ระบบฐานข้อมูลคนพิการ</h1>
-  <h2>PWDs Database — มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</h2>
-  <div class="tag">โครงการฝึกอบรม–ฝึกงานคนพิการ เพื่อเตรียมความพร้อมเข้าทำงาน</div>
-  <div class="meta">
-    คู่มือการใช้งานฉบับสมบูรณ์ • ขั้นตอนตั้งแต่ต้นจนจบ<br>
-    เว็บไซต์: https://kmutt-pwd-db.vercel.app<br>
-    ปรับปรุงล่าสุด: มิถุนายน 2568
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="blob b4"></div><div class="blob b5"></div>
+  <div class="cover-inner">
+    <div class="logo-ring"><img src="data:image/jpeg;base64,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" alt="KMUTT"></div>
+    <div class="kicker">USER MANUAL</div>
+    <h1>คู่มือการใช้งาน<br>ระบบฐานข้อมูลคนพิการ</h1>
+    <div class="rule"></div>
+    <h2>โครงการฝึกอบรม–ฝึกงานคนพิการ<br>เพื่อเตรียมความพร้อมเข้าทำงานในสถานประกอบการ</h2>
+    <div class="org">มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี (มจธ.)</div>
+    <div class="url">https://kmutt-pwd.duckdns.org</div>
+  </div>
+  <div class="cover-foot">
+    <div><b>ฉบับปรับปรุง สิงหาคม 2569</b><span>เวอร์ชันระบบ 1.1</span></div>
+    <div style="text-align:right"><b>สำหรับเจ้าหน้าที่ผู้ใช้งานระบบ</b><span>ผู้ดูแลระบบ • เจ้าหน้าที่ • ผู้ดูข้อมูล</span></div>
   </div>
 </div>
 
-<!-- ======== สารบัญ ======== -->
+<!-- ============ TOC ============ -->
 <div class="page">
-  <div class="sec-wrap"><div class="sec-num">≣</div><div><h2 class="sec">สารบัญ</h2><div class="sec-sub">ลำดับการใช้งาน “ต้นน้ำ → ปลายน้ำ”</div></div></div>
+  <div class="run-head"><div>คู่มือการใช้งาน — ระบบฐานข้อมูลคนพิการ มจธ.</div><div class="rh-r">สารบัญ</div></div>
+  <div class="body-area">
+    <div class="sec-wrap">
+      <div class="sec-num">?</div>
+      <div><h2 class="sec">สารบัญ</h2><div class="sec-sub">อ่านตามลำดับได้เลย เรียงตามการใช้งานจริง</div></div>
+    </div>
 
-  <div class="flow">
-    <span class="node">1. เข้าระบบ</span><span class="arr">→</span>
-    <span class="node">2. สร้างรุ่น</span><span class="arr">→</span>
-    <span class="node">3. เพิ่มคนพิการ</span><span class="arr">→</span>
-    <span class="node">4. อบรม/ทักษะ</span><span class="arr">→</span>
-    <span class="node">5. ประเมินทักษะ</span><span class="arr">→</span>
-    <span class="node">6. งาน/องค์กร</span><span class="arr">→</span>
-    <span class="node">7. ติดตามผล</span><span class="arr">→</span>
-    <span class="node">8. Dashboard</span><span class="arr">→</span>
-    <span class="node">9. ออกรายงาน</span>
+    <div class="toc-hero">
+      <h4>ภาพรวมการทำงานของระบบ</h4>
+      <p>ระบบนี้เก็บข้อมูลผู้พิการที่เข้าร่วมโครงการตั้งแต่ต้นจนจบ — สมัครเข้ารุ่น อบรม ประเมินผล ฝึกงาน จนถึงติดตามผลหลังจบ และออกรายงานได้ทันที</p>
+      <div class="flow">
+        <span class="node hi">1. เข้าระบบ</span><span class="arr">&#8594;</span>
+        <span class="node">2. สร้างรุ่น</span><span class="arr">&#8594;</span>
+        <span class="node">3. เพิ่มคนพิการ</span><span class="arr">&#8594;</span>
+        <span class="node">4. อบรม/ทักษะ</span><span class="arr">&#8594;</span>
+        <span class="node">5. ประเมินผล</span><span class="arr">&#8594;</span>
+        <span class="node">6. งาน/องค์กร</span><span class="arr">&#8594;</span>
+        <span class="node">7. ติดตามผล</span><span class="arr">&#8594;</span>
+        <span class="node hi">8. ออกรายงาน</span>
+      </div>
+    </div>
+
+    <div class="toc-item"><div class="n">1</div><div class="t">เข้าสู่ระบบ และสิทธิ์ผู้ใช้งาน<small>ล็อกอิน • 3 บทบาท • ออกจากระบบ</small></div><div class="pg">หน้า 2</div></div>
+    <div class="toc-item"><div class="n">2</div><div class="t">รู้จักหน้าจอและเมนู<small>แถบเมนูซ้าย • โหมดกลางคืน • สัญญาณแจ้งเตือน</small></div><div class="pg">หน้า 3</div></div>
+    <div class="toc-item"><div class="n">3</div><div class="t">Dashboard — สถิติภาพรวม<small>การ์ดสรุป • กราฟ • รุ่นปัจจุบัน</small></div><div class="pg">หน้า 4</div></div>
+    <div class="toc-item"><div class="n">4</div><div class="t">จัดการรุ่น และหลักสูตร<small>ขั้นบังคับ ต้องทำก่อนเพิ่มคน</small></div><div class="pg">หน้า 5</div></div>
+    <div class="toc-item"><div class="n">5</div><div class="t">เพิ่มข้อมูลคนพิการ + รูปถ่าย<small>หัวใจของระบบ • ช่องบังคับ • รูป 1 นิ้ว</small></div><div class="pg">หน้า 6</div></div>
+    <div class="toc-item"><div class="n">6</div><div class="t">นำเข้าข้อมูลจากไฟล์ Excel<small>เพิ่มทีละหลายคนในครั้งเดียว</small></div><div class="pg">หน้า 7</div></div>
+    <div class="toc-item"><div class="n">7</div><div class="t">บันทึกการอบรม และทักษะ<small>หน้ารายละเอียด 7 แท็บ</small></div><div class="pg">หน้า 8</div></div>
+    <div class="toc-item"><div class="n">8</div><div class="t">ประเมินทักษะ Pre / Post / Soft Skills<small>วัดพัฒนาการก่อน–หลังอบรม</small></div><div class="pg">หน้า 9</div></div>
+    <div class="toc-item"><div class="n">9</div><div class="t">ประสบการณ์งาน และสถานประกอบการ<small>ผูกผู้เข้าร่วมกับองค์กร</small></div><div class="pg">หน้า 10</div></div>
+    <div class="toc-item"><div class="n">10</div><div class="t">ติดตามผลหลังจบโครงการ<small>มีงานทำ • ว่างงาน • ศึกษาต่อ</small></div><div class="pg">หน้า 11</div></div>
+    <div class="toc-item"><div class="n">11</div><div class="t">ออกรายงาน และ Export Excel<small>5 รายงาน • พิมพ์ / บันทึก PDF / .xlsx</small></div><div class="pg">หน้า 12</div></div>
+    <div class="toc-item"><div class="n">12</div><div class="t">จัดการผู้ใช้งาน (เฉพาะผู้ดูแลระบบ)<small>เพิ่ม • แก้ไข • เปิด–ปิดบัญชี</small></div><div class="pg">หน้า 13</div></div>
+    <div class="toc-item star"><div class="n">&#9733;</div><div class="t">ภาคผนวก ก — สิ่งที่ควรรู้<small>รูปแบบวันที่ • คำศัพท์ • เคล็ดลับ</small></div><div class="pg">หน้า 14</div></div>
+    <div class="toc-item star"><div class="n">&#9733;</div><div class="t">ภาคผนวก ข — ปัญหาที่พบบ่อย<small>เจอแบบนี้ ทำยังไง</small></div><div class="pg">หน้า 15</div></div>
   </div>
-
-  <div class="toc-item"><div class="n">1</div><div class="t">เข้าสู่ระบบ (Login)</div><div class="pg">ต้นน้ำ</div></div>
-  <div class="toc-item"><div class="n">2</div><div class="t">สร้างรุ่น (Batch) — ต้องทำก่อนเสมอ</div><div class="pg">บังคับ</div></div>
-  <div class="toc-item"><div class="n">3</div><div class="t">เพิ่มข้อมูลคนพิการ + อัปโหลดรูปถ่าย</div><div class="pg"></div></div>
-  <div class="toc-item"><div class="n">4</div><div class="t">บันทึกการอบรม &amp; ทักษะ</div><div class="pg"></div></div>
-  <div class="toc-item"><div class="n">5</div><div class="t">ประเมินทักษะ (Pre / Post / Soft Skills)</div><div class="pg"></div></div>
-  <div class="toc-item"><div class="n">6</div><div class="t">ประสบการณ์ทำงาน &amp; ผูกสถานประกอบการ</div><div class="pg"></div></div>
-  <div class="toc-item"><div class="n">7</div><div class="t">ติดตามผลหลังจบโครงการ</div><div class="pg"></div></div>
-  <div class="toc-item"><div class="n">8</div><div class="t">Dashboard — ดูสถิติภาพรวม</div><div class="pg"></div></div>
-  <div class="toc-item"><div class="n">9</div><div class="t">ออกรายงาน 5 ประเภท (พิมพ์ / PDF)</div><div class="pg">ปลายน้ำ</div></div>
-  <div class="toc-item"><div class="n">10</div><div class="t">จัดการผู้ใช้งาน (เฉพาะ Admin)</div><div class="pg"></div></div>
-  <div class="toc-item"><div class="n">★</div><div class="t">ภาคผนวก: สิทธิ์ผู้ใช้ • รูปแบบวันที่ • เคล็ดลับ</div><div class="pg"></div></div>
+  <div class="run-foot"><div>ระบบฐานข้อมูลคนพิการ มจธ.</div><div class="pg-no">1</div></div>
 </div>
 
-<!-- ======== 1. LOGIN ======== -->
-<div class="page page-break">
-  <div class="sec-wrap"><div class="sec-num">1</div><div><h2 class="sec">เข้าสู่ระบบ</h2><div class="sec-sub">จุดเริ่มต้น — ต้นน้ำ</div></div></div>
-  <p class="lead">เปิดเว็บไซต์แล้วเข้าสู่ระบบด้วยอีเมลและรหัสผ่านที่ได้รับจากผู้ดูแลระบบ</p>
+<!-- ============ 1. LOGIN ============ -->
+<div class="page">
+  <div class="run-head"><div>บทที่ 1</div><div class="rh-r">เข้าสู่ระบบ</div></div>
+  <div class="body-area">
+    <div class="sec-wrap"><div class="sec-num">1</div>
+      <div><h2 class="sec">เข้าสู่ระบบ</h2><div class="sec-sub">จุดเริ่มต้นของการใช้งาน</div></div></div>
+    <p class="lead">เปิดเว็บไซต์ของระบบ แล้วเข้าสู่ระบบด้วยอีเมลและรหัสผ่านที่ได้รับจากผู้ดูแลระบบ ใช้งานได้ทั้งคอมพิวเตอร์ แท็บเล็ต และมือถือ</p>
 
-  <h3>ขั้นตอน</h3>
-  <div class="steps">
-    <div class="step">เปิดเบราว์เซอร์ไปที่ <b>https://kmutt-pwd-db.vercel.app</b></div>
-    <div class="step">กรอก <b>อีเมล</b> และ <b>รหัสผ่าน</b></div>
-    <div class="step">กดปุ่ม <b>“เข้าสู่ระบบ”</b> ระบบจะพาเข้าหน้า Dashboard อัตโนมัติ</div>
+    <h3>ขั้นตอน</h3>
+    <div class="steps">
+      <div class="step">เปิดเบราว์เซอร์ (Chrome / Edge / Safari) ไปที่ <b>https://kmutt-pwd.duckdns.org</b></div>
+      <div class="step">กรอก <b>อีเมล</b> และ <b>รหัสผ่าน</b> ที่ได้รับ</div>
+      <div class="step">กดปุ่ม <b>&#8220;เข้าสู่ระบบ&#8221;</b> ระบบจะพาเข้าหน้า Dashboard ให้อัตโนมัติ</div>
+    </div>
+
+    <h3>สิทธิ์ผู้ใช้งาน 3 ระดับ</h3>
+    <p class="lead" style="margin-bottom:8px">แต่ละบัญชีจะเห็นเมนูและทำสิ่งต่าง ๆ ได้ไม่เท่ากัน ขึ้นกับบทบาทที่ผู้ดูแลระบบกำหนดให้</p>
+    <table>
+      <tr><th style="width:26%">บทบาท</th><th>ทำอะไรได้บ้าง</th></tr>
+      <tr><td><span class="chip c-red">ผู้ดูแลระบบ (Admin)</span></td><td>ทำได้ทุกอย่าง รวมถึงเพิ่ม–แก้ไข–ปิดบัญชีผู้ใช้งานคนอื่น</td></tr>
+      <tr><td><span class="chip c-orange">เจ้าหน้าที่ (Staff)</span></td><td>เพิ่ม แก้ไข ลบ ข้อมูลได้ทุกส่วน ยกเว้นเมนูจัดการผู้ใช้</td></tr>
+      <tr><td><span class="chip c-blue">ผู้ดูข้อมูล (Viewer)</span></td><td>ดูข้อมูลและออกรายงานได้ แต่แก้ไขข้อมูลไม่ได้</td></tr>
+    </table>
+
+    <div class="note"><span class="ic">&#128272;</span><div><b>ลืมรหัสผ่าน?</b> ระบบไม่มีปุ่มรีเซ็ตด้วยตัวเอง ให้ติดต่อผู้ดูแลระบบตั้งรหัสผ่านใหม่ให้ที่เมนู &#8220;จัดการผู้ใช้&#8221;</div></div>
+    <div class="warn"><span class="ic">&#9203;</span><div>เซสชันการใช้งานมีอายุ <b>8 ชั่วโมง</b> หลังจากนั้นระบบจะให้เข้าสู่ระบบใหม่ • ออกจากระบบได้ที่ปุ่มลูกศรมุมล่างซ้ายของแถบเมนู</div></div>
+    <div class="tip"><span class="ic">&#128161;</span><div>ควรเปลี่ยนรหัสผ่านหลังใช้งานครั้งแรก และ<b>ไม่ควรใช้บัญชีร่วมกันหลายคน</b> เพราะระบบบันทึกว่าใครเป็นคนเพิ่มหรือแก้ไขข้อมูล</div></div>
   </div>
-
-  <h3>บัญชีเริ่มต้น (ผู้ดูแลระบบ)</h3>
-  <table>
-    <tr><th>อีเมล</th><th>รหัสผ่าน</th><th>หมายเหตุ</th></tr>
-    <tr><td>admin@kmutt.ac.th</td><td>admin1234</td><td>ควรเปลี่ยนรหัสผ่านหลังใช้งานครั้งแรก</td></tr>
-  </table>
-
-  <div class="tip"><span class="ic">💡</span><div>ครั้งแรกที่เปิดเว็บหลังไม่ได้ใช้นาน เซิร์ฟเวอร์อาจตื่นช้าสัก 10–30 วินาที ระบบจะรอให้พร้อมเองแล้วค่อยเข้า — เป็นเรื่องปกติ</div></div>
-  <div class="warn"><span class="ic">⏱️</span><div>เซสชันมีอายุ 8 ชั่วโมง หลังจากนั้นต้องเข้าสู่ระบบใหม่ • ออกจากระบบได้ที่ไอคอนลูกศรมุมล่างซ้าย</div></div>
+  <div class="run-foot"><div>บทที่ 1 — เข้าสู่ระบบ</div><div class="pg-no">2</div></div>
 </div>
 
-<!-- ======== 2. BATCH ======== -->
-<div class="page page-break">
-  <div class="sec-wrap"><div class="sec-num">2</div><div><h2 class="sec">สร้างรุ่น (Batch)</h2><div class="sec-sub">ขั้นบังคับ — ต้องทำก่อนเพิ่มคนพิการ</div></div></div>
-  <p class="lead">ระบบแบ่งผู้เข้าร่วมเป็น “รุ่น” ตามปี/รอบการอบรม เพื่อให้ติดตามและออกรายงานแยกแต่ละรุ่นได้</p>
+<!-- ============ 2. SCREEN ============ -->
+<div class="page">
+  <div class="run-head"><div>บทที่ 2</div><div class="rh-r">รู้จักหน้าจอและเมนู</div></div>
+  <div class="body-area">
+    <div class="sec-wrap"><div class="sec-num">2</div>
+      <div><h2 class="sec">รู้จักหน้าจอและเมนู</h2><div class="sec-sub">เห็นภาพรวมก่อน ใช้งานจะง่ายขึ้นมาก</div></div></div>
+    <p class="lead">ทุกหน้าในระบบใช้หน้าตาเดียวกัน คือมี <b>แถบเมนูด้านซ้าย</b> สำหรับสลับหน้า และ <b>พื้นที่ทำงานด้านขวา</b> สำหรับดูและแก้ไขข้อมูล</p>
 
-  <div class="warn"><span class="ic">⚠️</span><div><b>ต้องสร้างรุ่นก่อน</b> จึงจะเพิ่มข้อมูลคนพิการได้ เพราะช่อง “รุ่นที่เข้าร่วม” เป็นช่อง<span class="req"> บังคับ *</span></div></div>
+    <h3>แถบเมนูด้านซ้าย</h3>
+    <div class="mock">
+      <div class="mock-side">
+        <div class="ms-t">เมนูหลัก</div>
+        <div class="mi on">&#128202;&nbsp; Dashboard</div>
+        <div class="mi">&#128101;&nbsp; ข้อมูลคนพิการ</div>
+        <div class="mi">&#127891;&nbsp; การอบรม &amp; ฝึกงาน</div>
+        <div class="mi">&#127919;&nbsp; ติดตามผล</div>
+        <div class="mi">&#127970;&nbsp; สถานประกอบการ</div>
+        <div class="mi">&#128218;&nbsp; จัดการรุ่น</div>
+        <div class="mi">&#128424;&nbsp; ออกรายงาน</div>
+        <div class="mi">&#128214;&nbsp; คู่มือการใช้งาน</div>
+        <div class="mi">&#9881;&nbsp; จัดการผู้ใช้ <span style="opacity:.6;font-size:10px">(Admin)</span></div>
+      </div>
+      <div class="mock-note">
+        <div><b>Dashboard</b> — สถิติภาพรวมทั้งระบบ</div>
+        <div><b>ข้อมูลคนพิการ</b> — รายชื่อทั้งหมด เพิ่ม/แก้ไข/ดูรายละเอียด</div>
+        <div><b>การอบรม &amp; ฝึกงาน</b> — ประวัติการอบรมของทุกคนรวมกัน</div>
+        <div><b>ติดตามผล</b> — ผลการติดตามหลังจบของทุกคน</div>
+        <div><b>สถานประกอบการ</b> — ทะเบียนองค์กร/นายจ้าง</div>
+        <div><b>จัดการรุ่น</b> — สร้างรุ่นและหลักสูตรในรุ่น</div>
+        <div><b>ออกรายงาน</b> — พิมพ์เอกสาร / บันทึก PDF / Excel</div>
+        <div><b>จัดการผู้ใช้</b> — เห็นเฉพาะผู้ดูแลระบบ</div>
+      </div>
+    </div>
 
-  <h3>ขั้นตอนเพิ่มรุ่น</h3>
-  <div class="steps">
-    <div class="step">ไปที่เมนู <b>“จัดการรุ่น”</b> ด้านซ้าย</div>
-    <div class="step">กดปุ่ม <b>“+ เพิ่มรุ่น”</b></div>
-    <div class="step">กรอก <b>รุ่นที่</b> (เช่น 1, 2, 3) และ <b>ปี พ.ศ.</b> <span class="req">*</span></div>
-    <div class="step">เลือก <b>สถานะ</b> และระบุช่วงวันที่ (ถ้ามี)</div>
-    <div class="step">กด <b>“บันทึก”</b></div>
+    <h3>สิ่งที่พบได้ทุกหน้า</h3>
+    <table>
+      <tr><th style="width:33%">ส่วน</th><th>ใช้ทำอะไร</th></tr>
+      <tr><td>ช่องค้นหา</td><td>พิมพ์ชื่อ นามสกุล หรือเลขบัตร แล้วระบบกรองให้ทันที</td></tr>
+      <tr><td>ตัวกรองรุ่น</td><td>เลือกดูเฉพาะรุ่นที่ต้องการ (แบบเมนูหล่นลง)</td></tr>
+      <tr><td>ปุ่มสีส้ม &#8220;+ เพิ่ม&#8221;</td><td>เพิ่มรายการใหม่ อยู่มุมขวาบนของแต่ละหน้า</td></tr>
+      <tr><td>ไอคอนดวงตา / ดินสอ / ถังขยะ</td><td>ดูรายละเอียด / แก้ไข / ลบ ในแต่ละแถว</td></tr>
+      <tr><td>ปุ่มพระจันทร์–ดวงอาทิตย์</td><td>สลับโหมดกลางวัน–กลางคืน (Dark Mode) ถนอมสายตา</td></tr>
+    </table>
+
+    <h3>สัญญาณแจ้งเตือนของระบบ</h3>
+    <div class="grid2">
+      <div class="card"><h5>&#9989; แถบเขียว = สำเร็จ</h5><p>บันทึก แก้ไข หรือลบข้อมูลเรียบร้อยแล้ว</p></div>
+      <div class="card"><h5>&#10060; แถบแดง = ไม่สำเร็จ</h5><p>กรอกข้อมูลไม่ครบ หรือข้อมูลซ้ำ ระบบจะบอกว่าขาดอะไร</p></div>
+      <div class="card"><h5>&#9888; กล่องยืนยันก่อนลบ</h5><p>ทุกการลบจะถามยืนยันก่อนเสมอ กันกดพลาด</p></div>
+      <div class="card"><h5>&#128308; กรอบแดงที่ช่องกรอก</h5><p>ช่องนั้นยังกรอกไม่ครบหรือรูปแบบไม่ถูกต้อง</p></div>
+    </div>
+
+    <div class="tip"><span class="ic">&#128241;</span><div>บนมือถือ แถบเมนูจะซ่อนไว้ กดปุ่มขีดสามขีด (&#9776;) มุมซ้ายบนเพื่อเปิดเมนู</div></div>
   </div>
-
-  <h3>สถานะของรุ่น</h3>
-  <p><span class="chip c-green">กำลังดำเนินการ (ACTIVE)</span> <span class="chip c-gray">เสร็จสิ้น (COMPLETED)</span></p>
-  <div class="tip"><span class="ic">⭐</span><div>รุ่นที่ตั้งสถานะ <b>“กำลังดำเนินการ”</b> จะถูกใช้เป็น <b>รุ่นปัจจุบัน</b> แสดงเด่นบนหน้า Dashboard</div></div>
+  <div class="run-foot"><div>บทที่ 2 — รู้จักหน้าจอและเมนู</div><div class="pg-no">3</div></div>
 </div>
 
-<!-- ======== 3. PERSON ======== -->
-<div class="page page-break">
-  <div class="sec-wrap"><div class="sec-num">3</div><div><h2 class="sec">เพิ่มข้อมูลคนพิการ</h2><div class="sec-sub">หัวใจของระบบ + อัปโหลดรูปถ่าย</div></div></div>
+<!-- ============ 3. DASHBOARD ============ -->
+<div class="page">
+  <div class="run-head"><div>บทที่ 3</div><div class="rh-r">Dashboard</div></div>
+  <div class="body-area">
+    <div class="sec-wrap"><div class="sec-num">3</div>
+      <div><h2 class="sec">Dashboard — สถิติภาพรวม</h2><div class="sec-sub">หน้าแรกที่เห็นทันทีหลังเข้าสู่ระบบ</div></div></div>
+    <p class="lead">รวมตัวเลขและกราฟสำคัญไว้ในหน้าเดียว คำนวณจากข้อมูลจริงในระบบ อัปเดตใหม่ทุกครั้งที่เปิดหน้า</p>
 
-  <h3>ขั้นตอน</h3>
-  <div class="steps">
-    <div class="step">ไปที่เมนู <b>“ข้อมูลคนพิการ”</b> แล้วกด <b>“+ เพิ่มคนพิการ”</b></div>
-    <div class="step">อัปโหลดรูปถ่าย 1 นิ้ว (ถ้ามี) — กดที่กรอบรูปด้านบน</div>
-    <div class="step">กรอกข้อมูลส่วนตัวที่มีเครื่องหมาย <span class="req">*</span> ให้ครบ</div>
-    <div class="step">กรอกที่อยู่ปัจจุบัน + ข้อมูลติดต่อ (มือถือหรือโทรศัพท์อย่างน้อย 1 ช่อง)</div>
-    <div class="step">เลือก <b>รุ่นที่เข้าร่วม</b> <span class="req">*</span></div>
-    <div class="step">กด <b>“บันทึกข้อมูล”</b></div>
+    <h3>สิ่งที่แสดงบนหน้า</h3>
+    <table>
+      <tr><th style="width:34%">ส่วน</th><th>เนื้อหา</th></tr>
+      <tr><td>แถบรุ่นปัจจุบัน</td><td>รุ่นที่กำลังดำเนินการอยู่ พร้อมจำนวนผู้เข้าร่วมในรุ่นนั้น</td></tr>
+      <tr><td>การ์ดสรุป</td><td>จำนวนคนพิการทั้งหมด • สถานประกอบการ • ประวัติการอบรม</td></tr>
+      <tr><td>กราฟแยกเพศ</td><td>ชาย / หญิง / อื่น ๆ</td></tr>
+      <tr><td>กราฟประเภทความพิการ</td><td>แยกตามประเภทความพิการทั้ง 7 ประเภท</td></tr>
+      <tr><td>กราฟสถานะการทำงาน</td><td>มีงานทำ / ว่างงาน / ศึกษาต่อ (จากข้อมูลติดตามผล)</td></tr>
+      <tr><td>กราฟวุฒิการศึกษา</td><td>แยกตามระดับการศึกษาสูงสุด</td></tr>
+      <tr><td>กราฟช่วงอายุ และภูมิภาค</td><td>ระบบจัดกลุ่มให้อัตโนมัติจากวันเกิดและจังหวัด</td></tr>
+    </table>
+
+    <h3>วิธีอ่านให้เป็นประโยชน์</h3>
+    <ul>
+      <li>ดู <b>รุ่นปัจจุบัน</b> ก่อน เพื่อรู้ว่ากำลังทำงานกับรุ่นไหนอยู่</li>
+      <li>ถ้ากราฟบางอันว่างหรือดูน้อยผิดปกติ แปลว่า<b>ข้อมูลส่วนนั้นยังกรอกไม่ครบ</b> เช่น กราฟสถานะงานจะขึ้นก็ต่อเมื่อมีการบันทึกติดตามผลแล้ว</li>
+      <li>ตัวเลขบนการ์ดคือ<b>ยอดรวมทั้งระบบทุกรุ่น</b> ถ้าต้องการดูแยกรุ่น ให้ไปกรองที่หน้าข้อมูลคนพิการหรือหน้าออกรายงาน</li>
+    </ul>
+
+    <div class="tip"><span class="ic">&#9889;</span><div>ยิ่งกรอกข้อมูลครบ กราฟยิ่งสมบูรณ์ — ข้อมูลที่ส่งผลกับกราฟมากที่สุดคือ <b>เพศ • วันเกิด • จังหวัด • ประเภทความพิการ • ระดับการศึกษา • ผลติดตาม</b></div></div>
+    <div class="note"><span class="ic">&#128200;</span><div>Dashboard เหมาะกับการเปิดให้ผู้บริหารดูภาพรวม ถ้าต้องการตัวเลขแบบเป็นเอกสาร ให้ไปที่เมนู <b>ออกรายงาน</b> (บทที่ 11)</div></div>
   </div>
-
-  <h3>ช่องที่บังคับกรอก <span class="req">*</span></h3>
-  <table>
-    <tr><th>ช่อง</th><th>เงื่อนไข</th></tr>
-    <tr><td>ชื่อ–นามสกุล</td><td>บังคับ</td></tr>
-    <tr><td>เลขบัตรประชาชน / บัตรคนพิการ</td><td>บังคับ (13 หลัก)</td></tr>
-    <tr><td>วันเกิด</td><td>บังคับ (ต้องเป็นอดีต)</td></tr>
-    <tr><td>ระดับการศึกษา</td><td>บังคับ</td></tr>
-    <tr><td>ประเภทความพิการ</td><td>บังคับ (ตอนเพิ่มใหม่)</td></tr>
-    <tr><td>จังหวัด</td><td>บังคับ</td></tr>
-    <tr><td>มือถือ หรือ โทรศัพท์บ้าน</td><td>บังคับอย่างน้อย 1</td></tr>
-    <tr><td>รุ่นที่เข้าร่วม</td><td>บังคับ</td></tr>
-  </table>
-
-  <h3>รูปแบบการกรอกวันเกิด</h3>
-  <p><b>วว/ดด/ปปปป (พ.ศ.)</b> เช่น 15/06/2540</p>
-
-  <div class="tip"><span class="ic">🟢</span><div>กรอกครบกด “บันทึก” จะมีแถบ <b>สีเขียว</b> เด้งว่า “สำเร็จ” • ถ้ากรอกไม่ครบจะมีแถบ <b>สีแดง</b> บอกว่าขาดช่องไหน และช่องนั้นจะขึ้นกรอบแดง</div></div>
-  <div class="tip"><span class="ic">📷</span><div>รูปถ่าย: รองรับ JPG/PNG/WebP ขนาดไม่เกิน 5MB • เปลี่ยน/ลบรูปได้ภายหลังในหน้ารายละเอียด (เลื่อนเมาส์ที่รูป จะเห็นไอคอนกล้อง)</div></div>
+  <div class="run-foot"><div>บทที่ 3 — Dashboard</div><div class="pg-no">4</div></div>
 </div>
 
-<!-- ======== 4. TRAINING & SKILLS ======== -->
-<div class="page page-break">
-  <div class="sec-wrap"><div class="sec-num">4</div><div><h2 class="sec">บันทึกการอบรม &amp; ทักษะ</h2><div class="sec-sub">ในหน้ารายละเอียดของแต่ละคน (7 แท็บ)</div></div></div>
-  <p class="lead">เปิดรายละเอียดคนพิการได้โดยกดปุ่มดู (ไอคอนตา) หรือกดที่ชื่อในตาราง จะพบ 7 แท็บข้อมูล</p>
+<!-- ============ 4. BATCH ============ -->
+<div class="page">
+  <div class="run-head"><div>บทที่ 4</div><div class="rh-r">จัดการรุ่นและหลักสูตร</div></div>
+  <div class="body-area">
+    <div class="sec-wrap"><div class="sec-num">4</div>
+      <div><h2 class="sec">จัดการรุ่น และหลักสูตร</h2><div class="sec-sub">ขั้นบังคับ — ต้องทำก่อนเพิ่มข้อมูลคนพิการ</div></div></div>
+    <p class="lead">ระบบแบ่งผู้เข้าร่วมออกเป็น &#8220;รุ่น&#8221; ตามปีและรอบการอบรม และในแต่ละรุ่นยังแบ่งเป็น &#8220;หลักสูตร&#8221; ได้สูงสุด 4 หลักสูตร เพื่อให้ติดตามผลและออกรายงานแยกกันได้ชัดเจน</p>
 
-  <h3>7 แท็บในหน้ารายละเอียด</h3>
-  <table>
-    <tr><th>แท็บ</th><th>เนื้อหา</th></tr>
-    <tr><td>ข้อมูลพื้นฐาน</td><td>ส่วนตัว ที่อยู่ ความพิการ</td></tr>
-    <tr><td>การอบรม</td><td>ประวัติหลักสูตร / ฝึกงาน</td></tr>
-    <tr><td>ประสบการณ์งาน</td><td>ประวัติการทำงาน รายได้</td></tr>
-    <tr><td>ทักษะ</td><td>ทักษะพร้อมระดับ</td></tr>
-    <tr><td>ประเมินทักษะ</td><td>Pre/Post + Soft Skills (ดูขั้นที่ 5)</td></tr>
-    <tr><td>ติดตามผล</td><td>สถานะงานหลังจบ</td></tr>
-    <tr><td>สถานประกอบการ</td><td>องค์กรที่ฝึก/ทำงาน</td></tr>
-  </table>
+    <div class="warn"><span class="ic">&#9888;</span><div><b>ต้องสร้างรุ่นก่อนเสมอ</b> เพราะตอนเพิ่มข้อมูลคนพิการ ช่อง &#8220;รุ่นที่เข้าร่วม&#8221; เป็นช่องบังคับ<span class="req"> *</span></div></div>
 
-  <h3>เพิ่มประวัติการอบรม</h3>
-  <div class="steps">
-    <div class="step">เปิดรายละเอียดคน → แท็บ <b>“การอบรม”</b> → กด <b>“+ เพิ่ม”</b></div>
-    <div class="step">กรอกชื่อหลักสูตร (บังคับ) วันที่ ผลประเมิน แล้วกดบันทึก</div>
+    <h3>ก. เพิ่มรุ่นใหม่</h3>
+    <div class="steps">
+      <div class="step">ไปที่เมนู <b>&#8220;จัดการรุ่น&#8221;</b> ด้านซ้าย</div>
+      <div class="step">กดปุ่ม <b>&#8220;+ เพิ่มรุ่น&#8221;</b> มุมขวาบน</div>
+      <div class="step">กรอก <b>รุ่นที่</b> (เช่น 1, 2, 3) และ <b>ปี พ.ศ.</b> <span class="req">*</span></div>
+      <div class="step">เลือก <b>สถานะ</b> และระบุช่วงวันที่เริ่ม–สิ้นสุด (ถ้ามี)</div>
+      <div class="step">กด <b>&#8220;บันทึก&#8221;</b> — รุ่นใหม่จะขึ้นเป็นการ์ดในหน้านี้ทันที</div>
+    </div>
+    <p><b>สถานะของรุ่น:</b> <span class="chip c-green">กำลังดำเนินการ</span> <span class="chip c-gray">เสร็จสิ้น</span></p>
+    <div class="tip"><span class="ic">&#11088;</span><div>รุ่นที่ตั้งสถานะ <b>&#8220;กำลังดำเนินการ&#8221;</b> จะถูกใช้เป็น <b>รุ่นปัจจุบัน</b> แสดงเด่นอยู่บนหน้า Dashboard</div></div>
+
+    <h3>ข. เพิ่มหลักสูตรในรุ่น (สูงสุด 4 หลักสูตรต่อรุ่น)</h3>
+    <div class="steps">
+      <div class="step">ที่การ์ดของรุ่นนั้น ดูหัวข้อ <b>&#8220;หลักสูตร&#8221;</b></div>
+      <div class="step">พิมพ์ชื่อหลักสูตรลงในช่อง <b>&#8220;เพิ่มชื่อหลักสูตร...&#8221;</b> เช่น หลักสูตรเจ้าหน้าที่ประจำสำนักงาน</div>
+      <div class="step">กด <b>เพิ่ม</b> — จะเห็นชื่อหลักสูตรพร้อมจำนวนคนในหลักสูตรนั้น</div>
+      <div class="step">แก้ไขชื่อหรือลบหลักสูตรได้จากไอคอนข้างชื่อหลักสูตร</div>
+    </div>
+
+    <h3>สิ่งที่การ์ดรุ่นบอกเรา</h3>
+    <table>
+      <tr><th style="width:36%">ข้อมูล</th><th>ความหมาย</th></tr>
+      <tr><td>จำนวนคนในรุ่น</td><td>ผู้เข้าร่วมทั้งหมดของรุ่นนั้น</td></tr>
+      <tr><td>จำนวนหลักสูตร (x/4)</td><td>มีกี่หลักสูตรแล้ว จากได้สูงสุด 4</td></tr>
+      <tr><td>จำนวนคนต่อหลักสูตร</td><td>แต่ละหลักสูตรมีผู้เรียนกี่คน</td></tr>
+    </table>
+
+    <div class="note"><span class="ic">&#128260;</span><div>ถ้า<b>ลบหลักสูตร</b> คนในหลักสูตรนั้นจะถูกปลดออกจากหลักสูตรเฉย ๆ <b>แต่ยังอยู่ในรุ่นเดิม</b> ข้อมูลคนไม่หาย</div></div>
   </div>
-  <p><b>รูปแบบการอบรม:</b> <span class="chip c-orange">TRAIN — อบรม</span> <span class="chip c-orange">LEARN — เรียนรู้</span> <span class="chip c-orange">EARN — ฝึกงาน</span></p>
-
-  <h3>เพิ่มทักษะ</h3>
-  <div class="steps">
-    <div class="step">แท็บ <b>“ทักษะ”</b> → กด <b>“+ เพิ่ม”</b> → กรอกชื่อทักษะ + เลือกระดับ</div>
-  </div>
-  <p><b>ระดับทักษะ:</b> <span class="chip c-blue">เริ่มต้น</span> <span class="chip c-blue">ปานกลาง</span> <span class="chip c-blue">เชี่ยวชาญ</span></p>
+  <div class="run-foot"><div>บทที่ 4 — จัดการรุ่นและหลักสูตร</div><div class="pg-no">5</div></div>
 </div>
 
-<!-- ======== 5. ASSESSMENT ======== -->
-<div class="page page-break">
-  <div class="sec-wrap"><div class="sec-num">5</div><div><h2 class="sec">ประเมินทักษะ</h2><div class="sec-sub">Pre-test / Post-test / Soft Skills — แยกตามรุ่น</div></div></div>
-  <p class="lead">วัดพัฒนาการก่อน–หลังการอบรม บันทึกในแท็บ “ประเมินทักษะ” ของแต่ละคน</p>
+<!-- ============ 5. PERSON ============ -->
+<div class="page">
+  <div class="run-head"><div>บทที่ 5</div><div class="rh-r">เพิ่มข้อมูลคนพิการ</div></div>
+  <div class="body-area">
+    <div class="sec-wrap"><div class="sec-num">5</div>
+      <div><h2 class="sec">เพิ่มข้อมูลคนพิการ</h2><div class="sec-sub">หัวใจของระบบ พร้อมอัปโหลดรูปถ่าย 1 นิ้ว</div></div></div>
 
-  <h3>คะแนนที่บันทึก</h3>
-  <table>
-    <tr><th>รายการ</th><th>คะแนนเต็ม</th><th>ความหมาย</th></tr>
-    <tr><td>Pre-test</td><td>100</td><td>ทดสอบก่อนอบรม</td></tr>
-    <tr><td>Post-test</td><td>100</td><td>ทดสอบหลังอบรม</td></tr>
-    <tr><td>Soft Skills (4 ด้าน)</td><td>5 ต่อด้าน</td><td>ทักษะทางสังคม</td></tr>
-  </table>
+    <h3>ขั้นตอน</h3>
+    <div class="steps">
+      <div class="step">ไปที่เมนู <b>&#8220;ข้อมูลคนพิการ&#8221;</b> แล้วกด <b>&#8220;+ เพิ่มคนพิการ&#8221;</b></div>
+      <div class="step">กดที่กรอบรูปด้านบนเพื่อ <b>อัปโหลดรูปถ่าย 1 นิ้ว</b> (ถ้ามี)</div>
+      <div class="step">กรอกข้อมูลส่วนตัว — คำนำหน้า ชื่อ นามสกุล ชื่อเล่น เพศ วันเกิด เลขบัตร</div>
+      <div class="step">กรอกที่อยู่ปัจจุบัน โดยเลือก <b>จังหวัด</b> จากรายการ 77 จังหวัด</div>
+      <div class="step">กรอกช่องทางติดต่อ — มือถือหรือโทรศัพท์บ้าน อย่างน้อย 1 ช่อง</div>
+      <div class="step">เลือก <b>ประเภทความพิการ</b> และระดับความพิการ</div>
+      <div class="step">เลือก <b>รุ่นที่เข้าร่วม</b> และหลักสูตร (ถ้ารุ่นนั้นมีหลักสูตร)</div>
+      <div class="step">กด <b>&#8220;บันทึกข้อมูล&#8221;</b></div>
+    </div>
 
-  <h3>Soft Skills 4 ด้าน (ด้านละ 0–5)</h3>
-  <p><span class="chip c-orange">การสื่อสาร</span> <span class="chip c-blue">การบริหารเวลา</span> <span class="chip c-red">การจูงใจตนเอง</span> <span class="chip c-green">การทำงานตามหน้าที่</span></p>
+    <h3>ช่องที่บังคับกรอก <span class="req">*</span></h3>
+    <table>
+      <tr><th style="width:46%">ช่อง</th><th>เงื่อนไข</th></tr>
+      <tr><td>ชื่อ – นามสกุล</td><td>บังคับ</td></tr>
+      <tr><td>เลขบัตรประชาชน / บัตรคนพิการ</td><td>บังคับ 13 หลัก และห้ามซ้ำกับคนอื่น</td></tr>
+      <tr><td>วันเกิด</td><td>บังคับ ต้องเป็นวันที่ในอดีต</td></tr>
+      <tr><td>ระดับการศึกษา</td><td>บังคับ</td></tr>
+      <tr><td>ประเภทความพิการ</td><td>บังคับ (ตอนเพิ่มใหม่)</td></tr>
+      <tr><td>จังหวัด</td><td>บังคับ (เลือกจากรายการ)</td></tr>
+      <tr><td>มือถือ หรือ โทรศัพท์บ้าน</td><td>บังคับอย่างน้อย 1 ช่อง</td></tr>
+      <tr><td>รุ่นที่เข้าร่วม</td><td>บังคับ</td></tr>
+    </table>
 
-  <h3>ขั้นตอน</h3>
-  <div class="steps">
-    <div class="step">เปิดรายละเอียดคน → แท็บ <b>“ประเมินทักษะ”</b></div>
-    <div class="step">เลือก <b>รุ่น</b> (ค่าเริ่มต้น = รุ่นที่คนนั้นสังกัด)</div>
-    <div class="step">กรอกคะแนน Pre/Post และ Soft Skills 4 ด้าน</div>
-    <div class="step">กด <b>“บันทึก”</b> — 1 คน มี 1 ผลประเมินต่อ 1 รุ่น</div>
+    <h3>รูปแบบการกรอกวันเกิด</h3>
+    <p>ใช้รูปแบบ <b>วว/ดด/ปปปป เป็น พ.ศ.</b> เช่น <b>15/06/2540</b> — พิมพ์แต่ตัวเลข ระบบใส่เครื่องหมาย &#8220;/&#8221; ให้เอง</p>
+
+    <div class="tip"><span class="ic">&#128247;</span><div><b>รูปถ่าย:</b> รองรับไฟล์ JPG / PNG / WebP ขนาดไม่เกิน 5 MB • เปลี่ยนหรือลบรูปภายหลังได้ในหน้ารายละเอียด โดยเลื่อนเมาส์ไปที่รูปแล้วกดไอคอนกล้อง • รูปนี้จะไปแสดงในรายงานที่ต้องใช้รูปด้วย</div></div>
+    <div class="warn"><span class="ic">&#128269;</span><div>ก่อนเพิ่มคนใหม่ ควร<b>ค้นหาด้วยเลขบัตรก่อน</b> ว่ามีอยู่แล้วหรือยัง เพราะระบบไม่ยอมให้บันทึกเลขบัตรซ้ำ</div></div>
   </div>
-  <div class="tip"><span class="ic">📈</span><div>ระบบจะแสดง <b>พัฒนาการ Pre → Post</b> ให้อัตโนมัติ (เพิ่มขึ้น/ลดลงกี่คะแนน) • กรอกเกินคะแนนเต็มระบบปรับให้อยู่ในช่วงที่ถูกต้องเอง</div></div>
+  <div class="run-foot"><div>บทที่ 5 — เพิ่มข้อมูลคนพิการ</div><div class="pg-no">6</div></div>
 </div>
 
-<!-- ======== 6. WORK & ORG ======== -->
-<div class="page page-break">
-  <div class="sec-wrap"><div class="sec-num">6</div><div><h2 class="sec">ประสบการณ์งาน &amp; สถานประกอบการ</h2><div class="sec-sub">เชื่อมผู้เข้าร่วมกับองค์กร</div></div></div>
+<!-- ============ 6. IMPORT ============ -->
+<div class="page">
+  <div class="run-head"><div>บทที่ 6</div><div class="rh-r">นำเข้าข้อมูลจาก Excel</div></div>
+  <div class="body-area">
+    <div class="sec-wrap"><div class="sec-num">6</div>
+      <div><h2 class="sec">นำเข้าข้อมูลจากไฟล์ Excel</h2><div class="sec-sub">มีรายชื่อเป็นไฟล์อยู่แล้ว ไม่ต้องพิมพ์ทีละคน</div></div></div>
+    <p class="lead">ถ้ามีรายชื่อผู้เข้าร่วมเป็นไฟล์ Excel อยู่แล้ว สามารถนำเข้าทีเดียวได้หลายสิบคน โดยกรอกลงเทมเพลตที่ระบบเตรียมไว้</p>
 
-  <h3>ก. เพิ่มประสบการณ์ทำงาน</h3>
-  <div class="steps">
-    <div class="step">แท็บ <b>“ประสบการณ์งาน”</b> → กด <b>“+ เพิ่ม”</b></div>
-    <div class="step">กรอกชื่อองค์กร เลือกรูปแบบงาน วันที่ รายได้ แล้วบันทึก</div>
-  </div>
-  <p><b>รูปแบบงาน:</b> <span class="chip c-orange">ฝึกงาน</span> <span class="chip c-orange">จ้างงาน</span> <span class="chip c-orange">อิสระ</span></p>
+    <h3>ขั้นตอน</h3>
+    <div class="steps">
+      <div class="step">ไปที่เมนู <b>&#8220;ข้อมูลคนพิการ&#8221;</b> แล้วกดปุ่ม <b>&#8220;นำเข้า Excel&#8221;</b> (ปุ่มสีเขียวด้านบน)</div>
+      <div class="step">กด <b>&#8220;ดาวน์โหลดเทมเพลต&#8221;</b> จะได้ไฟล์ <b>เทมเพลตนำเข้าคนพิการ.xlsx</b></div>
+      <div class="step">เปิดไฟล์ด้วย Excel แล้วกรอกข้อมูลลงไปทีละแถว (1 แถว = 1 คน) <b>ห้ามแก้ชื่อหัวคอลัมน์</b></div>
+      <div class="step">บันทึกไฟล์ แล้วกลับมาที่ระบบ กด <b>&#8220;เลือกไฟล์ Excel ที่กรอกแล้ว&#8221;</b></div>
+      <div class="step">ระบบจะแสดง <b>ตัวอย่างข้อมูล</b> ให้ตรวจก่อน ถ้าถูกต้องกด <b>&#8220;นำเข้า ... รายการ&#8221;</b></div>
+      <div class="step">ดูผลสรุปว่านำเข้าสำเร็จกี่คน ไม่สำเร็จกี่คน และแถวไหนมีปัญหา</div>
+    </div>
 
-  <h3>ข. เพิ่มสถานประกอบการ (ทำครั้งเดียว ใช้ร่วมกันได้)</h3>
-  <div class="steps">
-    <div class="step">เมนู <b>“สถานประกอบการ”</b> → กด <b>“+ เพิ่มองค์กร”</b></div>
-    <div class="step">กรอกชื่อองค์กร (บังคับ) ประเภทธุรกิจ ที่อยู่ ผู้ติดต่อ แล้วบันทึก</div>
-  </div>
+    <h3>คอลัมน์ในเทมเพลต</h3>
+    <table>
+      <tr><th style="width:34%">คอลัมน์</th><th>คำอธิบาย</th></tr>
+      <tr><td>ชื่อ / นามสกุล</td><td>จำเป็นต้องมี ถ้าเว้นว่างระบบจะข้ามแถวนั้น</td></tr>
+      <tr><td>ชื่อเล่น</td><td>ไม่บังคับ</td></tr>
+      <tr><td>เลขบัตรประชาชน</td><td>13 หลัก ห้ามซ้ำกับที่มีอยู่ในระบบ</td></tr>
+      <tr><td>เพศ</td><td>พิมพ์ ชาย / หญิง ระบบแปลงให้เอง</td></tr>
+      <tr><td>วันเกิด</td><td>กรอกเป็น พ.ศ. ระบบแปลงเป็น ค.ศ. ให้เอง</td></tr>
+      <tr><td>เบอร์โทร • จังหวัด • ระดับการศึกษา</td><td>กรอกตามจริง</td></tr>
+      <tr><td>รุ่นที่ • ปี</td><td>ระบบจับคู่กับรุ่นที่มีอยู่ให้อัตโนมัติ</td></tr>
+    </table>
 
-  <h3>ค. ผูกคนพิการกับสถานประกอบการ</h3>
-  <div class="steps">
-    <div class="step">เปิดรายละเอียดคน → แท็บ <b>“สถานประกอบการ”</b></div>
-    <div class="step">เลือกองค์กรจากรายการ + ระบุบทบาท ช่วงเวลา และเงินสนับสนุน (ถ้ามี)</div>
+    <div class="warn"><span class="ic">&#9888;</span><div>แถวที่<b>เลขบัตรซ้ำ</b> หรือ<b>ไม่ครบ 13 หลัก</b> ระบบจะข้ามและรายงานให้ทราบ ส่วนแถวที่ถูกต้องยังนำเข้าได้ตามปกติ</div></div>
+    <div class="tip"><span class="ic">&#9989;</span><div>ควร<b>สร้างรุ่นให้เรียบร้อยก่อน</b>นำเข้า เพื่อให้ระบบจับคู่คนเข้ารุ่นได้ถูกต้อง • หลังนำเข้าเสร็จ แนะนำให้เข้าไปเติมข้อมูลที่ยังขาด เช่น ประเภทความพิการ และรูปถ่าย</div></div>
   </div>
-  <p><b>บทบาท:</b> <span class="chip c-orange">ฝึกงาน</span> <span class="chip c-orange">จ้างงาน</span> <span class="chip c-gray">อื่นๆ</span></p>
+  <div class="run-foot"><div>บทที่ 6 — นำเข้าข้อมูลจาก Excel</div><div class="pg-no">7</div></div>
 </div>
 
-<!-- ======== 7. FOLLOWUP ======== -->
-<div class="page page-break">
-  <div class="sec-wrap"><div class="sec-num">7</div><div><h2 class="sec">ติดตามผล</h2><div class="sec-sub">สถานะหลังจบโครงการ</div></div></div>
-  <p class="lead">บันทึกสถานะการทำงานหลังสำเร็จการฝึกงาน เพื่อติดตามความก้าวหน้าของผู้เข้าร่วม</p>
+<!-- ============ 7. DETAIL / TRAINING / SKILL ============ -->
+<div class="page">
+  <div class="run-head"><div>บทที่ 7</div><div class="rh-r">การอบรมและทักษะ</div></div>
+  <div class="body-area">
+    <div class="sec-wrap"><div class="sec-num">7</div>
+      <div><h2 class="sec">บันทึกการอบรม และทักษะ</h2><div class="sec-sub">ทำในหน้ารายละเอียดของแต่ละคน ซึ่งมี 7 แท็บ</div></div></div>
+    <p class="lead">เปิดหน้ารายละเอียดได้จากหน้ารายชื่อ โดยกดที่ชื่อคน หรือกดไอคอนรูปดวงตาในแถวนั้น</p>
 
-  <h3>สถานะที่บันทึกได้</h3>
-  <p><span class="chip c-green">มีงานทำ</span> <span class="chip c-gray">ว่างงาน</span> <span class="chip c-blue">ศึกษาต่อ</span></p>
+    <h3>7 แท็บในหน้ารายละเอียด</h3>
+    <table>
+      <tr><th style="width:30%">แท็บ</th><th>เก็บข้อมูลอะไร</th></tr>
+      <tr><td>ข้อมูลพื้นฐาน</td><td>ข้อมูลส่วนตัว ที่อยู่ การติดต่อ และความพิการ</td></tr>
+      <tr><td>การอบรม</td><td>ประวัติหลักสูตรที่เข้าอบรม / ฝึกงาน</td></tr>
+      <tr><td>ประสบการณ์งาน</td><td>ประวัติการทำงานและรายได้</td></tr>
+      <tr><td>ทักษะ</td><td>ทักษะที่มี พร้อมระดับความชำนาญ</td></tr>
+      <tr><td>ติดตามผล</td><td>สถานะหลังจบโครงการ (บทที่ 10)</td></tr>
+      <tr><td>สถานประกอบการ</td><td>องค์กรที่ฝึกงานหรือทำงานอยู่ (บทที่ 9)</td></tr>
+      <tr><td>ประเมินทักษะ</td><td>คะแนน Pre / Post และ Soft Skills (บทที่ 8)</td></tr>
+    </table>
 
-  <h3>ข้อมูลที่บันทึก</h3>
-  <table>
-    <tr><th>ช่อง</th><th>สำคัญ</th></tr>
-    <tr><td>วันที่ติดตาม</td><td>บังคับ</td></tr>
-    <tr><td>สถานะงาน</td><td>บังคับ</td></tr>
-    <tr><td>ประเภทงาน / รายได้ / ทักษะตรงสาย / ความพึงพอใจ / ปัญหา</td><td>ไม่บังคับ</td></tr>
-  </table>
+    <h3>ก. เพิ่มประวัติการอบรม</h3>
+    <div class="steps">
+      <div class="step">เปิดหน้ารายละเอียดของคนนั้น &#8594; แท็บ <b>&#8220;การอบรม&#8221;</b> &#8594; กด <b>&#8220;+ เพิ่ม&#8221;</b></div>
+      <div class="step">กรอก <b>ชื่อหลักสูตร</b> (บังคับ) เลือกรูปแบบ วันที่เริ่ม–สิ้นสุด และผลการประเมิน</div>
+      <div class="step">กด <b>&#8220;บันทึก&#8221;</b> รายการจะเรียงจากใหม่ไปเก่าให้อัตโนมัติ</div>
+    </div>
+    <p><b>รูปแบบการอบรม:</b> <span class="chip c-orange">TRAIN — อบรม</span> <span class="chip c-orange">LEARN — เรียนรู้</span> <span class="chip c-orange">EARN — ฝึกงาน/ฝึกปฏิบัติ</span></p>
 
-  <h3>ขั้นตอน</h3>
-  <div class="steps">
-    <div class="step">เปิดรายละเอียดคน → แท็บ <b>“ติดตามผล”</b> → กด <b>“+ เพิ่ม”</b></div>
-    <div class="step">กรอกวันที่ + สถานะ แล้วกดบันทึก</div>
+    <h3>ข. เพิ่มทักษะ</h3>
+    <div class="steps">
+      <div class="step">แท็บ <b>&#8220;ทักษะ&#8221;</b> &#8594; กด <b>&#8220;+ เพิ่ม&#8221;</b></div>
+      <div class="step">พิมพ์ชื่อทักษะ เช่น Microsoft Excel, งานคีย์ข้อมูล, งานบริการลูกค้า</div>
+      <div class="step">เลือก <b>ระดับ</b> แล้วกดบันทึก ทักษะจะแสดงเป็นป้ายสีให้เห็นชัด</div>
+    </div>
+    <p><b>ระดับทักษะ:</b> <span class="chip c-blue">เริ่มต้น</span> <span class="chip c-violet">ปานกลาง</span> <span class="chip c-green">เชี่ยวชาญ</span></p>
+
+    <div class="tip"><span class="ic">&#128221;</span><div>ทักษะที่บันทึกไว้จะช่วยตอนจับคู่งานกับสถานประกอบการ และใช้อ้างอิงในรายงานส่งบริษัทได้</div></div>
   </div>
-  <div class="tip"><span class="ic">🗂️</span><div>เมนู <b>“ติดตามผล”</b> ด้านซ้าย รวมการติดตามของทุกคนไว้ในที่เดียว ดูภาพรวมได้ง่าย</div></div>
+  <div class="run-foot"><div>บทที่ 7 — การอบรมและทักษะ</div><div class="pg-no">8</div></div>
 </div>
 
-<!-- ======== 8. DASHBOARD ======== -->
-<div class="page page-break">
-  <div class="sec-wrap"><div class="sec-num">8</div><div><h2 class="sec">Dashboard</h2><div class="sec-sub">ดูสถิติภาพรวมแบบ Real-time</div></div></div>
-  <p class="lead">หน้าแรกของระบบ แสดงสถิติรวมทั้งหมด อัปเดตทุกครั้งที่เปิดหน้า</p>
+<!-- ============ 8. ASSESSMENT ============ -->
+<div class="page">
+  <div class="run-head"><div>บทที่ 8</div><div class="rh-r">ประเมินทักษะ</div></div>
+  <div class="body-area">
+    <div class="sec-wrap"><div class="sec-num">8</div>
+      <div><h2 class="sec">ประเมินทักษะ</h2><div class="sec-sub">Pre-test / Post-test และ Soft Skills แยกตามรุ่น</div></div></div>
+    <p class="lead">ใช้วัดพัฒนาการของผู้เข้าร่วมก่อนและหลังการอบรม บันทึกได้ที่แท็บ &#8220;ประเมินทักษะ&#8221; ในหน้ารายละเอียดของแต่ละคน</p>
 
-  <h3>สิ่งที่แสดง</h3>
-  <table>
-    <tr><th>ส่วน</th><th>เนื้อหา</th></tr>
-    <tr><td>รุ่นปัจจุบัน</td><td>รุ่นที่กำลังดำเนินการ + จำนวนผู้เข้าร่วม</td></tr>
-    <tr><td>การ์ดสรุป</td><td>จำนวนคนพิการ / สถานประกอบการ / การอบรม</td></tr>
-    <tr><td>กราฟแยกเพศ</td><td>ชาย / หญิง / อื่นๆ</td></tr>
-    <tr><td>กราฟประเภทความพิการ</td><td>7 ประเภท</td></tr>
-    <tr><td>กราฟสถานะงาน</td><td>มีงาน / ว่างงาน / ศึกษาต่อ</td></tr>
-    <tr><td>กราฟวุฒิการศึกษา / ช่วงอายุ / ภูมิภาค</td><td>แบ่งกลุ่มอัตโนมัติ</td></tr>
-  </table>
-  <div class="tip"><span class="ic">⚡</span><div>กราฟทั้งหมดคำนวณจากข้อมูลจริงในระบบ ยิ่งกรอกข้อมูลครบ กราฟยิ่งสมบูรณ์</div></div>
+    <h3>คะแนนที่บันทึกได้</h3>
+    <table>
+      <tr><th style="width:34%">รายการ</th><th style="width:20%">คะแนนเต็ม</th><th>ความหมาย</th></tr>
+      <tr><td>Pre-test</td><td>100</td><td>ทดสอบความรู้ก่อนเริ่มอบรม</td></tr>
+      <tr><td>Post-test</td><td>100</td><td>ทดสอบความรู้หลังจบอบรม</td></tr>
+      <tr><td>Soft Skills (4 ด้าน)</td><td>ด้านละ 5</td><td>ทักษะการทำงานร่วมกับผู้อื่น</td></tr>
+    </table>
+
+    <h3>Soft Skills 4 ด้าน (ให้คะแนนด้านละ 0–5)</h3>
+    <p>
+      <span class="chip c-orange">การสื่อสาร</span>
+      <span class="chip c-violet">การบริหารเวลา</span>
+      <span class="chip c-red">การจูงใจตนเอง</span>
+      <span class="chip c-blue">การทำงานตามหน้าที่</span>
+    </p>
+
+    <h3>ขั้นตอน</h3>
+    <div class="steps">
+      <div class="step">เปิดหน้ารายละเอียดของคนนั้น &#8594; แท็บ <b>&#8220;ประเมินทักษะ&#8221;</b></div>
+      <div class="step">เลือก <b>รุ่น</b> ที่ต้องการประเมิน (ค่าเริ่มต้นคือรุ่นที่คนนั้นสังกัดอยู่)</div>
+      <div class="step">กรอกคะแนน <b>Pre-test</b> และ <b>Post-test</b></div>
+      <div class="step">ให้คะแนน <b>Soft Skills ทั้ง 4 ด้าน</b></div>
+      <div class="step">กด <b>&#8220;บันทึก&#8221;</b> — 1 คน มีผลประเมินได้ 1 ชุดต่อ 1 รุ่น</div>
+    </div>
+
+    <div class="tip"><span class="ic">&#128200;</span><div>ระบบคำนวณ <b>พัฒนาการ Pre &#8594; Post</b> ให้อัตโนมัติ ว่าคะแนนเพิ่มขึ้นหรือลดลงกี่คะแนน ใช้รายงานผลโครงการได้ทันที</div></div>
+    <div class="note"><span class="ic">&#128290;</span><div>ถ้าเผลอกรอกเกินคะแนนเต็ม ระบบจะปรับให้อยู่ในช่วงที่ถูกต้องเอง (Pre/Post ไม่เกิน 100, Soft Skills ไม่เกิน 5)</div></div>
+    <div class="warn"><span class="ic">&#128260;</span><div>ถ้าผู้เข้าร่วมกลับมาเรียนอีกรุ่น ให้เลือกรุ่นใหม่แล้วบันทึกอีกชุด ระบบจะเก็บแยกกัน <b>ไม่ทับของเดิม</b></div></div>
+  </div>
+  <div class="run-foot"><div>บทที่ 8 — ประเมินทักษะ</div><div class="pg-no">9</div></div>
 </div>
 
-<!-- ======== 9. REPORTS ======== -->
-<div class="page page-break">
-  <div class="sec-wrap"><div class="sec-num">9</div><div><h2 class="sec">ออกรายงาน</h2><div class="sec-sub">ปลายน้ำ — พิมพ์ หรือบันทึกเป็น PDF</div></div></div>
-  <p class="lead">ระบบออกรายงานได้ 5 ประเภท เลือกกรองตามรุ่นได้ และพิมพ์/บันทึก PDF ได้ทันที</p>
+<!-- ============ 9. WORK & ORG ============ -->
+<div class="page">
+  <div class="run-head"><div>บทที่ 9</div><div class="rh-r">ประสบการณ์งานและสถานประกอบการ</div></div>
+  <div class="body-area">
+    <div class="sec-wrap"><div class="sec-num">9</div>
+      <div><h2 class="sec">ประสบการณ์งาน และสถานประกอบการ</h2><div class="sec-sub">เชื่อมผู้เข้าร่วมเข้ากับองค์กรที่รับเข้าทำงาน</div></div></div>
 
-  <h3>5 ประเภทรายงาน</h3>
-  <table>
-    <tr><th>#</th><th>รายงาน</th><th>ใช้ทำอะไร</th></tr>
-    <tr><td>1</td><td>รายชื่อคนพิการ</td><td>สรุปรายชื่อผู้เข้าร่วม</td></tr>
-    <tr><td>2</td><td>แบบสังเกตพฤติกรรมรายบุคคล</td><td>ส่งให้วิทยากรก่อนอบรม</td></tr>
-    <tr><td>3</td><td>แบบประเมินรายวิชา (25 คะแนน)</td><td>ให้วิทยากรกรอกคะแนนรายวิชา</td></tr>
-    <tr><td>4</td><td>ใบ Certificate</td><td>ใบรับรองผลการอบรม (1 ใบ/คน)</td></tr>
-    <tr><td>5</td><td>รายงานส่งบริษัท</td><td>สรุปส่งบริษัทสนับสนุน</td></tr>
-  </table>
+    <h3>ก. เพิ่มประสบการณ์ทำงาน (ประวัติของแต่ละคน)</h3>
+    <div class="steps">
+      <div class="step">เปิดหน้ารายละเอียด &#8594; แท็บ <b>&#8220;ประสบการณ์งาน&#8221;</b> &#8594; กด <b>&#8220;+ เพิ่ม&#8221;</b></div>
+      <div class="step">กรอกชื่อองค์กร ตำแหน่ง เลือกรูปแบบงาน ช่วงวันที่ และรายได้ต่อเดือน</div>
+      <div class="step">กด <b>&#8220;บันทึก&#8221;</b></div>
+    </div>
+    <p><b>รูปแบบงาน:</b> <span class="chip c-orange">ฝึกงาน</span> <span class="chip c-green">จ้างงาน</span> <span class="chip c-blue">อาชีพอิสระ</span></p>
 
-  <h3>ขั้นตอน</h3>
-  <div class="steps">
-    <div class="step">ไปที่เมนู <b>“ออกรายงาน”</b></div>
-    <div class="step">เลือกประเภทรายงาน (5 ปุ่มด้านบน)</div>
-    <div class="step">เลือก <b>รุ่น</b> ที่ต้องการ (ถ้าต้องการกรองเฉพาะรุ่น)</div>
-    <div class="step">กรอกข้อมูลตั้งค่า (สำหรับ Certificate / ประเมินรายวิชา / รายงานบริษัท)</div>
-    <div class="step">เลือกรายชื่อ — หรือกด <b>“เลือกทั้งหมด”</b></div>
-    <div class="step">กด <b>“พิมพ์ / บันทึก PDF”</b> มุมขวาบน</div>
-    <div class="step">ในหน้าต่างพิมพ์ เลือกปลายทางเป็น <b>“Save as PDF”</b></div>
+    <h3>ข. เพิ่มสถานประกอบการ (ทำครั้งเดียว ใช้ร่วมกันได้ทุกคน)</h3>
+    <div class="steps">
+      <div class="step">ไปที่เมนู <b>&#8220;สถานประกอบการ&#8221;</b> &#8594; กด <b>&#8220;+ เพิ่มองค์กร&#8221;</b></div>
+      <div class="step">กรอก <b>ชื่อองค์กร</b> (บังคับ) ประเภทธุรกิจ ที่อยู่ ชื่อผู้ติดต่อ และเบอร์โทร</div>
+      <div class="step">กด <b>&#8220;บันทึก&#8221;</b> องค์กรนี้จะถูกเลือกใช้ซ้ำได้กับผู้เข้าร่วมทุกคน</div>
+    </div>
+
+    <h3>ค. ผูกผู้เข้าร่วมเข้ากับสถานประกอบการ</h3>
+    <div class="steps">
+      <div class="step">เปิดหน้ารายละเอียดของคนนั้น &#8594; แท็บ <b>&#8220;สถานประกอบการ&#8221;</b></div>
+      <div class="step">เลือกองค์กรจากรายการที่เพิ่มไว้แล้ว</div>
+      <div class="step">ระบุ <b>บทบาท</b> ช่วงเวลาที่ทำงาน และเงินสนับสนุน (ถ้ามี) แล้วกดบันทึก</div>
+    </div>
+    <p><b>บทบาท:</b> <span class="chip c-orange">ฝึกงาน</span> <span class="chip c-green">จ้างงาน</span> <span class="chip c-gray">อื่น ๆ</span></p>
+
+    <div class="note"><span class="ic">&#128161;</span><div><b>ต่างกันอย่างไร?</b> — &#8220;ประสบการณ์งาน&#8221; คือประวัติการทำงานที่พิมพ์เก็บไว้เฉย ๆ ส่วน &#8220;สถานประกอบการ&#8221; คือการผูกกับองค์กรที่มีอยู่จริงในระบบ ซึ่งใช้ทำรายงานส่งบริษัทได้</div></div>
+    <div class="tip"><span class="ic">&#127970;</span><div>ควรเพิ่มองค์กรไว้ล่วงหน้าให้ครบ ตอนผูกกับผู้เข้าร่วมจะเลือกได้เลย ไม่ต้องพิมพ์ชื่อบริษัทซ้ำ ๆ ให้สะกดไม่ตรงกัน</div></div>
   </div>
-  <div class="tip"><span class="ic">🖨️</span><div>ใบ Certificate ไม่มีตราโลโก้ในไฟล์ เผื่อพื้นที่ไว้ให้ <b>ปั๊มตราโลโก้เอง</b> ภายหลัง</div></div>
+  <div class="run-foot"><div>บทที่ 9 — ประสบการณ์งานและสถานประกอบการ</div><div class="pg-no">10</div></div>
 </div>
 
-<!-- ======== 10. USERS ======== -->
-<div class="page page-break">
-  <div class="sec-wrap"><div class="sec-num">10</div><div><h2 class="sec">จัดการผู้ใช้งาน</h2><div class="sec-sub">เฉพาะผู้ดูแลระบบ (Admin)</div></div></div>
-  <p class="lead">เมนู “จัดการผู้ใช้” เปิดเฉพาะ Admin ใช้เพิ่ม/แก้ไข/เปิด–ปิด บัญชีผู้ใช้</p>
+<!-- ============ 10. FOLLOWUP ============ -->
+<div class="page">
+  <div class="run-head"><div>บทที่ 10</div><div class="rh-r">ติดตามผล</div></div>
+  <div class="body-area">
+    <div class="sec-wrap"><div class="sec-num">10</div>
+      <div><h2 class="sec">ติดตามผลหลังจบโครงการ</h2><div class="sec-sub">ตัวชี้วัดสำคัญที่สุดของโครงการ</div></div></div>
+    <p class="lead">บันทึกว่าผู้เข้าร่วมแต่ละคนหลังจบการอบรมแล้วเป็นอย่างไร มีงานทำหรือไม่ รายได้เท่าไหร่ ตรงกับที่ฝึกมาหรือเปล่า</p>
 
-  <h3>เพิ่มผู้ใช้ใหม่</h3>
-  <div class="steps">
-    <div class="step">กด <b>“+ เพิ่มผู้ใช้”</b></div>
-    <div class="step">กรอกชื่อ อีเมล รหัสผ่าน และเลือก <b>บทบาท</b></div>
-    <div class="step">กด <b>“เพิ่มผู้ใช้”</b></div>
+    <h3>สถานะที่บันทึกได้</h3>
+    <p><span class="chip c-green">มีงานทำ</span> <span class="chip c-gray">ว่างงาน</span> <span class="chip c-blue">ศึกษาต่อ</span></p>
+
+    <h3>ข้อมูลที่บันทึก</h3>
+    <table>
+      <tr><th style="width:46%">ช่อง</th><th>จำเป็นไหม</th></tr>
+      <tr><td>วันที่ติดตาม</td><td>บังคับ</td></tr>
+      <tr><td>สถานะการทำงาน</td><td>บังคับ</td></tr>
+      <tr><td>ประเภทงาน / ชื่อองค์กร</td><td>ไม่บังคับ</td></tr>
+      <tr><td>รายได้ต่อเดือน</td><td>ไม่บังคับ</td></tr>
+      <tr><td>ทักษะที่ใช้ตรงกับที่อบรมหรือไม่</td><td>ไม่บังคับ</td></tr>
+      <tr><td>ความพึงพอใจ / ปัญหาที่พบ</td><td>ไม่บังคับ</td></tr>
+    </table>
+
+    <h3>ขั้นตอน</h3>
+    <div class="steps">
+      <div class="step">เปิดหน้ารายละเอียดของคนนั้น &#8594; แท็บ <b>&#8220;ติดตามผล&#8221;</b> &#8594; กด <b>&#8220;+ เพิ่ม&#8221;</b></div>
+      <div class="step">กรอกวันที่ติดตาม และเลือกสถานะการทำงาน</div>
+      <div class="step">กรอกรายละเอียดเพิ่มเติมเท่าที่ทราบ แล้วกด <b>&#8220;บันทึก&#8221;</b></div>
+    </div>
+
+    <div class="tip"><span class="ic">&#128193;</span><div>เมนู <b>&#8220;ติดตามผล&#8221;</b> ด้านซ้าย จะรวมผลการติดตามของทุกคนไว้ในหน้าเดียว ใช้ดูภาพรวมและตามงานที่ยังไม่ได้ติดตามได้ง่าย</div></div>
+    <div class="note"><span class="ic">&#128197;</span><div>ติดตามได้<b>หลายครั้ง</b>ต่อคน เช่น 3 เดือน / 6 เดือน / 1 ปี ระบบเก็บทุกครั้งเรียงตามวันที่ ทำให้เห็นความเปลี่ยนแปลง</div></div>
   </div>
-
-  <h3>ข้อควรรู้</h3>
-  <ul>
-    <li>แก้ไขผู้ใช้: เว้นช่องรหัสผ่านว่างไว้ถ้าไม่ต้องการเปลี่ยน</li>
-    <li>กดที่ป้ายสถานะเพื่อสลับ เปิด/ปิด การใช้งานบัญชี (บัญชีปิดเข้าระบบไม่ได้)</li>
-    <li>ไม่สามารถลบหรือปิดบัญชีของตัวเองได้</li>
-    <li>ควรเปลี่ยนรหัสผ่าน admin1234 หลังเริ่มใช้งาน</li>
-  </ul>
+  <div class="run-foot"><div>บทที่ 10 — ติดตามผล</div><div class="pg-no">11</div></div>
 </div>
 
-<!-- ======== APPENDIX ======== -->
-<div class="page page-break">
-  <div class="sec-wrap"><div class="sec-num">★</div><div><h2 class="sec">ภาคผนวก</h2><div class="sec-sub">สิ่งที่ควรรู้เพิ่มเติม</div></div></div>
+<!-- ============ 11. REPORT ============ -->
+<div class="page">
+  <div class="run-head"><div>บทที่ 11</div><div class="rh-r">ออกรายงาน</div></div>
+  <div class="body-area">
+    <div class="sec-wrap"><div class="sec-num">11</div>
+      <div><h2 class="sec">ออกรายงาน และ Export Excel</h2><div class="sec-sub">ปลายน้ำของระบบ — พิมพ์ บันทึก PDF หรือดึงเป็น Excel</div></div></div>
+    <p class="lead">รวมเอกสารที่ต้องใช้จริงในโครงการไว้ที่เมนู &#8220;ออกรายงาน&#8221; เลือกกรองตามรุ่น เลือกรายชื่อ แล้วพิมพ์ได้ทันที</p>
 
-  <h3>สิทธิ์ผู้ใช้งาน 3 ระดับ</h3>
-  <table>
-    <tr><th>บทบาท</th><th>ทำอะไรได้</th></tr>
-    <tr><td><span class="chip c-red">ADMIN</span></td><td>ทำได้ทุกอย่าง + จัดการบัญชีผู้ใช้</td></tr>
-    <tr><td><span class="chip c-orange">STAFF</span></td><td>เพิ่ม/แก้/ลบ ข้อมูลทุกอย่าง ยกเว้นจัดการผู้ใช้</td></tr>
-    <tr><td><span class="chip c-blue">VIEWER</span></td><td>ดูข้อมูล + ออกรายงานได้ แต่แก้ไขไม่ได้</td></tr>
-  </table>
+    <h3>รายงานที่ออกได้</h3>
+    <table>
+      <tr><th style="width:6%">#</th><th style="width:38%">รายงาน</th><th>ใช้ทำอะไร</th></tr>
+      <tr><td>1</td><td>รายชื่อคนพิการ</td><td>ตารางสรุปรายชื่อผู้เข้าร่วมพร้อมข้อมูลพื้นฐาน</td></tr>
+      <tr><td>2</td><td>แบบสังเกตพฤติกรรมรายบุคคล</td><td>ส่งให้วิทยากรใช้สังเกตผู้เรียนระหว่างอบรม</td></tr>
+      <tr><td>3</td><td>แบบประเมินรายวิชา / Transcript</td><td>ตารางให้คะแนน 5 หัวข้อ รวม 25 คะแนน (พิมพ์แนวนอน)</td></tr>
+      <tr><td>4</td><td>ใบ Certificate</td><td>ใบรับรองผลการอบรม 1 ใบต่อ 1 คน</td></tr>
+      <tr><td>5</td><td>รายงานส่งบริษัท</td><td>สรุปผลการดำเนินงานส่งบริษัทที่สนับสนุนโครงการ</td></tr>
+    </table>
 
-  <h3>รูปแบบวันที่</h3>
-  <p>ทุกวันที่ในระบบใช้รูปแบบ <b>วัน/เดือน/ปี (พ.ศ.)</b> เช่น 30/06/2568 — กรอกเป็นตัวเลข ระบบใส่ “/” ให้เอง</p>
+    <h3>ขั้นตอนพิมพ์ / บันทึกเป็น PDF</h3>
+    <div class="steps">
+      <div class="step">ไปที่เมนู <b>&#8220;ออกรายงาน&#8221;</b></div>
+      <div class="step">เลือก <b>ประเภทรายงาน</b> จากปุ่มด้านบน</div>
+      <div class="step">เลือก <b>รุ่น</b> ที่ต้องการ (หรือดูรวมทุกรุ่น)</div>
+      <div class="step">กรอกข้อมูลตั้งค่าเอกสาร เช่น ข้อความในใบ Certificate หรือชื่อวิชา</div>
+      <div class="step">ติ๊กเลือกรายชื่อ หรือกด <b>&#8220;เลือกทั้งหมด&#8221;</b></div>
+      <div class="step">กด <b>&#8220;พิมพ์ / บันทึก PDF&#8221;</b> มุมขวาบน</div>
+      <div class="step">ในหน้าต่างพิมพ์ ถ้าต้องการไฟล์ ให้เลือกปลายทางเป็น <b>&#8220;Save as PDF&#8221;</b></div>
+    </div>
 
-  <h3>สัญญาณแจ้งเตือนในระบบ</h3>
-  <ul>
-    <li><b>แถบเขียว</b> = ทำรายการสำเร็จ (เพิ่ม/แก้/ลบ/บันทึก)</li>
-    <li><b>แถบแดง</b> = ไม่สำเร็จ หรือกรอกข้อมูลไม่ครบ (จะบอกว่าขาดอะไร)</li>
-    <li><b>กล่องยืนยันลบ</b> = เด้งถามก่อนลบทุกครั้ง กันลบพลาด</li>
-  </ul>
+    <h3>ดึงข้อมูลเป็นไฟล์ Excel</h3>
+    <p>กดปุ่ม <b>&#8220;Excel&#8221;</b> ข้างปุ่มพิมพ์ ระบบจะสร้างไฟล์ <b>.xlsx</b> ของรายงานที่เลือกอยู่ พร้อมตั้งชื่อไฟล์ตามวันที่ให้อัตโนมัติ — เอาไปทำสถิติต่อใน Excel ได้เลย</p>
 
-  <h3>ลำดับการทำงานที่แนะนำ (สรุป)</h3>
-  <div class="flow">
-    <span class="node">สร้างรุ่น</span><span class="arr">→</span>
-    <span class="node">เพิ่มคนพิการ (ผูกรุ่น)</span><span class="arr">→</span>
-    <span class="node">บันทึกอบรม/ทักษะ</span><span class="arr">→</span>
-    <span class="node">ประเมิน Pre/Post</span><span class="arr">→</span>
-    <span class="node">ผูกงาน/องค์กร</span><span class="arr">→</span>
-    <span class="node">ติดตามผล</span><span class="arr">→</span>
-    <span class="node">ดู Dashboard</span><span class="arr">→</span>
-    <span class="node">ออกรายงาน</span>
+    <div class="tip"><span class="ic">&#128424;</span><div>ตั้งค่าการพิมพ์ให้สวย: เลือกกระดาษ <b>A4</b> • เปิด <b>&#8220;พิมพ์พื้นหลังและกราฟิก&#8221;</b> (Background graphics) • ระยะขอบเป็น <b>ค่าเริ่มต้น</b> — แบบประเมินรายวิชาจะพิมพ์แนวนอนให้เองอัตโนมัติ</div></div>
+    <div class="note"><span class="ic">&#127894;</span><div>ใบ Certificate เว้นพื้นที่ไว้สำหรับ<b>ประทับตราและลงนามจริง</b> จึงไม่มีตราปั๊มในไฟล์</div></div>
   </div>
+  <div class="run-foot"><div>บทที่ 11 — ออกรายงาน</div><div class="pg-no">12</div></div>
+</div>
 
-  <div class="tip"><span class="ic">✅</span><div>ทำตามลำดับนี้จะได้ข้อมูลครบถ้วน รายงานและกราฟจะสมบูรณ์ที่สุด</div></div>
+<!-- ============ 12. USERS ============ -->
+<div class="page">
+  <div class="run-head"><div>บทที่ 12</div><div class="rh-r">จัดการผู้ใช้งาน</div></div>
+  <div class="body-area">
+    <div class="sec-wrap"><div class="sec-num">12</div>
+      <div><h2 class="sec">จัดการผู้ใช้งาน</h2><div class="sec-sub">เมนูนี้เห็นเฉพาะผู้ดูแลระบบ (Admin)</div></div></div>
+    <p class="lead">ใช้เพิ่มบัญชีให้เจ้าหน้าที่คนใหม่ เปลี่ยนบทบาท ตั้งรหัสผ่านใหม่ หรือปิดบัญชีที่ไม่ใช้แล้ว</p>
 
-  <p style="text-align:center;color:#a8a29e;margin-top:40px;font-size:12px;">
-    — จบคู่มือการใช้งาน —<br>
-    ระบบฐานข้อมูลคนพิการ มจธ. • https://kmutt-pwd-db.vercel.app
-  </p>
+    <h3>เพิ่มผู้ใช้ใหม่</h3>
+    <div class="steps">
+      <div class="step">ไปที่เมนู <b>&#8220;จัดการผู้ใช้&#8221;</b> &#8594; กด <b>&#8220;+ เพิ่มผู้ใช้&#8221;</b></div>
+      <div class="step">กรอกชื่อ–นามสกุล อีเมล และรหัสผ่านเริ่มต้น</div>
+      <div class="step">เลือก <b>บทบาท</b> ให้เหมาะกับหน้าที่ของคนนั้น</div>
+      <div class="step">กด <b>&#8220;เพิ่มผู้ใช้&#8221;</b> แล้วแจ้งอีเมล–รหัสผ่านให้เจ้าตัวไปเปลี่ยนเอง</div>
+    </div>
+
+    <h3>แก้ไข / ปิดบัญชี</h3>
+    <ul>
+      <li>กดไอคอน<b>ดินสอ</b>เพื่อแก้ไขข้อมูล — ถ้าไม่ต้องการเปลี่ยนรหัสผ่าน ให้<b>เว้นช่องรหัสผ่านว่างไว้</b></li>
+      <li>กดที่<b>ป้ายสถานะ</b>ของผู้ใช้ เพื่อสลับ เปิด / ปิด การใช้งานบัญชี</li>
+      <li>บัญชีที่ถูกปิด จะเข้าสู่ระบบไม่ได้ และถ้ากำลังใช้งานอยู่จะถูกตัดออกทันที</li>
+      <li>ไม่สามารถลบหรือปิดบัญชี<b>ของตัวเอง</b>ได้ กันเผลอล็อกตัวเองออกจากระบบ</li>
+    </ul>
+
+    <h3>เลือกบทบาทให้เหมาะกับงาน</h3>
+    <table>
+      <tr><th style="width:30%">บทบาท</th><th>เหมาะกับใคร</th></tr>
+      <tr><td><span class="chip c-red">ผู้ดูแลระบบ</span></td><td>ผู้รับผิดชอบระบบ ควรมีเท่าที่จำเป็น 1–2 คน</td></tr>
+      <tr><td><span class="chip c-orange">เจ้าหน้าที่</span></td><td>ผู้กรอกและดูแลข้อมูลประจำวัน</td></tr>
+      <tr><td><span class="chip c-blue">ผู้ดูข้อมูล</span></td><td>ผู้บริหาร หรือผู้ที่ต้องการแค่ดูข้อมูลและออกรายงาน</td></tr>
+    </table>
+
+    <div class="tip"><span class="ic">&#9889;</span><div>เปลี่ยนบทบาทหรือปิดบัญชีแล้ว <b>มีผลทันที</b> ผู้ใช้คนนั้นแค่รีเฟรชหน้าเว็บก็เห็นสิทธิ์ใหม่ ไม่ต้องรอให้ล็อกอินใหม่</div></div>
+    <div class="warn"><span class="ic">&#128274;</span><div>ควรปิดบัญชีของเจ้าหน้าที่ที่<b>ลาออกหรือหมดวาระ</b>ทันที เพื่อความปลอดภัยของข้อมูลส่วนบุคคล</div></div>
+  </div>
+  <div class="run-foot"><div>บทที่ 12 — จัดการผู้ใช้งาน</div><div class="pg-no">13</div></div>
+</div>
+
+<!-- ============ APPENDIX A ============ -->
+<div class="page">
+  <div class="run-head"><div>ภาคผนวก ก</div><div class="rh-r">สิ่งที่ควรรู้</div></div>
+  <div class="body-area">
+    <div class="sec-wrap"><div class="sec-num">&#9733;</div>
+      <div><h2 class="sec">ภาคผนวก ก — สิ่งที่ควรรู้</h2><div class="sec-sub">รูปแบบข้อมูล คำศัพท์ และเคล็ดลับใช้งาน</div></div></div>
+
+    <h3>รูปแบบวันที่</h3>
+    <p>ทุกวันที่ในระบบใช้รูปแบบ <b>วัน/เดือน/ปี เป็น พ.ศ.</b> เช่น <b>28/08/2569</b> — พิมพ์เฉพาะตัวเลข ระบบจะเติมเครื่องหมาย &#8220;/&#8221; ให้เอง</p>
+
+    <h3>คำศัพท์ที่เจอบ่อย</h3>
+    <table>
+      <tr><th style="width:30%">คำ</th><th>ความหมาย</th></tr>
+      <tr><td>รุ่น (Batch)</td><td>รอบการอบรม เช่น รุ่นที่ 1 ปี 2569</td></tr>
+      <tr><td>หลักสูตร (Course)</td><td>สาขาวิชาที่เรียนภายในรุ่น มีได้สูงสุด 4 หลักสูตรต่อรุ่น</td></tr>
+      <tr><td>TRAIN / LEARN / EARN</td><td>รูปแบบการอบรม: อบรม / เรียนรู้ / ฝึกปฏิบัติ</td></tr>
+      <tr><td>Pre-test / Post-test</td><td>ทดสอบก่อนอบรม / หลังอบรม เต็ม 100 คะแนน</td></tr>
+      <tr><td>Soft Skills</td><td>ทักษะการทำงานร่วมกับผู้อื่น 4 ด้าน ด้านละ 5 คะแนน</td></tr>
+      <tr><td>ติดตามผล (Follow-up)</td><td>การตามผลหลังจบโครงการว่ามีงานทำหรือไม่</td></tr>
+    </table>
+
+    <h3>ลำดับการทำงานที่แนะนำ</h3>
+    <div class="flow">
+      <span class="node hi">สร้างรุ่น + หลักสูตร</span><span class="arr">&#8594;</span>
+      <span class="node">เพิ่มคนพิการ (ผูกรุ่น)</span><span class="arr">&#8594;</span>
+      <span class="node">บันทึกอบรม/ทักษะ</span><span class="arr">&#8594;</span>
+      <span class="node">ประเมิน Pre/Post</span><span class="arr">&#8594;</span>
+      <span class="node">ผูกงาน/องค์กร</span><span class="arr">&#8594;</span>
+      <span class="node">ติดตามผล</span><span class="arr">&#8594;</span>
+      <span class="node hi">ออกรายงาน</span>
+    </div>
+
+    <h3>เคล็ดลับใช้งานให้เร็วขึ้น</h3>
+    <div class="grid2">
+      <div class="card"><h5>ค้นหาก่อนเพิ่ม</h5><p>พิมพ์เลขบัตรในช่องค้นหา เช็คว่ามีคนนี้อยู่แล้วหรือยัง กันข้อมูลซ้ำ</p></div>
+      <div class="card"><h5>มีไฟล์อยู่แล้วใช้ Excel</h5><p>รายชื่อเยอะ ๆ ให้ใช้ &#8220;นำเข้า Excel&#8221; เร็วกว่าพิมพ์ทีละคนมาก</p></div>
+      <div class="card"><h5>กรอกให้ครบตั้งแต่แรก</h5><p>เพศ วันเกิด จังหวัด การศึกษา มีผลกับกราฟและรายงานโดยตรง</p></div>
+      <div class="card"><h5>ทยอยติดตามผล</h5><p>ติดตามเป็นช่วง 3–6–12 เดือน ทำให้เห็นผลลัพธ์โครงการชัดเจน</p></div>
+    </div>
+
+    <div class="note"><span class="ic">&#128190;</span><div>ระบบสำรองข้อมูลอัตโนมัติ<b>ทุกวัน ตี 2</b> และเก็บย้อนหลัง 14 วัน หากข้อมูลผิดพลาดร้ายแรง สามารถแจ้งผู้ดูแลระบบให้กู้คืนได้</div></div>
+  </div>
+  <div class="run-foot"><div>ภาคผนวก ก — สิ่งที่ควรรู้</div><div class="pg-no">14</div></div>
+</div>
+
+<!-- ============ APPENDIX B ============ -->
+<div class="page">
+  <div class="run-head"><div>ภาคผนวก ข</div><div class="rh-r">ปัญหาที่พบบ่อย</div></div>
+  <div class="body-area">
+    <div class="sec-wrap"><div class="sec-num">&#9733;</div>
+      <div><h2 class="sec">ภาคผนวก ข — ปัญหาที่พบบ่อย</h2><div class="sec-sub">เจอแบบนี้ ให้ทำแบบนี้</div></div></div>
+
+    <table>
+      <tr><th style="width:42%">อาการที่เจอ</th><th>วิธีแก้</th></tr>
+      <tr><td>เข้าสู่ระบบไม่ได้ ขึ้นว่าอีเมลหรือรหัสผ่านไม่ถูกต้อง</td><td>ตรวจว่าพิมพ์อีเมลครบถ้วน ไม่มีเว้นวรรคเกิน และปิด Caps Lock — ถ้ายังไม่ได้ ให้ผู้ดูแลระบบตั้งรหัสผ่านใหม่ให้</td></tr>
+      <tr><td>ใช้งานอยู่ดี ๆ ระบบเด้งออกไปหน้าล็อกอิน</td><td>เซสชันหมดอายุ (8 ชั่วโมง) หรือบัญชีถูกปิดใช้งาน ให้เข้าสู่ระบบใหม่</td></tr>
+      <tr><td>บันทึกข้อมูลคนพิการไม่ได้ ขึ้นแถบแดง</td><td>ดูข้อความในแถบแดงว่าขาดช่องไหน ช่องที่ผิดจะขึ้นกรอบแดง — มักเป็นเลขบัตรไม่ครบ 13 หลัก หรือยังไม่เลือกรุ่น</td></tr>
+      <tr><td>บันทึกแล้วขึ้นว่าเลขบัตรซ้ำ</td><td>มีคนนี้ในระบบอยู่แล้ว ให้ค้นหาด้วยเลขบัตรแล้วเข้าไปแก้ไขรายการเดิมแทน</td></tr>
+      <tr><td>เลือกรุ่นไม่ได้ ไม่มีรุ่นให้เลือก</td><td>ยังไม่ได้สร้างรุ่น ให้ไปที่เมนู &#8220;จัดการรุ่น&#8221; สร้างรุ่นก่อน (บทที่ 4)</td></tr>
+      <tr><td>อัปโหลดรูปไม่สำเร็จ</td><td>ไฟล์ต้องเป็น JPG / PNG / WebP และไม่เกิน 5 MB — ถ้าไฟล์ใหญ่ให้ย่อขนาดก่อน</td></tr>
+      <tr><td>นำเข้า Excel แล้วไม่มีข้อมูลขึ้น</td><td>ต้องใช้ไฟล์จาก &#8220;ดาวน์โหลดเทมเพลต&#8221; และห้ามแก้ชื่อหัวคอลัมน์ ถ้าแก้แล้วให้โหลดเทมเพลตใหม่มากรอก</td></tr>
+      <tr><td>พิมพ์รายงานแล้วสีพื้นหลังหาย ตารางดูจืด</td><td>ในหน้าต่างพิมพ์ ให้เปิดตัวเลือก &#8220;พิมพ์พื้นหลังและกราฟิก&#8221; (Background graphics)</td></tr>
+      <tr><td>พิมพ์รายงานแล้วตารางตกขอบกระดาษ</td><td>ตั้งกระดาษเป็น A4 และระยะขอบเป็นค่าเริ่มต้น อย่าตั้งย่อ/ขยายเอง</td></tr>
+      <tr><td>ไม่เห็นเมนู &#8220;จัดการผู้ใช้&#8221;</td><td>เมนูนี้เห็นเฉพาะผู้ดูแลระบบ ถ้าควรเห็นแต่ไม่เห็น ให้รีเฟรชหน้าเว็บหนึ่งครั้ง</td></tr>
+      <tr><td>กราฟใน Dashboard ว่างเปล่า</td><td>ยังไม่มีข้อมูลในส่วนนั้น เช่น กราฟสถานะงานจะขึ้นเมื่อเริ่มบันทึกติดตามผลแล้ว</td></tr>
+      <tr><td>หน้าเว็บค้าง หรือข้อมูลไม่อัปเดต</td><td>กดรีเฟรช (F5) หนึ่งครั้ง ถ้ายังไม่หาย ให้ลองเบราว์เซอร์อื่นหรือแจ้งผู้ดูแลระบบ</td></tr>
+    </table>
+
+    <div class="tip"><span class="ic">&#128172;</span><div>ในระบบมีเมนู <b>&#8220;คู่มือการใช้งาน&#8221;</b> อยู่ด้วย เปิดอ่านบนหน้าจอได้ทุกเมื่อ เนื้อหาเดียวกับเล่มนี้</div></div>
+
+    <div class="end">
+      — จบคู่มือการใช้งาน —<br>
+      ระบบฐานข้อมูลคนพิการ มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี<br>
+      https://kmutt-pwd.duckdns.org
+    </div>
+  </div>
+  <div class="run-foot"><div>ภาคผนวก ข — ปัญหาที่พบบ่อย</div><div class="pg-no">15</div></div>
 </div>
 
 </body>

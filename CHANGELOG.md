@@ -1,7 +1,7 @@
 # บันทึกการพัฒนา — ระบบฐานข้อมูลคนพิการ มจธ.
 
 > ผู้พัฒนา: Suthat Srisawat  
-> URL ระบบ: https://kmutt-pwd-db.vercel.app
+> URL ระบบ: https://kmutt-pwd.duckdns.org  (VPS Vultr สิงคโปร์)
 
 ---
 
@@ -36,6 +36,36 @@
 | Vercel | Host frontend |
 | Render | Host backend + PostgreSQL |
 | GitHub | Source code + auto deploy |
+
+---
+
+## 28 สิงหาคม 2569
+
+### เอกสาร — คู่มือการใช้งานฉบับใหม่ (PDF 16 หน้า)
+
+> รื้อคู่มือเดิม (ฉบับ 30 มิ.ย.) ทำใหม่ทั้งเล่ม ทั้งเนื้อหาและดีไซน์
+
+- **เนื้อหาตรงกับระบบปัจจุบัน** — เดิมยังชี้ URL Vercel และไม่มีฟีเจอร์ที่เพิ่มหลังจากนั้น
+  - แก้ URL เป็น `https://kmutt-pwd.duckdns.org`
+  - เพิ่มบท **นำเข้าข้อมูลจากไฟล์ Excel**, **หลักสูตรต่อรุ่น (สูงสุด 4)**, **Export Excel (.xlsx)**, ช่องชื่อเล่น, จังหวัดแบบ dropdown 77 จังหวัด
+  - เพิ่มบท **รู้จักหน้าจอและเมนู** (ภาพจำลอง sidebar + สัญญาณแจ้งเตือน + dark mode)
+  - เพิ่ม **ภาคผนวก ข — ปัญหาที่พบบ่อย** 12 อาการพร้อมวิธีแก้
+  - รวม 12 บท + 2 ภาคผนวก = 16 หน้า A4
+- **ดีไซน์ใหม่** — ปกโลโก้ มจธ. บนพื้นไล่สีส้ม, หัวบทเลขกลม gradient, running head/footer + เลขหน้าทุกหน้า, การ์ด tip/warn/note, ตารางหัวส้ม, flow diagram
+- **คุมให้ 1 บท = 1 หน้าพอดี** — วัดความสูงจริงทุกหน้าในเบราว์เซอร์จนได้ 1123px เท่ากันหมด ไม่มีหน้าไหนล้นไปหน้าถัดไป (PDF ออกมา 16 หน้าเป๊ะ)
+- ไฟล์: `docs/คู่มือการใช้งาน.pdf` + `.html` และวางสำเนาไว้ที่ Desktop
+
+### คำสั่งที่ใช้
+```bash
+# ประกอบ HTML (CSS + body + โลโก้ base64) แล้ว render เป็น PDF
+node build.cjs
+msedge --headless=new --no-pdf-header-footer --print-to-pdf=manual.pdf file:///.../manual.html
+
+# verify ก่อนบอกเสร็จ: ดูด้วยตาทีละหน้า + วัดความสูงจริง + นับหน้า PDF
+node preview.cjs                                             # แตกไฟล์ preview ทีละหน้า
+msedge --headless=new --window-size=794,1123 --screenshot=shot_N.png file:///.../pv_N.html
+msedge --headless=new --dump-dom file:///.../measure.html    # วัดความสูงทุกหน้า
+```
 
 ---
 
