@@ -220,15 +220,24 @@ export default function PersonList() {
     if (s.includes('ชาย')) return 'MALE';
     return 'MALE';
   };
+  // แปลงเป็น YYYY-MM-DD (ค.ศ.) — Excel มองปี พ.ศ. เป็น ค.ศ. จึงต้องลบ 543 เองทุกทาง
+  const toISO = (y, mo, d) => `${y > 2400 ? y - 543 : y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
   const parseBirth = (v) => {
     if (!v) return '';
-    if (v instanceof Date) return v.toISOString().slice(0, 10);
+    // ใช้ค่าตามเวลาเครื่อง ไม่ใช่ toISOString() ที่แปลงเป็น UTC แล้ววันถอยไป 1
+    if (v instanceof Date) return isNaN(v) ? '' : toISO(v.getFullYear(), v.getMonth() + 1, v.getDate());
     const s = String(v).trim();
     const m = s.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})$/);
-    if (m) { let y = parseInt(m[3]); if (y > 2400) y -= 543; return `${y}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; }
-    const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (m2) return `${m2[1]}-${m2[2]}-${m2[3]}`;
+    if (m) return toISO(parseInt(m[3]), m[2], m[1]);
+    const m2 = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m2) return toISO(parseInt(m2[1]), m2[2], m2[3]);
     return '';
+  };
+  // แสดงวันเกิดในตารางตัวอย่างเป็น วว/ดด/ปปปป พ.ศ. ให้ตรวจก่อนนำเข้า
+  const showBirth = (iso) => {
+    if (!iso) return '—';
+    const [y, mo, d] = iso.split('-');
+    return `${d}/${mo}/${parseInt(y) + 543}`;
   };
   const resolveBatch = (numRaw, yearRaw) => {
     if (!numRaw) return '';
@@ -794,6 +803,7 @@ export default function PersonList() {
                           <th className="px-2 py-2 text-left">ชื่อเล่น</th>
                           <th className="px-2 py-2 text-left">เลขบัตร</th>
                           <th className="px-2 py-2 text-center">เพศ</th>
+                          <th className="px-2 py-2 text-left">วันเกิด</th>
                           <th className="px-2 py-2 text-left">จังหวัด</th>
                           <th className="px-2 py-2 text-left">รุ่น</th>
                         </tr>
@@ -806,6 +816,7 @@ export default function PersonList() {
                             <td className="px-2 py-1.5 text-gray-500">{r.nickname}</td>
                             <td className="px-2 py-1.5 text-gray-500 font-mono">{r.thaiId}</td>
                             <td className="px-2 py-1.5 text-center text-gray-500">{r.gender === 'FEMALE' ? 'หญิง' : r.gender === 'OTHER' ? 'อื่นๆ' : 'ชาย'}</td>
+                            <td className={`px-2 py-1.5 ${r.birthDate ? 'text-gray-500' : 'text-red-400'}`}>{showBirth(r.birthDate)}</td>
                             <td className="px-2 py-1.5 text-gray-500">{r.province}</td>
                             <td className="px-2 py-1.5 text-gray-500">{r.batchId ? (batches.find(b => String(b.id) === r.batchId)?.batchNumber ?? '—') : '—'}</td>
                           </tr>
