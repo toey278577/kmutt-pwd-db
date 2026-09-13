@@ -41,6 +41,77 @@
 
 ## 13 กันยายน 2569
 
+### แก้ปัญหา deploy แล้วผู้ใช้ยังเห็นของเก่า
+
+> อาการ: deploy เทมเพลต 22 คอลัมน์ขึ้นเซิร์ฟเวอร์แล้ว แต่กดดาวน์โหลดจากเว็บยังได้ไฟล์ 10 คอลัมน์เดิม
+
+- **สาเหตุ:** เบราว์เซอร์ยัง cache `index.html` + service worker เก่าไว้ (แอปเป็น PWA) เลยโหลดโค้ดชุดเดิม
+  และไฟล์ที่ดาวน์โหลดมาชื่อซ้ำกับตัวเก่าใน Downloads แยกไม่ออกว่าอันไหนใหม่
+- **แก้ฝั่งเว็บ:** ตั้ง Cache-Control ใน nginx ให้ถูกหลัก
+  - `index.html` + `sw.js` → `no-cache, no-store, must-revalidate` (เปลือกแอป ต้องได้ตัวใหม่เสมอ)
+  - `/assets/` → `max-age=31536000, immutable` (ไฟล์มี hash ในชื่ออยู่แล้ว cache ยาวได้ปลอดภัย)
+  - เก็บสำเนา config ไว้ใน repo ที่ `docs/deploy/nginx-kmutt.conf` (ของจริงอยู่ที่ `/etc/nginx/sites-enabled/kmutt`)
+- **แก้ฝั่งไฟล์:** เปลี่ยนชื่อไฟล์เทมเพลตเป็น `เทมเพลตนำเข้าคนพิการ-v2-มีที่อยู่.xlsx` เห็นปุ๊บรู้ปั๊บว่าตัวใหม่
+- **บทเรียน:** แก้ config บนเซิร์ฟเวอร์ อย่ายิง `sed` ที่มี `# บันทึกการพัฒนา — ระบบฐานข้อมูลคนพิการ มจธ.
+
+> ผู้พัฒนา: Suthat Srisawat  
+> URL ระบบ: https://kmutt-pwd.duckdns.org  (VPS Vultr สิงคโปร์)
+
+---
+
+## เทคโนโลยีที่ใช้พัฒนา
+
+### Frontend
+| เทคโนโลยี | หน้าที่ |
+|-----------|---------|
+| React 19 | Framework หลัก |
+| Vite | Build tool |
+| Tailwind CSS 4 | Styling |
+| DaisyUI 5 | UI Component library |
+| React Router 7 | Routing |
+| Axios | HTTP client เรียก API |
+| Recharts | กราฟใน Dashboard |
+| Lucide React | Icons |
+| Google Fonts (Sarabun) | ฟอนต์ภาษาไทย |
+
+### Backend
+| เทคโนโลยี | หน้าที่ |
+|-----------|---------|
+| Node.js + Express 5 | Web server |
+| Prisma 7 | ORM จัดการ database |
+| PostgreSQL | ฐานข้อมูลหลัก |
+| JWT (jsonwebtoken) | Authentication |
+| bcryptjs | เข้ารหัสรหัสผ่าน |
+| CORS | จัดการ cross-origin |
+
+### Deploy / Infrastructure
+| บริการ | ใช้ทำอะไร |
+|--------|----------|
+| Vercel | Host frontend |
+| Render | Host backend + PostgreSQL |
+| GitHub | Source code + auto deploy |
+
+---
+
+ ผ่าน ssh (shell กิน $ จน config พัง)
+  ให้ `scp` ไฟล์ทั้งไฟล์ขึ้นไปแทน แล้ว `nginx -t` ก่อน reload เสมอ
+
+### คำสั่งที่ใช้
+```bash
+# deploy (ตอนนี้มี SSH key แล้ว รันจากเครื่องตัวเองได้เลย)
+ssh -i ~/.ssh/kmutt_vps root@66.42.63.65 "/opt/kmutt/deploy.sh"
+
+# แก้ nginx อย่างปลอดภัย: backup -> scp ไฟล์ใหม่ -> test -> reload
+scp -i ~/.ssh/kmutt_vps nginx-kmutt.conf root@66.42.63.65:/tmp/kmutt-new.conf
+ssh -i ~/.ssh/kmutt_vps root@66.42.63.65 "cp /tmp/kmutt-new.conf /etc/nginx/sites-enabled/kmutt && nginx -t && systemctl reload nginx"
+
+# verify: เช็ค header ที่เสิร์ฟจริง
+curl -sI https://kmutt-pwd.duckdns.org/ | grep -i cache-control          # ต้องได้ no-store
+curl -sI https://kmutt-pwd.duckdns.org/assets/<file>.js | grep -i cache  # ต้องได้ immutable
+```
+
+---
+
 ### นำเข้า Excel — เพิ่มที่อยู่ปัจจุบันและข้อมูลติดต่อ
 
 > เดิมนำเข้าได้แค่ 10 ช่อง ที่อยู่ต้องมานั่งกรอกเองทีละคน
