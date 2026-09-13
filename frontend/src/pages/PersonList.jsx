@@ -274,7 +274,8 @@ export default function PersonList() {
     ws['!cols'] = headers.map(() => ({ wch: 18 }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'นำเข้าคนพิการ');
-    XLSX.writeFile(wb, 'เทมเพลตนำเข้าคนพิการ.xlsx');
+    // ใส่เลขเวอร์ชันในชื่อไฟล์ กันสับสนกับเทมเพลตเก่าที่ค้างอยู่ในเครื่อง
+    XLSX.writeFile(wb, 'เทมเพลตนำเข้าคนพิการ-v2-มีที่อยู่.xlsx');
   };
 
   const handleImportFile = (e) => {
