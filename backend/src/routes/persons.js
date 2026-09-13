@@ -185,16 +185,34 @@ router.post('/import', async (req, res) => {
       if (thaiId && thaiId.length !== 13) { errors.push({ row: rowNo, error: 'เลขบัตรไม่ครบ 13 หลัก' }); continue; }
       const gender = ['MALE', 'FEMALE', 'OTHER'].includes(r.gender) ? r.gender : 'MALE';
       try {
+        // ตัดความยาวตาม VarChar ใน schema กันแถวเดียวพังทั้งไฟล์
+        const txt = (v, max) => {
+          const s = v == null ? '' : String(v).trim();
+          return s ? s.slice(0, max) : null;
+        };
         await prisma.person.create({
           data: {
             fullName,
-            nickname: r.nickname ? String(r.nickname).trim() : null,
+            nickname: txt(r.nickname, 100),
             thaiId: thaiId || null,
             gender,
             birthDate: toDate(r.birthDate),
-            mobile: r.mobile ? String(r.mobile).trim() : null,
-            province: r.province ? String(r.province).trim() : null,
-            educationLevel: r.educationLevel ? String(r.educationLevel).trim() : null,
+            mobile: txt(r.mobile, 20),
+            phone: txt(r.phone, 20),
+            email: txt(r.email, 255),
+            // ที่อยู่ปัจจุบัน
+            houseNo: txt(r.houseNo, 20),
+            moo: txt(r.moo, 20),
+            building: txt(r.building, 100),
+            floor: txt(r.floor, 20),
+            soi: txt(r.soi, 100),
+            road: txt(r.road, 100),
+            subDistrict: txt(r.subDistrict, 100),
+            district: txt(r.district, 100),
+            province: txt(r.province, 100),
+            postalCode: txt(r.postalCode, 10),
+            landmark: txt(r.landmark, 255),
+            educationLevel: txt(r.educationLevel, 100),
             batchId: r.batchId ? parseInt(r.batchId) : null,
           },
         });

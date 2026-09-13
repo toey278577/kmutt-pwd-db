@@ -239,6 +239,14 @@ export default function PersonList() {
     const [y, mo, d] = iso.split('-');
     return `${d}/${mo}/${parseInt(y) + 543}`;
   };
+  // ที่อยู่แบบย่อ ไว้ตรวจในตารางตัวอย่างว่าอ่านที่อยู่จากไฟล์ได้ครบไหม
+  const showAddress = (r) => {
+    const parts = [
+      r.houseNo, r.moo && `ม.${r.moo}`, r.soi, r.road,
+      r.subDistrict, r.district, r.province, r.postalCode,
+    ].filter(Boolean);
+    return parts.length ? parts.join(' ') : '—';
+  };
   const resolveBatch = (numRaw, yearRaw) => {
     if (!numRaw) return '';
     const num = parseInt(String(numRaw).replace(/\D/g, ''));
@@ -248,8 +256,20 @@ export default function PersonList() {
   };
 
   const downloadTemplate = () => {
-    const headers = ['ชื่อ-นามสกุล', 'ชื่อเล่น', 'เลขบัตรประชาชน', 'เพศ', 'วันเกิด', 'เบอร์โทร', 'จังหวัด', 'ระดับการศึกษา', 'รุ่นที่', 'ปี'];
-    const example = ['นาย สมชาย ใจดี', 'ชาย', '1234567890123', 'ชาย', '15/05/2540', '0812345678', 'กรุงเทพมหานคร', 'ปริญญาตรี', '13', '2569'];
+    const headers = [
+      'ชื่อ-นามสกุล', 'ชื่อเล่น', 'เลขบัตรประชาชน', 'เพศ', 'วันเกิด',
+      'เบอร์โทร', 'โทรศัพท์บ้าน', 'อีเมล',
+      'เลขที่', 'หมู่ที่', 'อาคาร/หมู่บ้าน', 'ชั้นที่', 'ซอย', 'ถนน',
+      'แขวง/ตำบล', 'เขต/อำเภอ', 'จังหวัด', 'รหัสไปรษณีย์', 'สถานที่ใกล้เคียง',
+      'ระดับการศึกษา', 'รุ่นที่', 'ปี',
+    ];
+    const example = [
+      'นาย สมชาย ใจดี', 'ชาย', '1234567890123', 'ชาย', '15/05/2540',
+      '0812345678', '021234567', 'somchai@email.com',
+      '99/1', '5', 'หมู่บ้านสุขใจ', '2', 'ซอยประชาอุทิศ 10', 'ถนนประชาอุทิศ',
+      'บางมด', 'ทุ่งครุ', 'กรุงเทพมหานคร', '10140', 'ใกล้ มจธ.',
+      'ปริญญาตรี', '13', '2569',
+    ];
     const ws = XLSX.utils.aoa_to_sheet([headers, example]);
     ws['!cols'] = headers.map(() => ({ wch: 18 }));
     const wb = XLSX.utils.book_new();
@@ -273,8 +293,21 @@ export default function PersonList() {
           thaiId: String(row['เลขบัตรประชาชน'] || row['เลขบัตร'] || '').trim(),
           gender: parseGender(row['เพศ']),
           birthDate: parseBirth(row['วันเกิด']),
-          mobile: String(row['เบอร์โทร'] || row['เบอร์โทรศัพท์'] || '').trim(),
+          mobile: String(row['เบอร์โทร'] || row['เบอร์โทรศัพท์'] || row['มือถือ'] || '').trim(),
+          phone: String(row['โทรศัพท์บ้าน'] || row['โทรศัพท์'] || '').trim(),
+          email: String(row['อีเมล'] || row['EMAIL'] || row['email'] || '').trim(),
+          // ที่อยู่ปัจจุบัน
+          houseNo: String(row['เลขที่'] || row['บ้านเลขที่'] || '').trim(),
+          moo: String(row['หมู่ที่'] || row['หมู่'] || '').trim(),
+          building: String(row['อาคาร/หมู่บ้าน'] || row['ชื่ออาคาร / หมู่บ้าน'] || row['อาคาร'] || '').trim(),
+          floor: String(row['ชั้นที่'] || row['ชั้น'] || '').trim(),
+          soi: String(row['ซอย'] || '').trim(),
+          road: String(row['ถนน'] || '').trim(),
+          subDistrict: String(row['แขวง/ตำบล'] || row['แขวง / ตำบล'] || row['ตำบล'] || '').trim(),
+          district: String(row['เขต/อำเภอ'] || row['เขต / อำเภอ'] || row['อำเภอ'] || '').trim(),
           province: String(row['จังหวัด'] || '').trim(),
+          postalCode: String(row['รหัสไปรษณีย์'] || '').replace(/\D/g, '').trim(),
+          landmark: String(row['สถานที่ใกล้เคียง'] || '').trim(),
           educationLevel: String(row['ระดับการศึกษา'] || row['วุฒิการศึกษา'] || '').trim(),
           batchId: resolveBatch(row['รุ่นที่'], row['ปี']),
         })).filter(r => r.fullName);
@@ -769,7 +802,7 @@ export default function PersonList() {
                 <div className="w-7 h-7 rounded-full bg-orange-500 text-white text-sm font-bold flex items-center justify-center flex-shrink-0">1</div>
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-gray-700">ดาวน์โหลดเทมเพลต แล้วกรอกข้อมูล</p>
-                  <p className="text-xs text-gray-500 mt-0.5">คอลัมน์: ชื่อ-นามสกุล*, ชื่อเล่น, เลขบัตรประชาชน, เพศ, วันเกิด (วว/ดด/ปปปป พ.ศ.), เบอร์โทร, จังหวัด, ระดับการศึกษา, รุ่นที่, ปี</p>
+                  <p className="text-xs text-gray-500 mt-0.5">คอลัมน์: ชื่อ-นามสกุล*, ชื่อเล่น, เลขบัตรประชาชน, เพศ, วันเกิด (วว/ดด/ปปปป พ.ศ.), เบอร์โทร, โทรศัพท์บ้าน, อีเมล, ที่อยู่ (เลขที่, หมู่ที่, อาคาร/หมู่บ้าน, ชั้นที่, ซอย, ถนน, แขวง/ตำบล, เขต/อำเภอ, จังหวัด, รหัสไปรษณีย์, สถานที่ใกล้เคียง), ระดับการศึกษา, รุ่นที่, ปี</p>
                   <button onClick={downloadTemplate}
                     className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-orange-600 bg-white border border-orange-200 hover:bg-orange-50">
                     <Download size={13} /> ดาวน์โหลดเทมเพลต
@@ -804,7 +837,7 @@ export default function PersonList() {
                           <th className="px-2 py-2 text-left">เลขบัตร</th>
                           <th className="px-2 py-2 text-center">เพศ</th>
                           <th className="px-2 py-2 text-left">วันเกิด</th>
-                          <th className="px-2 py-2 text-left">จังหวัด</th>
+                          <th className="px-2 py-2 text-left">ที่อยู่</th>
                           <th className="px-2 py-2 text-left">รุ่น</th>
                         </tr>
                       </thead>
@@ -817,7 +850,7 @@ export default function PersonList() {
                             <td className="px-2 py-1.5 text-gray-500 font-mono">{r.thaiId}</td>
                             <td className="px-2 py-1.5 text-center text-gray-500">{r.gender === 'FEMALE' ? 'หญิง' : r.gender === 'OTHER' ? 'อื่นๆ' : 'ชาย'}</td>
                             <td className={`px-2 py-1.5 ${r.birthDate ? 'text-gray-500' : 'text-red-400'}`}>{showBirth(r.birthDate)}</td>
-                            <td className="px-2 py-1.5 text-gray-500">{r.province}</td>
+                            <td className="px-2 py-1.5 text-gray-500 max-w-[220px] truncate" title={showAddress(r)}>{showAddress(r)}</td>
                             <td className="px-2 py-1.5 text-gray-500">{r.batchId ? (batches.find(b => String(b.id) === r.batchId)?.batchNumber ?? '—') : '—'}</td>
                           </tr>
                         ))}
