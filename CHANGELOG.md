@@ -52,7 +52,7 @@
   1. พิมพ์คำว่า "ล้างข้อมูลทั้งหมด" ให้ตรงเป๊ะ (ตัดช่องว่างหัวท้ายให้)
   2. ใส่รหัสผ่านของตัวเอง (ตรวจด้วย bcrypt ฝั่ง server)
   3. กล่องยืนยันถามย้ำอีกครั้ง พร้อมบอกจำนวนรายการที่จะลบ
-  4. ระบบ **สำรองข้อมูลอัตโนมัติ** เป็น JSON ก่อนลบทุกครั้ง (`backups/before-reset-<เวลา>.json`)
+  4. มีช่องติ๊ก **สำรองข้อมูลก่อนลบ** ให้เลือกเอง (ค่าเริ่มต้น = ไม่สำรอง ลบเลย) ถ้าติ๊กจะได้ไฟล์ `backups/before-reset-<เวลา>.json` และระบบเก็บไว้แค่ 5 ไฟล์ล่าสุด
 - **ความปลอดภัย 2 ชั้น:** frontend `ProtectedRoute adminOnly` + backend `requireRole('ADMIN')` — STAFF ยิง API ตรงก็ได้ 403
 - ลบใน transaction เรียงจากลูกไปแม่ + log ลง console ว่าใครกดและสำรองไว้ที่ไฟล์ไหน
 - ไฟล์ใหม่: `backend/src/routes/system.js` (GET `/api/system/stats`, POST `/api/system/reset`), `frontend/src/components/DangerZone.jsx`

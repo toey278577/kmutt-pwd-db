@@ -42,10 +42,10 @@ router.get('/stats', async (req, res) => {
 });
 
 // POST /api/system/reset — ล้างข้อมูลทั้งหมดให้เหมือนเพิ่งติดตั้งระบบใหม่
-// body: { password, confirmText, keepUsers }
+// body: { password, confirmText, keepUsers, backup }
 router.post('/reset', async (req, res) => {
   try {
-    const { password, confirmText, keepUsers = true } = req.body;
+    const { password, confirmText, keepUsers = true, backup = false } = req.body;
 
     // ── ด่านที่ 1: ต้องพิมพ์ข้อความยืนยันให้ตรง ──
     if (String(confirmText || '').trim() !== CONFIRM_TEXT) {
@@ -59,37 +59,41 @@ router.post('/reset', async (req, res) => {
       return res.status(401).json({ error: 'รหัสผ่านไม่ถูกต้อง' });
     }
 
-    // ── ด่านที่ 3: สำรองข้อมูลไว้ก่อนเสมอ กู้คืนได้ถ้าเผลอกด ──
-    const BACKUP_MODELS = [
-      'disabilityType', 'organization', 'user', 'trainingBatch', 'course',
-      'person', 'personPhoto', 'disabilityInfo', 'trainingRecord',
-      'workExperience', 'skill', 'followUp', 'personOrganization', 'personAssessment',
-    ];
-    const data = {};
-    for (const m of BACKUP_MODELS) data[m] = await prisma[m].findMany();
+    // ── ด่านที่ 3: สำรองข้อมูลก่อนลบ (เฉพาะเมื่อผู้ใช้ติ๊กเลือก) ──
+    // ไม่ติ๊ก = ลบเลย ยังมีสำรองรายวันตอนตี 2 เป็นตาข่ายรองอยู่ (แต่เป็นข้อมูลของเมื่อคืน)
+    let backupFile = null;
+    if (backup) {
+      const BACKUP_MODELS = [
+        'disabilityType', 'organization', 'user', 'trainingBatch', 'course',
+        'person', 'personPhoto', 'disabilityInfo', 'trainingRecord',
+        'workExperience', 'skill', 'followUp', 'personOrganization', 'personAssessment',
+      ];
+      const data = {};
+      for (const m of BACKUP_MODELS) data[m] = await prisma[m].findMany();
 
-    const dir = path.join(__dirname, '..', '..', 'backups');
-    fs.mkdirSync(dir, { recursive: true });
-    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
-    const backupFile = `before-reset-${stamp}.json`;
-    fs.writeFileSync(
-      path.join(dir, backupFile),
-      JSON.stringify({ backupAt: new Date().toISOString(), by: me.email, data }, null, 2),
-      'utf8'
-    );
+      const dir = path.join(__dirname, '..', '..', 'backups');
+      fs.mkdirSync(dir, { recursive: true });
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+      backupFile = `before-reset-${stamp}.json`;
+      fs.writeFileSync(
+        path.join(dir, backupFile),
+        JSON.stringify({ backupAt: new Date().toISOString(), by: me.email, data }, null, 2),
+        'utf8'
+      );
 
-    // เก็บไฟล์สำรองก่อนรีเซ็ตแค่ KEEP ไฟล์ล่าสุด ที่เก่ากว่านั้นลบทิ้ง — กันไฟล์กองจนดิสก์เต็ม
-    // (คนละชุดกับสำรองรายวัน backup-*.json ซึ่ง backup.sh ลบให้เมื่อเกิน 14 วัน)
-    const KEEP = 5;
-    try {
-      const olds = fs.readdirSync(dir)
-        .filter((f) => f.startsWith('before-reset-') && f.endsWith('.json'))
-        .sort()              // ชื่อไฟล์ขึ้นต้นด้วยเวลา เรียงชื่อ = เรียงเวลา
-        .slice(0, -KEEP);    // เหลือ KEEP ไฟล์ล่าสุดไว้
-      for (const f of olds) fs.unlinkSync(path.join(dir, f));
-      if (olds.length) console.log(`[RESET] ลบไฟล์สำรองเก่า ${olds.length} ไฟล์ (เก็บล่าสุด ${KEEP} ไฟล์)`);
-    } catch (e) {
-      console.warn('[RESET] ลบไฟล์สำรองเก่าไม่สำเร็จ:', e.message);
+      // เก็บไฟล์สำรองก่อนรีเซ็ตแค่ KEEP ไฟล์ล่าสุด ที่เก่ากว่านั้นลบทิ้ง — กันไฟล์กองจนดิสก์เต็ม
+      // (คนละชุดกับสำรองรายวัน backup-*.json ซึ่ง backup.sh ลบให้เมื่อเกิน 14 วัน)
+      const KEEP = 5;
+      try {
+        const olds = fs.readdirSync(dir)
+          .filter((f) => f.startsWith('before-reset-') && f.endsWith('.json'))
+          .sort()              // ชื่อไฟล์ขึ้นต้นด้วยเวลา เรียงชื่อ = เรียงเวลา
+          .slice(0, -KEEP);    // เหลือ KEEP ไฟล์ล่าสุดไว้
+        for (const f of olds) fs.unlinkSync(path.join(dir, f));
+        if (olds.length) console.log(`[RESET] ลบไฟล์สำรองเก่า ${olds.length} ไฟล์ (เก็บล่าสุด ${KEEP} ไฟล์)`);
+      } catch (e) {
+        console.warn('[RESET] ลบไฟล์สำรองเก่าไม่สำเร็จ:', e.message);
+      }
     }
 
     // ── ล้างข้อมูล ──
@@ -107,7 +111,7 @@ router.post('/reset', async (req, res) => {
     }, { timeout: 60_000 });
 
     const total = Object.values(deleted).reduce((a, b) => a + b, 0);
-    console.log(`[RESET] ${me.email} ล้างข้อมูล ${total} แถว | สำรองไว้ที่ ${backupFile}`);
+    console.log(`[RESET] ${me.email} ล้างข้อมูล ${total} แถว | ${backupFile ? 'สำรองไว้ที่ ' + backupFile : 'ไม่ได้สำรอง'}`);
 
     res.json({ ok: true, deleted, total, backupFile });
   } catch (err) {

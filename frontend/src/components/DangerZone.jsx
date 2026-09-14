@@ -22,13 +22,14 @@ export default function DangerZone() {
   const [confirmText, setConfirmText] = useState('');
   const [password, setPassword] = useState('');
   const [keepUsers, setKeepUsers] = useState(true);
+  const [backup, setBackup] = useState(false);   // ค่าเริ่มต้น: ไม่สำรอง ลบเลย
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
   useEffect(() => { getSystemStats().then((r) => setStats(r.data)).catch(() => {}); }, []);
 
   const open = () => {
-    setConfirmText(''); setPassword(''); setKeepUsers(true); setErr('');
+    setConfirmText(''); setPassword(''); setKeepUsers(true); setBackup(false); setErr('');
     getSystemStats().then((r) => setStats(r.data)).catch(() => {});
     dlg.current?.showModal();
   };
@@ -44,15 +45,18 @@ export default function DangerZone() {
       title: 'แน่ใจนะว่าจะล้างข้อมูลทั้งหมด?',
       message: `ข้อมูล ${total.toLocaleString()} รายการจะถูกลบทันที และย้อนกลับเองไม่ได้`
         + `${keepUsers ? '' : ' รวมถึงบัญชีผู้ใช้งานคนอื่นด้วย'}`
-        + ' — ระบบจะสำรองข้อมูลไว้ให้ก่อนลบ หากต้องการกู้คืนให้ติดต่อผู้ดูแลระบบ',
+        + (backup
+          ? ' — ระบบจะสำรองข้อมูลไว้ให้ก่อนลบ'
+          : ' — ไม่ได้สำรองข้อมูลไว้ กู้ได้แค่จากสำรองรายวันของเมื่อคืนเท่านั้น'),
     });
     if (!yes) return;
 
     setBusy(true); setErr('');
     try {
-      const { data } = await resetSystem({ password, confirmText: confirmText.trim(), keepUsers });
+      const { data } = await resetSystem({ password, confirmText: confirmText.trim(), keepUsers, backup });
       dlg.current?.close();
-      toast.success(`ล้างข้อมูลสำเร็จ ${data.total} รายการ`, `สำรองไว้ที่ ${data.backupFile} แล้ว`);
+      toast.success(`ล้างข้อมูลสำเร็จ ${data.total} รายการ`,
+        data.backupFile ? `สำรองไว้ที่ ${data.backupFile} แล้ว` : 'ไม่ได้สำรองข้อมูลไว้');
       setTimeout(() => window.location.reload(), 1500);
     } catch (e) {
       const msg = e.response?.data?.error || 'เกิดข้อผิดพลาด';
@@ -84,7 +88,7 @@ export default function DangerZone() {
               <br />
               <span className="text-green-600 font-semibold">บัญชีผู้ใช้งานและประเภทความพิการยังอยู่</span>
               {' · '}
-              <span className="text-gray-400">ระบบสำรองข้อมูลให้อัตโนมัติก่อนลบ</span>
+              <span className="text-gray-400">เลือกได้ว่าจะสำรองข้อมูลเก็บไว้ก่อนลบหรือไม่</span>
             </p>
             {stats && (
               <p className="text-xs text-gray-400 mt-2">
@@ -132,16 +136,32 @@ export default function DangerZone() {
               </div>
             </div>
 
-            {/* ตัวเลือกบัญชีผู้ใช้ */}
-            <label className="flex items-start gap-2.5 p-3 rounded-2xl bg-gray-50 cursor-pointer">
-              <input type="checkbox" checked={!keepUsers} onChange={(e) => setKeepUsers(!e.target.checked)}
-                className="mt-0.5 w-4 h-4 accent-red-600 flex-shrink-0" />
-              <span className="text-xs text-gray-600 leading-relaxed">
-                ลบบัญชีผู้ใช้งานคนอื่นด้วย ({stats ? Math.max((stats.users || 1) - 1, 0) : '—'} บัญชี)
-                <br />
-                <span className="text-gray-400">บัญชีของคุณจะยังอยู่เสมอ เพื่อให้เข้าระบบต่อได้</span>
-              </span>
-            </label>
+            {/* ตัวเลือก */}
+            <div className="space-y-2">
+              <label className="flex items-start gap-2.5 p-3 rounded-2xl bg-gray-50 cursor-pointer">
+                <input type="checkbox" checked={!keepUsers} onChange={(e) => setKeepUsers(!e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-red-600 flex-shrink-0" />
+                <span className="text-xs text-gray-600 leading-relaxed">
+                  ลบบัญชีผู้ใช้งานคนอื่นด้วย ({stats ? Math.max((stats.users || 1) - 1, 0) : '—'} บัญชี)
+                  <br />
+                  <span className="text-gray-400">บัญชีของคุณจะยังอยู่เสมอ เพื่อให้เข้าระบบต่อได้</span>
+                </span>
+              </label>
+
+              <label className="flex items-start gap-2.5 p-3 rounded-2xl bg-gray-50 cursor-pointer">
+                <input type="checkbox" checked={backup} onChange={(e) => setBackup(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-green-600 flex-shrink-0" />
+                <span className="text-xs text-gray-600 leading-relaxed">
+                  สำรองข้อมูลเก็บไว้ก่อนลบ
+                  <br />
+                  <span className="text-gray-400">
+                    {backup
+                      ? 'เก็บเป็นไฟล์บนเซิร์ฟเวอร์ ถ้าเผลอกดให้ผู้ดูแลกู้คืนได้'
+                      : 'ไม่สำรอง — ถ้าเผลอกด กู้ได้แค่จากสำรองรายวันของเมื่อคืน'}
+                  </span>
+                </span>
+              </label>
+            </div>
 
             {/* ด่านยืนยัน */}
             <div>
