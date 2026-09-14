@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, GraduationCap, Briefcase, Star, Target, ChevronDown, Building2, Accessibility, Camera, ClipboardList, TrendingUp, Save } from 'lucide-react';
 import {
   getPerson, getTraining, createTraining, deleteTraining,
@@ -59,6 +59,10 @@ const DateRange = ({ start, end, noEndLabel = 'ปัจจุบัน' }) => (
 export default function PersonDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  // ย้อนกลับไปหน้าที่มา (รายชื่อหน้าเดิม / ติดตามผล / ฯลฯ)
+  // ถ้าเปิดลิงก์นี้ตรงๆ ไม่มีประวัติให้ย้อน ค่อยไปหน้ารายชื่อ
+  const goBack = () => (location.key !== 'default' ? navigate(-1) : navigate('/persons'));
   const { canEdit } = useAuth();
   const toast = useToast();
   const modalRef = useRef(null);
@@ -210,7 +214,7 @@ export default function PersonDetail() {
 
   return (
     <div>
-      <button className="btn btn-ghost btn-sm gap-1 mb-4 text-gray-500" onClick={() => navigate('/persons')}>
+      <button className="btn btn-ghost btn-sm gap-1 mb-4 text-gray-500" onClick={goBack}>
         <ArrowLeft size={15} /> กลับ
       </button>
 

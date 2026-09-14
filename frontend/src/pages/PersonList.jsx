@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown, Users, Camera, X, Layers, FileSpreadsheet, Download, Upload } from 'lucide-react';
 import { getPersons, getPerson, createPerson, importPersons, updatePerson, deletePerson, getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo, getPersonPhotos, uploadPersonPhoto, getBatches } from '../api';
@@ -59,10 +59,12 @@ export default function PersonList() {
   const toast = useToast();
   const modalRef = useRef(null);
   const [persons, setPersons] = useState([]);
-  const [search, setSearch] = useState('');
+  // เลขหน้า / คำค้น / รุ่นที่เลือก เก็บไว้ใน URL (?page=&q=&batch=)
+  // กดดูรายละเอียดแล้วกลับมา หรือรีเฟรช ก็ยังอยู่หน้าเดิม
+  const [urlParams, setUrlParams] = useSearchParams();
+  const [search, setSearch] = useState(() => urlParams.get('q') || '');
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
-  const [page, setPage] = useState(1);
   const [disabilityTypes, setDisabilityTypes] = useState([]);
   const [disabilityTypeId, setDisabilityTypeId] = useState('');
   const [editPersonDisabilities, setEditPersonDisabilities] = useState([]);
@@ -74,7 +76,7 @@ export default function PersonList() {
   const [loadError, setLoadError] = useState(false);
   const formBodyRef = useRef(null);
   const [batches, setBatches] = useState([]);
-  const [batchFilter, setBatchFilter] = useState('');
+  const [batchFilter, setBatchFilter] = useState(() => urlParams.get('batch') || '');
   const [importModal, setImportModal] = useState(false);
   const [importRows, setImportRows] = useState([]);
   const [importing, setImporting] = useState(false);
@@ -82,23 +84,43 @@ export default function PersonList() {
 
   const PAGE_SIZE = 10;
   const totalPages = Math.ceil(persons.length / PAGE_SIZE);
+  // ลบคนสุดท้ายของหน้าสุดท้าย หน้านั้นจะหายไป → แสดงหน้าสุดท้ายที่ยังมีแทน
+  const page = Math.min(Math.max(1, parseInt(urlParams.get('page'), 10) || 1), Math.max(1, totalPages));
   const paged = persons.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const setPage = (next) => setUrlParams((prev) => {
+    const p = new URLSearchParams(prev);
+    const n = typeof next === 'function' ? next(page) : next;
+    if (n > 1) p.set('page', String(n)); else p.delete('page');
+    return p;
+  }, { replace: true });
 
+  // โหลดซ้ำโดยอยู่หน้าเดิม — ใช้หลังแก้ไข/ลบ
   const load = (q = '', b = batchFilter) => {
     setLoadError(false);
     const params = {};
     if (q) params.search = q;
     if (b) params.batchId = b;
     return getPersons(params)
-      .then((r) => { setPersons(r.data); setPage(1); })
+      .then((r) => setPersons(r.data))
       .catch(() => setLoadError(true));
+  };
+  // ผลลัพธ์ชุดใหม่ (ค้นหา / เปลี่ยนรุ่น / เพิ่มคน / นำเข้า) → จำคำค้น+รุ่นลง URL แล้วเริ่มหน้า 1
+  // เขียน URL ตอนผู้ใช้กดเท่านั้น ไม่เขียนตอนโหลดเสร็จ กันกรณีกดไปหน้าอื่นแล้วโดนดึงกลับ
+  const applyFilter = (q = search, b = batchFilter) => {
+    setUrlParams(() => {
+      const p = new URLSearchParams();
+      if (q) p.set('q', q);
+      if (b) p.set('batch', b);
+      return p;
+    }, { replace: true });
+    return load(q, b);
   };
   const handleBatchFilter = (b) => {
     setBatchFilter(b);
-    load(search, b);
+    applyFilter(search, b);
   };
   useEffect(() => {
-    load();
+    load(search);   // search / batchFilter / page เริ่มจากค่าใน URL แล้ว
     getDisabilityTypes().then((r) => setDisabilityTypes(r.data)).catch(() => {});
     getBatches().then((r) => setBatches(r.data)).catch(() => {});
   }, []);
@@ -201,7 +223,8 @@ export default function PersonList() {
         await uploadPersonPhoto(personId, { filePath: photoBase64, photoType: 'profile' });
       }
       modalRef.current?.close();
-      load(search);
+      // แก้ไข = อยู่หน้าเดิม / เพิ่มใหม่ = กลับหน้า 1 (คนใหม่อยู่บนสุด จะได้เห็นเลย)
+      if (editId) load(search); else applyFilter();
       toast.success(editId ? 'แก้ไขข้อมูลสำเร็จ!' : 'เพิ่มข้อมูลสำเร็จ!');
     } catch (err) {
       toast.error('บันทึกไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง');
@@ -339,7 +362,7 @@ export default function PersonList() {
       const { created, failed, errors } = res.data;
       setImportModal(false);
       setImportRows([]);
-      load(search);
+      applyFilter();
       if (failed > 0) {
         toast.error(`นำเข้า ${created} สำเร็จ, ${failed} ไม่สำเร็จ`,
           errors.slice(0, 3).map(er => `แถว ${er.row}: ${er.error}`).join(' • ') + (errors.length > 3 ? ' …' : ''));
@@ -400,19 +423,19 @@ export default function PersonList() {
             className="flex-1 text-sm bg-transparent outline-none text-gray-700 placeholder:text-gray-300 min-w-0"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && load(search)}
+            onKeyDown={(e) => e.key === 'Enter' && applyFilter(search)}
           />
 
           {/* Clear */}
           {search && (
-            <button onClick={() => { setSearch(''); load(''); }}
+            <button onClick={() => { setSearch(''); applyFilter(''); }}
               className="p-1.5 rounded-lg text-gray-300 hover:text-orange-500 hover:bg-orange-50 transition-all flex-shrink-0">
               <X size={13} />
             </button>
           )}
 
           {/* Search button — float inside, not flush to edge */}
-          <button onClick={() => load(search)}
+          <button onClick={() => applyFilter(search)}
             className="px-4 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 flex-shrink-0"
             style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
             ค้นหา
