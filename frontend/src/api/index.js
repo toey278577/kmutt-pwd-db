@@ -57,6 +57,10 @@ export const createUser = (data) => api.post('/users', data);
 export const updateUser = (id, data) => api.put(`/users/${id}`, data);
 export const deleteUser = (id) => api.delete(`/users/${id}`);
 
+// ระบบ (เฉพาะผู้ดูแลระบบ)
+export const getSystemStats = () => api.get('/system/stats');
+export const resetSystem = (data) => api.post('/system/reset', data);
+
 // persons list: cache 20 วิ (key แยกตาม params), invalidate เมื่อ mutate
 export const getPersons = (params) => {
   const key = 'persons:' + JSON.stringify(params || {});

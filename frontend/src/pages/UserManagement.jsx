@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, ChevronDown, Shield, Eye, UserCog, Users } from '
 import { getUsers, createUser, updateUser, deleteUser } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import DangerZone from '../components/DangerZone';
 
 const ROLES = {
   ADMIN:  { label: 'ผู้ดูแลระบบ', bg: 'bg-red-100 text-red-700 border-red-200',       icon: Shield,  grad: 'from-red-500 to-orange-500' },
@@ -182,6 +183,9 @@ export default function UserManagement() {
           </table>
         </div>
       </div>
+
+      {/* โซนอันตราย — รีเซ็ตระบบ (เห็นเฉพาะผู้ดูแลระบบ เพราะหน้านี้เปิดให้ ADMIN เท่านั้น) */}
+      <DangerZone />
 
       {/* Modal */}
       <dialog ref={modalRef} className="modal">
