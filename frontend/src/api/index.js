@@ -75,8 +75,8 @@ export const deletePerson = (id) => api.delete(`/persons/${id}`).then(r => { inv
 // disability types ไม่เปลี่ยนตลอด session — cache ไว้เลย
 export const getDisabilityTypes = () => cached('disability-types', () => api.get('/persons/disability-types'), 10 * 60_000);
 export const getDisabilityInfos = (id) => api.get(`/persons/${id}/disability`);
-export const createDisabilityInfo = (id, data) => api.post(`/persons/${id}/disability`, data);
-export const deleteDisabilityInfo = (id, did) => api.delete(`/persons/${id}/disability/${did}`);
+export const createDisabilityInfo = (id, data) => api.post(`/persons/${id}/disability`, data).then(r => { invalidate(`person:${id}`); return r; });
+export const deleteDisabilityInfo = (id, did) => api.delete(`/persons/${id}/disability/${did}`).then(r => { invalidate(`person:${id}`); return r; });
 
 export const getTraining = (id) => api.get(`/persons/${id}/training`);
 export const createTraining = (id, data) => api.post(`/persons/${id}/training`, data);

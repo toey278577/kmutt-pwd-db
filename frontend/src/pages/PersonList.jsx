@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown, Users, Camera, X, Layers, FileSpreadsheet, Download, Upload } from 'lucide-react';
-import { getPersons, createPerson, importPersons, updatePerson, deletePerson, getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo, getPersonPhotos, uploadPersonPhoto, getBatches } from '../api';
+import { getPersons, getPerson, createPerson, importPersons, updatePerson, deletePerson, getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo, getPersonPhotos, uploadPersonPhoto, getBatches } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
@@ -103,9 +103,18 @@ export default function PersonList() {
     getBatches().then((r) => setBatches(r.data)).catch(() => {});
   }, []);
 
-  const openModal = (person = null) => {
+  const openModal = async (row = null) => {
     setPhotoBase64('');
-    if (person) {
+    if (row) {
+      // ดึงข้อมูลเต็มของคนนี้ก่อน — แถวในหน้ารายชื่อมีแค่บางช่อง (ไม่มีที่อยู่/อีเมล/หลักสูตร)
+      // ถ้าเอาแถวนั้นใส่ฟอร์มตรงๆ กดบันทึกแล้วช่องที่ขาดจะถูกเขียนทับเป็นค่าว่างหมด
+      let person;
+      try {
+        person = (await getPerson(row.id)).data;
+      } catch (err) {
+        toast.error('โหลดข้อมูลไม่สำเร็จ', err.response?.data?.error || 'ลองใหม่อีกครั้ง');
+        return;
+      }
       const { prefix: p, nameOnly: n } = splitPrefix(person.fullName || '');
       // แปลง null → '' ทุก field ก่อน spread เพื่อป้องกัน controlled input error
       const cleaned = Object.fromEntries(Object.entries(person).map(([k, v]) => [k, v === null ? '' : v]));
