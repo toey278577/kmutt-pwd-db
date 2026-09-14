@@ -78,6 +78,20 @@ router.post('/reset', async (req, res) => {
       'utf8'
     );
 
+    // เก็บไฟล์สำรองก่อนรีเซ็ตแค่ KEEP ไฟล์ล่าสุด ที่เก่ากว่านั้นลบทิ้ง — กันไฟล์กองจนดิสก์เต็ม
+    // (คนละชุดกับสำรองรายวัน backup-*.json ซึ่ง backup.sh ลบให้เมื่อเกิน 14 วัน)
+    const KEEP = 5;
+    try {
+      const olds = fs.readdirSync(dir)
+        .filter((f) => f.startsWith('before-reset-') && f.endsWith('.json'))
+        .sort()              // ชื่อไฟล์ขึ้นต้นด้วยเวลา เรียงชื่อ = เรียงเวลา
+        .slice(0, -KEEP);    // เหลือ KEEP ไฟล์ล่าสุดไว้
+      for (const f of olds) fs.unlinkSync(path.join(dir, f));
+      if (olds.length) console.log(`[RESET] ลบไฟล์สำรองเก่า ${olds.length} ไฟล์ (เก็บล่าสุด ${KEEP} ไฟล์)`);
+    } catch (e) {
+      console.warn('[RESET] ลบไฟล์สำรองเก่าไม่สำเร็จ:', e.message);
+    }
+
     // ── ล้างข้อมูล ──
     const deleted = {};
     await prisma.$transaction(async (tx) => {
