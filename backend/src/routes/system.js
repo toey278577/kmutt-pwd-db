@@ -110,6 +110,18 @@ router.post('/reset', async (req, res) => {
       }
     }, { timeout: 60_000 });
 
+    // ลบไฟล์รูปถ่ายบนดิสก์ด้วย (ข้อมูลใน DB ถูกลบไปแล้ว ไฟล์จะกลายเป็นขยะ)
+    try {
+      const photoDir = path.join(__dirname, '..', '..', 'uploads', 'photos');
+      if (fs.existsSync(photoDir)) {
+        const imgs = fs.readdirSync(photoDir);
+        for (const f of imgs) fs.unlinkSync(path.join(photoDir, f));
+        deleted.photoFiles = imgs.length;
+      }
+    } catch (e) {
+      console.warn('[RESET] ลบไฟล์รูปไม่สำเร็จ:', e.message);
+    }
+
     const total = Object.values(deleted).reduce((a, b) => a + b, 0);
     console.log(`[RESET] ${me.email} ล้างข้อมูล ${total} แถว | ${backupFile ? 'สำรองไว้ที่ ' + backupFile : 'ไม่ได้สำรอง'}`);
 

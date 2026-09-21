@@ -10,3 +10,6 @@ backend/backend.log
 
 # ไฟล์สำรองฐานข้อมูล — มีข้อมูลส่วนบุคคล ห้ามขึ้น repo
 backend/backups/
+
+# ไฟล์รูปถ่ายที่ผู้ใช้อัปโหลด — ข้อมูลส่วนบุคคล ห้ามขึ้น repo
+backend/uploads/

@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const compression = require('compression');
 const helmet = require('helmet');
@@ -68,6 +69,15 @@ const loginLimiter = rateLimit({
 
 app.use('/api', apiLimiter);
 app.use('/api/auth/login', loginLimiter);
+
+// เสิร์ฟไฟล์รูปถ่ายที่เก็บบนดิสก์ (ชื่อไฟล์เป็นรหัสสุ่ม เดาไม่ได้)
+// cache 7 วัน — ชื่อไฟล์เปลี่ยนทุกครั้งที่อัปโหลดใหม่ จึงไม่ค้างรูปเก่า
+app.use('/api/uploads', express.static(path.join(__dirname, '..', 'uploads'), {
+  maxAge: '7d',
+  fallthrough: true,
+  index: false,
+  dotfiles: 'deny',
+}));
 
 app.use('/api/auth', authRouter);
 

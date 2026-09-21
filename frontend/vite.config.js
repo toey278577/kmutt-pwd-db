@@ -12,6 +12,13 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(pkg.version),
     __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
   },
+  // ตอน dev ส่ง /api ไปที่ backend เอง — รูปถ่ายเก็บเป็นไฟล์แล้วอ้างด้วย path /api/uploads/...
+  // ถ้าไม่ proxy รูปจะไม่ขึ้นตอน dev (บน production nginx จัดการให้อยู่แล้ว)
+  server: {
+    proxy: {
+      '/api': { target: 'http://localhost:5000', changeOrigin: true },
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),

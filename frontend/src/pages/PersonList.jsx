@@ -219,7 +219,8 @@ export default function PersonList() {
         personId = created.data.id;
         if (disabilityTypeId) await createDisabilityInfo(personId, { disabilityTypeId });
       }
-      if (photoBase64) {
+      // อัปโหลดเฉพาะรูปที่เพิ่งเลือกใหม่ (เป็น data URL) — ถ้าเป็นรูปเดิมจะเป็น path ของไฟล์ ไม่ต้องส่งซ้ำ
+      if (photoBase64?.startsWith('data:')) {
         await uploadPersonPhoto(personId, { filePath: photoBase64, photoType: 'profile' });
       }
       modalRef.current?.close();
