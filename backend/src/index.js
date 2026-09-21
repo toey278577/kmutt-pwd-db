@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const { authenticate } = require('./middleware/auth');
@@ -28,10 +30,44 @@ const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',')
   : ['http://localhost:5173', 'http://localhost:5174', 'https://kmutt-pwd-db.vercel.app'];
 
+// อยู่หลัง nginx — ต้องเชื่อ X-Forwarded-For ไม่งั้นจะเห็นทุกคนเป็น IP เดียวกัน (127.0.0.1)
+// แล้ว rate limit จะบล็อกทุกคนพร้อมกันตอนมีใครยิงถี่
+app.set('trust proxy', 1);
+
+// security headers พื้นฐาน (กัน clickjacking, MIME sniffing ฯลฯ)
+// ปิด CSP เพราะหน้าเว็บเสิร์ฟจาก nginx ไม่ได้ผ่าน express — ตั้งที่นี่จะไม่มีผลและกวนของเดิม
+app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+
 app.use(compression());
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+
+// ── จำกัดอัตราการเรียก API ──
+const msg = (error) => ({ error });
+
+// ทั้งระบบ: กันยิงถล่ม แต่ตั้งหลวมพอให้ทั้งสำนักงานใช้พร้อมกันได้ (หลายคนอาจออกเน็ต IP เดียวกัน)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 2000,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.path === '/health',   // health check ต้องเรียกได้เสมอ
+  message: msg('เรียกใช้งานระบบถี่เกินไป กรุณารอสักครู่แล้วลองใหม่'),
+});
+
+// หน้าล็อกอิน: เข้มกว่ามาก เพราะเป็นช่องให้เดารหัสผ่าน
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,            // ล็อกอินถูกไม่นับ นับเฉพาะที่ผิด
+  message: msg('ลองเข้าสู่ระบบผิดหลายครั้งเกินไป กรุณารอ 15 นาทีแล้วลองใหม่'),
+});
+
+app.use('/api', apiLimiter);
+app.use('/api/auth/login', loginLimiter);
 
 app.use('/api/auth', authRouter);
 
