@@ -26,6 +26,19 @@ const CustomTooltip = ({ active, payload }) => {
   );
 };
 
+// คำอธิบายใต้กราฟแบบเขียนเอง — recharts จะตัดหมวดที่ยังไม่มีคน (ค่า 0) ทิ้ง
+// แต่เราอยากให้เห็นครบทุกหมวด หมวดที่ยังว่างจะจางลง
+const FullLegend = ({ items }) => (
+  <ul className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 px-3 pb-1">
+    {items.map((it) => (
+      <li key={it.name} className="flex items-center gap-1.5" style={{ opacity: it.value > 0 ? 1 : 0.4 }}>
+        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: it.fill }} />
+        <span className="recharts-legend-item-text text-gray-600" style={{ fontSize: '0.75rem' }}>{it.name}</span>
+      </li>
+    ))}
+  </ul>
+);
+
 const RADIAN = Math.PI / 180;
 const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
   if (percent < 0.05) return null;
@@ -68,6 +81,10 @@ export default function Dashboard() {
 
   const genderData = stats.byGender.map(g => ({ ...g, name: GENDER_LABELS[g.name] || g.name }));
   const empData = stats.byEmployment.map(e => ({ ...e, name: EMP_LABELS[e.name] || e.name }));
+  // ช่วงอายุ: หลังบ้านส่งมาครบทุกช่วงเสมอ (ช่วงที่ยังไม่มีคน = 0)
+  // → โดนัทวาดเฉพาะช่วงที่มีคน แต่คำอธิบายใต้กราฟโชว์ครบทุกช่วง (ช่วงว่างเป็นสีเทา)
+  const ageAll = (stats.byAgeGroup || []).map((a, i) => ({ ...a, fill: COLORS[i % COLORS.length] }));
+  const ageData = ageAll.filter(a => a.value > 0);
   const hasData = (stats.totalPersons || 0) > 0;
 
   return (
@@ -221,15 +238,15 @@ export default function Dashboard() {
         </GlassChart>
 
         <GlassChart title="ช่วงอายุ" accent="#8b5cf6">
-          {stats.byAgeGroup?.length > 0 ? (
+          {ageData.length > 0 ? (
             <ResponsiveContainer width="100%" height={210}>
               <PieChart>
-                <Pie data={stats.byAgeGroup} dataKey="value" nameKey="name" cx="50%" cy="50%"
+                <Pie data={ageData} dataKey="value" nameKey="name" cx="50%" cy="50%"
                   outerRadius={75} innerRadius={35} paddingAngle={4} labelLine={false} label={renderLabel}>
-                  {stats.byAgeGroup.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  {ageData.map((a, i) => <Cell key={i} fill={a.fill} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '0.75rem' }} />
+                <Legend content={<FullLegend items={ageAll} />} />
               </PieChart>
             </ResponsiveContainer>
           ) : <EmptyChart />}
