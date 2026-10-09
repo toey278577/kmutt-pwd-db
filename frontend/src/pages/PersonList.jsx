@@ -5,6 +5,7 @@ import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown, Users, Camer
 import { getPersons, getPerson, createPerson, importPersons, updatePerson, deletePerson, getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo, getPersonPhotos, uploadPersonPhoto, getBatches } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { THAI_PROVINCES, checkProvince } from '../utils/province';
 
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
 const GENDER_BADGE = { MALE: 'bg-sky-100 text-sky-600 border-sky-200', FEMALE: 'bg-pink-100 text-pink-500 border-pink-200', OTHER: 'bg-gray-100 text-gray-500 border-gray-200' };
@@ -22,18 +23,6 @@ const EDUCATION_OPTS = [
   'อื่นๆ',
 ];
 
-// 77 จังหวัดของไทย (สำหรับ dropdown เลือกจังหวัด)
-const THAI_PROVINCES = [
-  'กรุงเทพมหานคร', 'กระบี่', 'กาญจนบุรี', 'กาฬสินธุ์', 'กำแพงเพชร', 'ขอนแก่น', 'จันทบุรี', 'ฉะเชิงเทรา',
-  'ชลบุรี', 'ชัยนาท', 'ชัยภูมิ', 'ชุมพร', 'เชียงราย', 'เชียงใหม่', 'ตรัง', 'ตราด', 'ตาก', 'นครนายก',
-  'นครปฐม', 'นครพนม', 'นครราชสีมา', 'นครศรีธรรมราช', 'นครสวรรค์', 'นนทบุรี', 'นราธิวาส', 'น่าน', 'บึงกาฬ',
-  'บุรีรัมย์', 'ปทุมธานี', 'ประจวบคีรีขันธ์', 'ปราจีนบุรี', 'ปัตตานี', 'พระนครศรีอยุธยา', 'พะเยา', 'พังงา',
-  'พัทลุง', 'พิจิตร', 'พิษณุโลก', 'เพชรบุรี', 'เพชรบูรณ์', 'แพร่', 'ภูเก็ต', 'มหาสารคาม', 'มุกดาหาร',
-  'แม่ฮ่องสอน', 'ยโสธร', 'ยะลา', 'ร้อยเอ็ด', 'ระนอง', 'ระยอง', 'ราชบุรี', 'ลพบุรี', 'ลำปาง', 'ลำพูน', 'เลย',
-  'ศรีสะเกษ', 'สกลนคร', 'สงขลา', 'สตูล', 'สมุทรปราการ', 'สมุทรสงคราม', 'สมุทรสาคร', 'สระแก้ว', 'สระบุรี',
-  'สิงห์บุรี', 'สุโขทัย', 'สุพรรณบุรี', 'สุราษฎร์ธานี', 'สุรินทร์', 'หนองคาย', 'หนองบัวลำภู', 'อ่างทอง',
-  'อำนาจเจริญ', 'อุดรธานี', 'อุตรดิตถ์', 'อุทัยธานี', 'อุบลราชธานี',
-];
 
 const splitPrefix = (fullName = '') => {
   for (const p of PREFIXES) {
@@ -307,6 +296,10 @@ export default function PersonList() {
     ws['!cols'] = headers.map(() => ({ wch: 18 }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'นำเข้าคนพิการ');
+    // แถมชีตรายชื่อจังหวัดไว้ก็อปไปวาง — ถ้าชื่อไม่ตรงระบบจะไม่ยอมให้นำเข้า
+    const wsProv = XLSX.utils.aoa_to_sheet([['จังหวัด (ใช้ชื่อตามนี้เท่านั้น)'], ...THAI_PROVINCES.map(p => [p])]);
+    wsProv['!cols'] = [{ wch: 30 }];
+    XLSX.utils.book_append_sheet(wb, wsProv, 'รายชื่อจังหวัด');
     // ใส่เลขเวอร์ชันในชื่อไฟล์ กันสับสนกับเทมเพลตเก่าที่ค้างอยู่ในเครื่อง
     XLSX.writeFile(wb, 'เทมเพลตนำเข้าคนพิการ-v2-มีที่อยู่.xlsx');
   };
@@ -339,7 +332,11 @@ export default function PersonList() {
           road: String(row['ถนน'] || '').trim(),
           subDistrict: String(row['แขวง/ตำบล'] || row['แขวง / ตำบล'] || row['ตำบล'] || '').trim(),
           district: String(row['เขต/อำเภอ'] || row['เขต / อำเภอ'] || row['อำเภอ'] || '').trim(),
-          province: String(row['จังหวัด'] || '').trim(),
+          ...(() => {
+            // ตรวจจังหวัดตั้งแต่ตอนอ่านไฟล์ ชื่อย่อ/คำนำหน้าแก้ให้อัตโนมัติ ที่เหลือบล็อกไม่ให้นำเข้า
+            const p = checkProvince(row['จังหวัด']);
+            return { province: p.value, __prov: p };
+          })(),
           postalCode: String(row['รหัสไปรษณีย์'] || '').replace(/\D/g, '').trim(),
           landmark: String(row['สถานที่ใกล้เคียง'] || '').trim(),
           educationLevel: String(row['ระดับการศึกษา'] || row['วุฒิการศึกษา'] || '').trim(),
@@ -355,8 +352,13 @@ export default function PersonList() {
     e.target.value = '';
   };
 
+  // สรุปผลตรวจจังหวัดของไฟล์ที่เลือกไว้ ใช้ทั้งตอนโชว์และตอนกันไม่ให้กดนำเข้า
+  const provBad = importRows.filter(r => r.__prov?.status === 'bad');
+  const provFixed = importRows.filter(r => r.__prov?.status === 'fixed');
+  const provEmpty = importRows.filter(r => r.__prov?.status === 'empty');
+
   const handleImport = async () => {
-    if (importRows.length === 0) return;
+    if (importRows.length === 0 || provBad.length > 0) return;
     setImporting(true);
     try {
       const res = await importPersons(importRows);
@@ -371,7 +373,13 @@ export default function PersonList() {
         toast.success(`นำเข้าสำเร็จ ${created} รายการ!`);
       }
     } catch (err) {
-      toast.error('นำเข้าไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด');
+      const bad = err.response?.data?.badProvinces;
+      if (bad?.length) {
+        toast.error('จังหวัดไม่ถูกต้อง — ยังไม่ได้นำเข้าข้อมูลใดๆ',
+          bad.slice(0, 3).map(b => `แถว ${b.row}: "${b.province}"`).join(' • ') + (bad.length > 3 ? ' …' : ''));
+      } else {
+        toast.error('นำเข้าไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด');
+      }
     } finally {
       setImporting(false);
     }
@@ -837,6 +845,7 @@ export default function PersonList() {
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-gray-700">ดาวน์โหลดเทมเพลต แล้วกรอกข้อมูล</p>
                   <p className="text-xs text-gray-500 mt-0.5">คอลัมน์: ชื่อ-นามสกุล*, ชื่อเล่น, เลขบัตรประชาชน, เพศ, วันเกิด (วว/ดด/ปปปป พ.ศ.), เบอร์โทร, โทรศัพท์บ้าน, อีเมล, ที่อยู่ (เลขที่, หมู่ที่, อาคาร/หมู่บ้าน, ชั้นที่, ซอย, ถนน, แขวง/ตำบล, เขต/อำเภอ, จังหวัด, รหัสไปรษณีย์, สถานที่ใกล้เคียง), ระดับการศึกษา, รุ่นที่, ปี</p>
+                  <p className="text-xs text-red-500 mt-1 font-semibold">ช่อง &quot;จังหวัด&quot; ต้องสะกดให้ตรงกับชื่อจริง — ดูรายชื่อได้ในชีต &quot;รายชื่อจังหวัด&quot; ของเทมเพลต ถ้าไม่ตรงจะนำเข้าไม่ได้</p>
                   <button onClick={downloadTemplate}
                     className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-orange-600 bg-white border border-orange-200 hover:bg-orange-50">
                     <Download size={13} /> ดาวน์โหลดเทมเพลต
@@ -856,6 +865,47 @@ export default function PersonList() {
                   </button>
                 </div>
               </div>
+
+              {/* ผลตรวจจังหวัด — ถ้ามีแถวที่ผิด จะกดนำเข้าไม่ได้จนกว่าจะแก้ไฟล์ */}
+              {provBad.length > 0 && (
+                <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200">
+                  <p className="text-sm font-bold text-red-700 flex items-center gap-1.5">
+                    <X size={15} /> นำเข้าไม่ได้ — มี {provBad.length} แถวที่กรอกจังหวัดไม่ถูกต้อง
+                  </p>
+                  <p className="text-xs text-red-500 mt-1 mb-2">
+                    แก้ชื่อจังหวัดในไฟล์ Excel ให้ตรงกับชื่อจริง (เช่น &quot;กรุงเทพมหานคร&quot; &quot;อุทัยธานี&quot;) แล้วเลือกไฟล์ใหม่อีกครั้ง
+                  </p>
+                  <div className="bg-white rounded-lg border border-red-100 overflow-auto" style={{ maxHeight: '120px' }}>
+                    <table className="w-full text-xs">
+                      <tbody>
+                        {provBad.slice(0, 20).map((r, i) => (
+                          <tr key={i} className="border-b border-red-50 last:border-0">
+                            <td className="px-2 py-1.5 text-gray-400 whitespace-nowrap">แถว {r.__row}</td>
+                            <td className="px-2 py-1.5 text-gray-600 truncate max-w-[180px]">{r.fullName}</td>
+                            <td className="px-2 py-1.5 text-red-600 font-semibold">&quot;{r.__prov.typed}&quot;</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {provBad.length > 20 && <p className="text-xs text-red-400 mt-1">แสดง 20 แถวแรก จากทั้งหมด {provBad.length} แถว</p>}
+                </div>
+              )}
+
+              {importRows.length > 0 && provBad.length === 0 && (provFixed.length > 0 || provEmpty.length > 0) && (
+                <div className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-1">
+                  {provFixed.length > 0 && (
+                    <p className="text-xs text-amber-700">
+                      <b>แก้ชื่อจังหวัดให้อัตโนมัติ {provFixed.length} แถว</b> — เช่น แถว {provFixed[0].__row}: &quot;{provFixed[0].__prov.typed}&quot; → &quot;{provFixed[0].province}&quot;
+                    </p>
+                  )}
+                  {provEmpty.length > 0 && (
+                    <p className="text-xs text-amber-700">
+                      <b>ไม่ได้กรอกจังหวัด {provEmpty.length} แถว</b> — นำเข้าได้ แต่จะไปอยู่กลุ่ม &quot;ไม่ระบุ&quot; ในกราฟภูมิภาค
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Preview */}
               {importRows.length > 0 && (
@@ -877,14 +927,14 @@ export default function PersonList() {
                       </thead>
                       <tbody>
                         {importRows.slice(0, 50).map((r, i) => (
-                          <tr key={i} className="border-t border-gray-100">
+                          <tr key={i} className={`border-t border-gray-100 ${r.__prov?.status === 'bad' ? 'bg-red-50' : ''}`}>
                             <td className="px-2 py-1.5 text-gray-400">{i + 1}</td>
                             <td className="px-2 py-1.5 text-gray-700">{r.fullName}</td>
                             <td className="px-2 py-1.5 text-gray-500">{r.nickname}</td>
                             <td className="px-2 py-1.5 text-gray-500 font-mono">{r.thaiId}</td>
                             <td className="px-2 py-1.5 text-center text-gray-500">{r.gender === 'FEMALE' ? 'หญิง' : r.gender === 'OTHER' ? 'อื่นๆ' : 'ชาย'}</td>
                             <td className={`px-2 py-1.5 ${r.birthDate ? 'text-gray-500' : 'text-red-400'}`}>{showBirth(r.birthDate)}</td>
-                            <td className="px-2 py-1.5 text-gray-500 max-w-[220px] truncate" title={showAddress(r)}>{showAddress(r)}</td>
+                            <td className={`px-2 py-1.5 max-w-[220px] truncate ${r.__prov?.status === 'bad' ? 'text-red-600 font-semibold' : 'text-gray-500'}`} title={showAddress(r)}>{showAddress(r)}</td>
                             <td className="px-2 py-1.5 text-gray-500">{r.batchId ? (batches.find(b => String(b.id) === r.batchId)?.batchNumber ?? '—') : '—'}</td>
                           </tr>
                         ))}
@@ -899,9 +949,11 @@ export default function PersonList() {
             <div className="px-6 py-4 border-t border-gray-100 flex gap-2 justify-end flex-shrink-0">
               <button onClick={() => setImportModal(false)}
                 className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-100">ยกเลิก</button>
-              <button onClick={handleImport} disabled={importRows.length === 0 || importing}
-                className="px-5 py-2 rounded-xl text-sm font-bold text-white bg-green-600 hover:bg-green-700 active:scale-95 transition-all disabled:opacity-50">
-                {importing ? 'กำลังนำเข้า...' : `นำเข้า ${importRows.length} รายการ`}
+              <button onClick={handleImport} disabled={importRows.length === 0 || importing || provBad.length > 0}
+                className={`px-5 py-2 rounded-xl text-sm font-bold transition-all disabled:cursor-not-allowed ${provBad.length > 0 ? 'bg-gray-200 text-gray-500' : 'text-white bg-green-600 hover:bg-green-700 active:scale-95 disabled:opacity-50'}`}>
+                {importing ? 'กำลังนำเข้า...'
+                  : provBad.length > 0 ? `แก้จังหวัดในไฟล์ก่อน (${provBad.length} แถว)`
+                  : `นำเข้า ${importRows.length} รายการ`}
               </button>
             </div>
           </div>

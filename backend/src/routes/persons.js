@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient');
+const { canonicalProvince } = require('../utils/province');
 
 const toDate = (val) => (val && String(val).trim() !== '') ? new Date(val) : null;
 const toEnum = (val) => (val && String(val).trim() !== '') ? val : null;
@@ -174,6 +175,23 @@ router.post('/import', async (req, res) => {
   try {
     const rows = Array.isArray(req.body.persons) ? req.body.persons : [];
     if (rows.length === 0) return res.status(400).json({ error: 'ไม่มีข้อมูลให้นำเข้า' });
+
+    // ตรวจจังหวัดให้ครบทุกแถวก่อน — ถ้ามีแถวไหนผิด ไม่นำเข้าเลยสักแถว
+    // (กันข้อมูลเข้าไปครึ่งๆ กลางๆ แล้วต้องมาตามลบทีหลัง)
+    const badProvinces = [];
+    rows.forEach((r, i) => {
+      const raw = String(r.province || '').trim();
+      if (raw && !canonicalProvince(raw)) {
+        badProvinces.push({ row: r.__row || (i + 1), fullName: String(r.fullName || '').trim(), province: raw });
+      }
+    });
+    if (badProvinces.length > 0) {
+      return res.status(400).json({
+        error: `มี ${badProvinces.length} แถวที่กรอกจังหวัดไม่ถูกต้อง — ยังไม่ได้นำเข้าข้อมูลใดๆ`,
+        badProvinces,
+      });
+    }
+
     let created = 0;
     const errors = [];
     for (let i = 0; i < rows.length; i++) {
@@ -209,7 +227,8 @@ router.post('/import', async (req, res) => {
             road: txt(r.road, 100),
             subDistrict: txt(r.subDistrict, 100),
             district: txt(r.district, 100),
-            province: txt(r.province, 100),
+            // เก็บชื่อจังหวัดแบบมาตรฐานเสมอ ("กทม." → "กรุงเทพมหานคร")
+            province: txt(canonicalProvince(r.province) || r.province, 100),
             postalCode: txt(r.postalCode, 10),
             landmark: txt(r.landmark, 255),
             educationLevel: txt(r.educationLevel, 100),
