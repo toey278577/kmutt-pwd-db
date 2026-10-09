@@ -61,6 +61,25 @@ html:not(.dark) main .bg-white { background-color: #fffdfa; }
 ::-webkit-scrollbar-thumb { background: #fdba74; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #fb923c; }
 
+/* ─── สีกราฟบน Dashboard — สลับเองตาม light/dark ───
+   ชุดสีผ่านการตรวจแล้วว่าคนตาบอดสีแยกออก (ส้มแบรนด์ + น้ำเงิน) */
+:root {
+  --viz-bar: linear-gradient(90deg, #fb923c, #ea580c);
+  --viz-col: linear-gradient(180deg, #fb923c, #ea580c);
+  --viz-1: #ea580c;
+  --viz-2: #2a78d6;
+  --viz-track: #f1f5f9;
+  --viz-ghost: #e2e8f0;
+}
+html.dark {
+  --viz-bar: linear-gradient(90deg, #fb923c, #f97316);
+  --viz-col: linear-gradient(180deg, #fb923c, #f97316);
+  --viz-1: #fb923c;
+  --viz-2: #5a9ae8;
+  --viz-track: #2f2f36;
+  --viz-ghost: #3a3a42;
+}
+
 /* Vibrant orange utility */
 .btn-orange { background-image: linear-gradient(135deg,#fb923c,#ea580c); }
 .btn-orange:hover { background-image: linear-gradient(135deg,#f97316,#c2410c); }

@@ -1,13 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Users, Building2, GraduationCap, TrendingUp, Layers, CheckCircle, Clock, ArrowRight, Sparkles, UserPlus, ClipboardList } from 'lucide-react';
-import {
-  PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar,
-  XAxis, YAxis, ResponsiveContainer, CartesianGrid,
-} from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import { getDashboardStats, getBatches } from '../api';
 
-const COLORS = ['#ea580c', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b', '#f97316'];
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
 const EMP_LABELS = { EMPLOYED: 'มีงานทำ', UNEMPLOYED: 'ว่างงาน', STUDYING: 'ศึกษาต่อ' };
 
@@ -17,36 +12,6 @@ const statCards = [
   { key: 'totalTraining', label: 'บันทึกการอบรม', icon: GraduationCap, grad: 'linear-gradient(135deg,#34d399,#059669)' },
 ];
 
-const CustomTooltip = ({ active, payload }) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="bg-gray-900/90 backdrop-blur-sm text-white px-3 py-2 rounded-xl text-xs shadow-2xl border border-white/10">
-      <b>{payload[0].name}</b>: {payload[0].value}
-    </div>
-  );
-};
-
-// คำอธิบายใต้กราฟแบบเขียนเอง — recharts จะตัดหมวดที่ยังไม่มีคน (ค่า 0) ทิ้ง
-// แต่เราอยากให้เห็นครบทุกหมวด หมวดที่ยังว่างจะจางลง
-const FullLegend = ({ items }) => (
-  <ul className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 px-3 pb-1">
-    {items.map((it) => (
-      <li key={it.name} className="flex items-center gap-1.5" style={{ opacity: it.value > 0 ? 1 : 0.4 }}>
-        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: it.fill }} />
-        <span className="recharts-legend-item-text text-gray-600" style={{ fontSize: '0.75rem' }}>{it.name}</span>
-      </li>
-    ))}
-  </ul>
-);
-
-const RADIAN = Math.PI / 180;
-const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
-  if (percent < 0.05) return null;
-  const r = innerRadius + (outerRadius - innerRadius) * 0.55;
-  const x = cx + r * Math.cos(-midAngle * RADIAN);
-  const y = cy + r * Math.sin(-midAngle * RADIAN);
-  return <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight="700">{`${(percent*100).toFixed(0)}%`}</text>;
-};
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -83,8 +48,9 @@ export default function Dashboard() {
   const empData = stats.byEmployment.map(e => ({ ...e, name: EMP_LABELS[e.name] || e.name }));
   // ช่วงอายุ: หลังบ้านส่งมาครบทุกช่วงเสมอ (ช่วงที่ยังไม่มีคน = 0)
   // → โดนัทวาดเฉพาะช่วงที่มีคน แต่คำอธิบายใต้กราฟโชว์ครบทุกช่วง (ช่วงว่างเป็นสีเทา)
-  const ageAll = (stats.byAgeGroup || []).map((a, i) => ({ ...a, fill: COLORS[i % COLORS.length] }));
-  const ageData = ageAll.filter(a => a.value > 0);
+  const ageAll = stats.byAgeGroup || [];
+  // นับเฉพาะภูมิภาคจริง 6 ภาค ไม่รวม "อื่นๆ"/"ไม่ระบุ" ที่โผล่มาเฉพาะตอนมีข้อมูลตกค้าง
+  const regionShown = (stats.byRegion || []).filter(r => r.name !== 'อื่นๆ' && r.name !== 'ไม่ระบุ').length;
   const hasData = (stats.totalPersons || 0) > 0;
 
   return (
@@ -171,102 +137,35 @@ export default function Dashboard() {
 
       {/* ═══ CHARTS — แสดงเมื่อมีข้อมูล ═══ */}
       {hasData && (<>
-      {/* ═══ CHART ROW 1 ═══ */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <GlassChart title="แยกตามเพศ" accent="#ea580c">
-          {genderData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie data={genderData} dataKey="value" nameKey="name" cx="50%" cy="50%"
-                  outerRadius={75} innerRadius={35} paddingAngle={4} labelLine={false} label={renderLabel}>
-                  {genderData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '0.75rem' }} />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : <EmptyChart />}
-        </GlassChart>
+      {/* ═══ กราฟแถวบน — ตัวหลัก 3 ตัว (ช่องเท่ากัน ขอบตรงกับแถวล่าง) ═══ */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+        <ChartCard title="ภูมิภาคที่อยู่อาศัย" accent="#ec4899" sub={`${regionShown} ภาค`}>
+          {stats.byRegion?.length > 0 ? <BarList data={stats.byRegion} /> : <EmptyChart />}
+        </ChartCard>
 
-        <GlassChart title="ประเภทความพิการ" accent="#06b6d4">
-          {stats.byDisabilityType.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie data={stats.byDisabilityType} dataKey="value" nameKey="name" cx="50%" cy="50%"
-                  outerRadius={75} innerRadius={35} paddingAngle={4} labelLine={false} label={renderLabel}>
-                  {stats.byDisabilityType.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '0.68rem' }} />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : <EmptyChart />}
-        </GlassChart>
+        <ChartCard title="วุฒิการศึกษา" accent="#f59e0b" sub={stats.byEducation?.length ? `${stats.byEducation.length} ระดับ` : ''}>
+          {stats.byEducation?.length > 0 ? <BarList data={stats.byEducation} /> : <EmptyChart />}
+        </ChartCard>
 
-        <GlassChart title="สถานะการมีงานทำ" accent="#10b981">
-          {empData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={empData} barSize={32}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(234,88,12,0.05)', radius: 8 }} />
-                <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                  {empData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : <EmptyChart />}
-        </GlassChart>
+        <ChartCard title="ช่วงอายุ" accent="#8b5cf6" sub="ปี" center>
+          {ageAll.length > 0 ? <ColumnChart data={ageAll} /> : <EmptyChart />}
+        </ChartCard>
       </div>
 
-      {/* ═══ CHART ROW 2 ═══ */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <GlassChart title="วุฒิการศึกษา" accent="#f59e0b">
-          {stats.byEducation?.length > 0 ? (
-            <ResponsiveContainer width="100%" height={210}>
-              <PieChart>
-                <Pie data={stats.byEducation} dataKey="value" nameKey="name" cx="50%" cy="50%"
-                  outerRadius={75} innerRadius={35} paddingAngle={4} labelLine={false} label={renderLabel}>
-                  {stats.byEducation.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '0.68rem' }} />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : <EmptyChart />}
-        </GlassChart>
+      {/* ═══ กราฟแถวล่าง — ตัวรอง 3 ตัว ═══ */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+        <ChartCard title="แยกตามเพศ" accent="#ea580c" sub={`${stats.totalPersons} คน`} center>
+          {genderData.length > 0 ? <GenderSplit data={genderData} /> : <EmptyChart />}
+        </ChartCard>
 
-        <GlassChart title="ช่วงอายุ" accent="#8b5cf6">
-          {ageData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={210}>
-              <PieChart>
-                <Pie data={ageData} dataKey="value" nameKey="name" cx="50%" cy="50%"
-                  outerRadius={75} innerRadius={35} paddingAngle={4} labelLine={false} label={renderLabel}>
-                  {ageData.map((a, i) => <Cell key={i} fill={a.fill} />)}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-                <Legend content={<FullLegend items={ageAll} />} />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : <EmptyChart />}
-        </GlassChart>
+        <ChartCard title="ประเภทความพิการ" accent="#06b6d4"
+          sub={stats.byDisabilityType?.length ? `${stats.byDisabilityType.length} ประเภท` : ''} center>
+          {stats.byDisabilityType?.length > 0 ? <BarList data={stats.byDisabilityType} /> : <EmptyChart />}
+        </ChartCard>
 
-        <GlassChart title="ภูมิภาค" accent="#ec4899">
-          {stats.byRegion?.length > 0 ? (
-            <ResponsiveContainer width="100%" height={210}>
-              <BarChart data={stats.byRegion} barSize={16} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={75} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(234,88,12,0.05)' }} />
-                <Bar dataKey="value" radius={[0, 6, 6, 0]}>
-                  {stats.byRegion.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : <EmptyChart />}
-        </GlassChart>
+        <ChartCard title="สถานะการมีงานทำ" accent="#10b981" sub="ติดตามผล" center>
+          {empData.length > 0 ? <BarList data={empData} /> : <EmptyChart />}
+        </ChartCard>
       </div>
       </>)}
     </div>
@@ -316,21 +215,102 @@ function EmptyDashboard({ onAdd, onBatch }) {
   );
 }
 
-function GlassChart({ title, accent, children }) {
+// การ์ดกราฟ — ทุกใบหน้าตาเดียวกัน และสูงเท่ากันเมื่ออยู่แถวเดียวกัน
+// center = จัดเนื้อหาไว้กลางการ์ด สำหรับใบที่เนื้อหาน้อยกว่าเพื่อนในแถว
+function ChartCard({ title, accent, sub, center, children }) {
   return (
-    <div className="bg-white rounded-3xl overflow-hidden chart-card">
-      <div className="px-5 pt-4 pb-3 flex items-center gap-2 chart-card-header">
-        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: accent, boxShadow: `0 0 6px ${accent}` }} />
-        <span className="font-bold text-gray-800 text-sm">{title}</span>
+    <div className="bg-white rounded-3xl overflow-hidden chart-card flex flex-col">
+      <div className="px-5 pt-4 pb-3 flex items-center justify-between gap-2 chart-card-header">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: accent, boxShadow: `0 0 6px ${accent}` }} />
+          <span className="font-bold text-gray-800 text-sm truncate">{title}</span>
+        </div>
+        {sub && <span className="text-xs text-gray-400 font-medium flex-shrink-0">{sub}</span>}
       </div>
-      <div className="p-4">{children}</div>
+      <div className={`px-5 pb-5 pt-1 flex-1 flex flex-col${center ? ' justify-center' : ''}`}>{children}</div>
+    </div>
+  );
+}
+
+// แท่งแนวนอน — ชื่ออยู่บน เลขอยู่ขวา แท่งยาวเต็มการ์ด
+// (ไม่วางชื่อไว้ซ้ายแท่ง เพราะชื่อยาวไม่เท่ากันแล้วจุดเริ่มแท่งแต่ละการ์ดจะเหลื่อมกัน)
+function BarList({ data }) {
+  const max = Math.max(...data.map(d => d.value), 1);
+  return (
+    <div className="flex flex-col gap-2.5">
+      {data.map((d) => (
+        <div key={d.name}>
+          <div className="flex items-baseline justify-between gap-2.5 mb-1.5">
+            <span className={`text-xs font-medium truncate ${d.value ? 'text-gray-600' : 'text-gray-300'}`} title={d.name}>{d.name}</span>
+            <span className={`text-xs font-bold tabular-nums flex-shrink-0 ${d.value ? 'text-gray-800' : 'text-gray-300'}`}>{d.value}</span>
+          </div>
+          <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--viz-track)' }}>
+            <div className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${(d.value / max) * 100}%`, background: 'var(--viz-bar)' }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// กราฟแท่งตั้ง — ใช้กับช่วงอายุ เพราะมันเรียงลำดับน้อยไปมาก
+function ColumnChart({ data }) {
+  const max = Math.max(...data.map(d => d.value), 1);
+  return (
+    <div>
+      <div className="flex items-end gap-2.5" style={{ height: 128 }}>
+        {data.map((d) => (
+          <div key={d.name} className="flex-1 flex flex-col items-center justify-end h-full">
+            <span className={`text-xs font-extrabold mb-1.5 tabular-nums ${d.value ? 'text-gray-800' : 'text-gray-300'}`}>{d.value}</span>
+            <div className="w-full rounded-t-md transition-all duration-500" style={{
+              maxWidth: 44,
+              height: d.value ? `${Math.max((d.value / max) * 100, 4)}%` : 3,
+              background: d.value ? 'var(--viz-col)' : 'var(--viz-ghost)',
+            }} />
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-2.5 mt-2">
+        {data.map((d) => (
+          <span key={d.name} className={`flex-1 text-center text-[11px] font-medium leading-tight ${d.value ? 'text-gray-400' : 'text-gray-300'}`}>{d.name}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// สัดส่วนเพศ — มีแค่ 2 ค่า เลยโชว์เป็นเลขใหญ่ + แถบเดียว อ่านง่ายกว่าโดนัท
+function GenderSplit({ data }) {
+  const total = data.reduce((s, d) => s + d.value, 0) || 1;
+  const hues = ['var(--viz-1)', 'var(--viz-2)', '#94a3b8'];
+  return (
+    <div>
+      <div className="flex flex-wrap gap-5 mb-3.5">
+        {data.map((d, i) => (
+          <div key={d.name}>
+            <p className="text-3xl font-extrabold leading-none tabular-nums" style={{ color: hues[i % hues.length] }}>
+              {Math.round((d.value / total) * 100)}<span className="text-base">%</span>
+            </p>
+            <p className="text-xs text-gray-600 mt-1.5 font-semibold flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: hues[i % hues.length] }} />
+              {d.name} · {d.value} คน
+            </p>
+          </div>
+        ))}
+      </div>
+      <div className="flex h-3.5 rounded-full overflow-hidden gap-0.5">
+        {data.map((d, i) => (
+          <span key={d.name} style={{ width: `${(d.value / total) * 100}%`, background: hues[i % hues.length] }} />
+        ))}
+      </div>
     </div>
   );
 }
 
 function EmptyChart() {
   return (
-    <div className="h-48 flex flex-col items-center justify-center gap-2">
+    <div className="h-32 flex flex-col items-center justify-center gap-2">
       <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center">
         <TrendingUp size={18} className="text-orange-200" />
       </div>
