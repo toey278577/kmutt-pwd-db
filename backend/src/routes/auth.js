@@ -13,7 +13,11 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'กรุณากรอกอีเมลและรหัสผ่าน' });
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    // ไม่สนตัวใหญ่-เล็ก — บัญชีเก่าบางบัญชีเก็บอีเมลเป็นตัวใหญ่ไว้ (บัญชีใหม่เก็บตัวเล็กเสมอ)
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: String(email).trim(), mode: 'insensitive' } },
+      orderBy: { id: 'asc' },
+    });
     const match = !!user && user.isActive && await bcrypt.compare(password, user.password);
     if (!match) {
       // เก็บไว้ดูว่ามีคนพยายามเดารหัสผ่านไหม (label = อีเมลที่ลองใช้)

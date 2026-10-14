@@ -2,15 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown, Users, Camera, X, Layers, FileSpreadsheet, Download, Upload } from 'lucide-react';
-import { getPersons, getPerson, createPerson, importPersons, updatePerson, deletePerson, getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo, getPersonPhotos, uploadPersonPhoto, getBatches } from '../api';
+import { getPersons, getPerson, createPerson, importPersons, updatePerson, deletePerson, getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo, getPersonPhotos, uploadPersonPhoto, deletePersonPhoto, getBatches } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { THAI_PROVINCES, checkProvince } from '../utils/province';
+import { PREFIXES, splitPrefix, nameInitials } from '../utils/name';
+import { resizeImage } from '../utils/resizeImage';
+import { useThaiDate } from '../utils/useThaiDate';
 
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
 const GENDER_BADGE = { MALE: 'bg-sky-100 text-sky-600 border-sky-200', FEMALE: 'bg-pink-100 text-pink-500 border-pink-200', OTHER: 'bg-gray-100 text-gray-500 border-gray-200' };
 
-const PREFIXES = ['นาย', 'นาง', 'นางสาว', 'เด็กชาย', 'เด็กหญิง'];
 
 const EDUCATION_OPTS = [
   'ต่ำกว่าประถมศึกษา',
@@ -24,12 +26,6 @@ const EDUCATION_OPTS = [
 ];
 
 
-const splitPrefix = (fullName = '') => {
-  for (const p of PREFIXES) {
-    if (fullName.startsWith(p)) return { prefix: p, nameOnly: fullName.slice(p.length).trim() };
-  }
-  return { prefix: '', nameOnly: fullName };
-};
 
 const emptyForm = {
   fullName: '', nickname: '', thaiId: '', gender: 'MALE', birthDate: '',
@@ -57,9 +53,13 @@ export default function PersonList() {
   const [disabilityTypes, setDisabilityTypes] = useState([]);
   const [disabilityTypeId, setDisabilityTypeId] = useState('');
   const [editPersonDisabilities, setEditPersonDisabilities] = useState([]);
+  // ประเภทความพิการที่กดถังขยะในฟอร์ม — ลบจริงตอนกดบันทึก (เดิมลบทันที กดยกเลิกฟอร์มก็ไม่กลับมา)
+  const [removedDisabilityIds, setRemovedDisabilityIds] = useState([]);
   const [prefix, setPrefix] = useState('นาย');
   const [nameOnly, setNameOnly] = useState('');
   const [photoBase64, setPhotoBase64] = useState('');
+  const [existingPhotoId, setExistingPhotoId] = useState(null);   // รูปเดิมของคนที่กำลังแก้ — ใช้ตอนกด "ลบรูป" แล้วบันทึก
+  const [formNonce, setFormNonce] = useState(0);
   const photoInputRef = useRef(null);
   const [errors, setErrors] = useState({});
   const [loadError, setLoadError] = useState(false);
@@ -115,7 +115,9 @@ export default function PersonList() {
   }, []);
 
   const openModal = async (row = null) => {
+    setFormNonce((n) => n + 1);   // สร้างช่องในฟอร์มใหม่ทุกครั้งที่เปิด — ไม่ให้ตัวเลขที่พิมพ์ค้างจากรอบก่อนโผล่มา
     setPhotoBase64('');
+    setExistingPhotoId(null);
     if (row) {
       // ดึงข้อมูลเต็มของคนนี้ก่อน — แถวในหน้ารายชื่อมีแค่บางช่อง (ไม่มีที่อยู่/อีเมล/หลักสูตร)
       // ถ้าเอาแถวนั้นใส่ฟอร์มตรงๆ กดบันทึกแล้วช่องที่ขาดจะถูกเขียนทับเป็นค่าว่างหมด
@@ -130,14 +132,14 @@ export default function PersonList() {
       // แปลง null → '' ทุก field ก่อน spread เพื่อป้องกัน controlled input error
       const cleaned = Object.fromEntries(Object.entries(person).map(([k, v]) => [k, v === null ? '' : v]));
       setForm({ ...emptyForm, ...cleaned, birthDate: person.birthDate?.slice(0, 10) || '' });
-      setPrefix(p || 'นาย');
+      setPrefix(p);   // ไม่มีคำนำหน้า = "ไม่ระบุ" (เดิมเติม "นาย" ให้เอง ผู้หญิงที่นำเข้าจาก Excel ก็โดน)
       setNameOnly(n);
       setEditId(person.id);
       setEditPersonDisabilities(person.disabilityInfos || []);
       // โหลดรูปเดิม
       getPersonPhotos(person.id).then(r => {
         const profile = r.data.find(p => p.photoType === 'profile');
-        if (profile?.filePath) setPhotoBase64(profile.filePath);
+        if (profile?.filePath) { setPhotoBase64(profile.filePath); setExistingPhotoId(profile.id); }
       }).catch(() => {});
     } else {
       setForm(emptyForm);
@@ -147,9 +149,14 @@ export default function PersonList() {
       setEditPersonDisabilities([]);
     }
     setDisabilityTypeId('');
+    setRemovedDisabilityIds([]);
     setErrors({});
     modalRef.current?.showModal();
   };
+
+  // ประเภทที่ยังเหลืออยู่ (ไม่นับที่กดถังขยะไว้) และประเภทที่ยังเลือกเพิ่มได้ (ไม่ให้เลือกซ้ำ)
+  const keptDisabilities = editPersonDisabilities.filter((d) => !removedDisabilityIds.includes(d.id));
+  const availableDisabilityTypes = disabilityTypes.filter((t) => !keptDisabilities.some((d) => d.disabilityTypeId === t.id));
 
   const validate = () => {
     const e = {};
@@ -159,18 +166,20 @@ export default function PersonList() {
     if (!form.educationLevel) e.educationLevel = 'กรุณาเลือกระดับการศึกษา';
     if (!form.province) e.province = 'กรุณากรอกจังหวัด';
     if (!form.phone && !form.mobile) e.contact = 'กรุณากรอกเบอร์โทรศัพท์หรือมือถืออย่างน้อย 1 ช่อง';
-    if (!editId && !disabilityTypeId && editPersonDisabilities.length === 0) e.disability = 'กรุณาเลือกประเภทความพิการ';
+    if (!editId && !disabilityTypeId) e.disability = 'กรุณาเลือกประเภทความพิการ';
     if (!form.batchId) e.batchId = 'กรุณาเลือกรุ่นที่เข้าร่วม';
     return e;
   };
 
-  const handlePhotoChange = (e) => {
+  const handlePhotoChange = async (e) => {
     const file = e.target.files[0];
+    e.target.value = '';   // เลือกไฟล์เดิมซ้ำได้
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) return toast.error('ไฟล์ใหญ่เกินไป', 'รูปต้องไม่เกิน 5MB — แนะนำ JPG/PNG ขนาด 300×300 ถึง 600×600 px');
-    const reader = new FileReader();
-    reader.onload = (ev) => setPhotoBase64(ev.target.result);
-    reader.readAsDataURL(file);
+    try {
+      setPhotoBase64(await resizeImage(file));   // ย่อให้อัตโนมัติ รูปมือถือใหญ่ๆ ก็ใช้ได้
+    } catch (err) {
+      toast.error('ใช้รูปนี้ไม่ได้', err.message);
+    }
   };
 
   const handleSave = async () => {
@@ -202,6 +211,7 @@ export default function PersonList() {
       let personId = editId;
       if (editId) {
         await updatePerson(editId, payload);
+        for (const did of removedDisabilityIds) await deleteDisabilityInfo(editId, did);
         if (disabilityTypeId) await createDisabilityInfo(editId, { disabilityTypeId });
       } else {
         const created = await createPerson(payload);
@@ -210,7 +220,10 @@ export default function PersonList() {
       }
       // อัปโหลดเฉพาะรูปที่เพิ่งเลือกใหม่ (เป็น data URL) — ถ้าเป็นรูปเดิมจะเป็น path ของไฟล์ ไม่ต้องส่งซ้ำ
       if (photoBase64?.startsWith('data:')) {
-        await uploadPersonPhoto(personId, { filePath: photoBase64, photoType: 'profile' });
+        await uploadPersonPhoto(personId, { filePath: photoBase64, photoType: 'profile' });   // หลังบ้านลบรูปเก่าให้เอง
+      } else if (!photoBase64 && existingPhotoId) {
+        // กด "ลบรูป" ในฟอร์ม → ลบจริงตอนบันทึก (เดิมแค่หายจากหน้าจอ รูปยังอยู่ในระบบ)
+        await deletePersonPhoto(personId, existingPhotoId);
       }
       modalRef.current?.close();
       // แก้ไข = อยู่หน้าเดิม / เพิ่มใหม่ = กลับหน้า 1 (คนใหม่อยู่บนสุด จะได้เห็นเลย)
@@ -232,7 +245,6 @@ export default function PersonList() {
     }
   };
 
-  const initials = (name = '') => name.slice(0, 2).toUpperCase();
 
   // ── นำเข้า Excel ──
   const parseGender = (v) => {
@@ -517,7 +529,7 @@ export default function PersonList() {
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-2xl text-white text-xs font-black flex items-center justify-center flex-shrink-0 shadow-sm"
                         style={{ background: `linear-gradient(135deg,${['#ea580c','#06b6d4','#10b981','#8b5cf6','#ec4899'][i % 5]},${['#c2410c','#0284c7','#047857','#7c3aed','#db2777'][i % 5]})` }}>
-                        {initials(p.fullName)}
+                        {nameInitials(p.fullName)}
                       </div>
                       <div>
                         <p className="font-bold text-gray-800 text-sm leading-none">{p.fullName}</p>
@@ -647,8 +659,8 @@ export default function PersonList() {
                       <X size={13} /> ลบรูป
                     </button>
                   )}
-                  <p className="text-xs text-gray-400">JPG/PNG ไม่เกิน 5MB</p>
-                  <p className="text-xs text-gray-300">แนะนำ 300×300 px ขึ้นไป</p>
+                  <p className="text-xs text-gray-400">JPG/PNG/WebP ไม่เกิน 20MB</p>
+                  <p className="text-xs text-gray-300">ระบบย่อรูปให้อัตโนมัติ</p>
                 </div>
                 <input
                   ref={photoInputRef}
@@ -692,7 +704,7 @@ export default function PersonList() {
                 <FormField label="ชื่อเล่น" value={form.nickname} onChange={(v) => setForm({ ...form, nickname: v })} />
                 <FormField label="เลขบัตรประชาชน / บัตรคนพิการ" required value={form.thaiId} error={errors.thaiId}
                   onChange={(v) => { setForm({ ...form, thaiId: v }); if (errors.thaiId) setErrors(p => ({...p, thaiId: ''})); }} numericOnly maxLength={13} />
-                <ThaiDateField label="วันเกิด" required value={form.birthDate} error={errors.birthDate}
+                <ThaiDateField key={formNonce} label="วันเกิด" required value={form.birthDate} error={errors.birthDate}
                   onChange={(v) => { setForm({ ...form, birthDate: v }); if (errors.birthDate) setErrors(p => ({...p, birthDate: ''})); }} />
                 <SelectField label="เพศ" value={form.gender} onChange={(v) => setForm({ ...form, gender: v })}
                   options={[['MALE','ชาย'],['FEMALE','หญิง'],['OTHER','อื่นๆ']]} />
@@ -728,19 +740,29 @@ export default function PersonList() {
                   </label>
                   {editPersonDisabilities.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-2">
-                      {editPersonDisabilities.map((d) => (
-                        <div key={d.id} className="flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold px-2.5 py-1.5 rounded-xl">
-                          <span>{d.disabilityType?.typeName}</span>
-                          <button type="button" className="text-red-400 hover:text-red-600 transition-colors ml-1"
-                            onClick={async () => {
-                              await deleteDisabilityInfo(editId, d.id);
-                              setEditPersonDisabilities(prev => prev.filter(x => x.id !== d.id));
-                            }}>
-                            <Trash2 size={11} />
-                          </button>
-                        </div>
-                      ))}
+                      {editPersonDisabilities.map((d) => {
+                        const removed = removedDisabilityIds.includes(d.id);
+                        return (
+                          <div key={d.id} className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border ${removed ? 'bg-gray-50 border-gray-200 text-gray-400' : 'bg-orange-50 border-orange-200 text-orange-700'}`}>
+                            <span className={removed ? 'line-through' : ''}>{d.disabilityType?.typeName}</span>
+                            {removed ? (
+                              <button type="button" title="ยกเลิกการลบ" className="text-orange-500 hover:text-orange-700 transition-colors ml-1 underline"
+                                onClick={() => setRemovedDisabilityIds(prev => prev.filter(x => x !== d.id))}>
+                                คืน
+                              </button>
+                            ) : (
+                              <button type="button" title="ลบ (มีผลเมื่อกดบันทึก)" className="text-red-400 hover:text-red-600 transition-colors ml-1"
+                                onClick={() => setRemovedDisabilityIds(prev => [...prev, d.id])}>
+                                <Trash2 size={11} />
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
+                  )}
+                  {removedDisabilityIds.length > 0 && (
+                    <p className="text-xs text-gray-400 mb-2">รายการที่ขีดฆ่าจะถูกลบเมื่อกด "บันทึกข้อมูล" — กด "ยกเลิก" ถ้าไม่ต้องการลบ</p>
                   )}
                   <div className="relative">
                     <select
@@ -749,7 +771,7 @@ export default function PersonList() {
                       onChange={(e) => { setDisabilityTypeId(e.target.value); if (errors.disability) setErrors(p => ({...p, disability: ''})); }}
                     >
                       <option value="">— {editId ? 'เพิ่มประเภทความพิการ' : 'เลือกประเภทความพิการ'} —</option>
-                      {disabilityTypes.map((t) => (
+                      {availableDisabilityTypes.map((t) => (
                         <option key={t.id} value={String(t.id)}>{t.typeName}</option>
                       ))}
                     </select>
@@ -1061,35 +1083,20 @@ function EducationField({ value = '', onChange, required, error }) {
 
 function ThaiDateField({ label, value = '', onChange, required, error }) {
   const hasError = error && error.trim() !== '';
-  const toDisplay = (iso) => {
-    if (!iso) return '';
-    const [y, m, d] = iso.split('-');
-    if (!y || !m || !d) return '';
-    return `${d}/${m}/${parseInt(y) + 543}`;
-  };
-  const [display, setDisplay] = useState(() => toDisplay(value));
-  useEffect(() => { setDisplay(toDisplay(value)); }, [value]);
-  const todayTH = new Date().getFullYear() + 543;
-  const handleChangeWithValidation = (e) => {
-    const raw = e.target.value.replace(/\D/g, '').slice(0, 8);
-    let fmt = raw.length <= 2 ? raw : raw.length <= 4 ? `${raw.slice(0,2)}/${raw.slice(2)}` : `${raw.slice(0,2)}/${raw.slice(2,4)}/${raw.slice(4)}`;
-    setDisplay(fmt);
-    if (raw.length === 8) {
-      const yearTH = parseInt(raw.slice(4, 8));
-      if (yearTH >= todayTH) { setDisplay(''); return; } // ปีต้องเป็นอดีต
-      const yAD = yearTH - 543;
-      onChange(`${yAD}-${raw.slice(2,4)}-${raw.slice(0,2)}`);
-    } else if (raw.length === 0) onChange('');
-  };
+  // วันเกิด → ต้องเป็นวันที่ผ่านมาแล้ว (เดิมพิมพ์ปีผิดแล้วช่องโดนล้างเงียบๆ ไม่บอกเหตุผล)
+  const { display, onInput, msg } = useThaiDate(value, onChange, { pastOnly: true });
+  const shownError = hasError ? error : msg?.type === 'error' ? msg.text : '';
   return (
     <div>
       <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">
         {label}{required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
-      <input type="text" placeholder="วว/ดด/ปปปป (พ.ศ.) — ต้องเป็นอดีต" maxLength={10}
-        className={`w-full rounded-xl border px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 transition-all ${hasError ? 'border-red-400 bg-red-50 focus:ring-red-300/40' : 'border-gray-200 focus:ring-orange-400/40 focus:border-orange-400'}`}
-        value={display} onChange={handleChangeWithValidation} />
-      {hasError && <p className="text-xs text-red-500 mt-1">{error}</p>}
+      <input type="text" inputMode="numeric" placeholder="วว/ดด/ปปปป (พ.ศ.) เช่น 15/05/2540" maxLength={10}
+        className={`w-full rounded-xl border px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 transition-all ${shownError ? 'border-red-400 bg-red-50 focus:ring-red-300/40' : 'border-gray-200 focus:ring-orange-400/40 focus:border-orange-400'}`}
+        value={display} onChange={onInput} />
+      {shownError
+        ? <p className="text-xs text-red-500 mt-1">{shownError}</p>
+        : msg && <p className="text-xs text-gray-400 mt-1">{msg.text}</p>}
     </div>
   );
 }

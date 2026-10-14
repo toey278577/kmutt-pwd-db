@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient');
+const { ensureOwned, pick } = require('../utils/owned');
 
 router.get('/:id/skills', async (req, res) => {
   try {
@@ -16,7 +17,7 @@ router.get('/:id/skills', async (req, res) => {
 router.post('/:id/skills', async (req, res) => {
   try {
     const skill = await prisma.skill.create({
-      data: { ...req.body, personId: parseInt(req.params.id) },
+      data: { ...pick(req.body, ['skillName', 'skillLevel']), personId: parseInt(req.params.id) },
     });
     res.status(201).json(skill);
   } catch (err) {
@@ -26,6 +27,7 @@ router.post('/:id/skills', async (req, res) => {
 
 router.delete('/:id/skills/:sid', async (req, res) => {
   try {
+    if (!(await ensureOwned(res, 'skill', parseInt(req.params.sid), parseInt(req.params.id)))) return;
     await prisma.skill.delete({ where: { id: parseInt(req.params.sid) } });
     res.json({ message: 'Deleted' });
   } catch (err) {

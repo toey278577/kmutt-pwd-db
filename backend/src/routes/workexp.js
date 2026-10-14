@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient');
+const { ensureOwned, pick } = require('../utils/owned');
 
 const toDate = (val) => (val && String(val).trim() !== '') ? new Date(val) : null;
 const toNum = (val) => (val !== '' && val != null) ? parseFloat(val) : null;
 const toEnum = (val) => (val && String(val).trim() !== '') ? val : null;
+const TEXT = ['organizationName', 'jobType', 'outcome'];
 
 router.get('/:id/workexp', async (req, res) => {
   try {
@@ -20,7 +22,8 @@ router.get('/:id/workexp', async (req, res) => {
 
 router.post('/:id/workexp', async (req, res) => {
   try {
-    const { startDate, endDate, income, workMode, ...rest } = req.body;
+    const { startDate, endDate, income, workMode } = req.body;
+    const rest = pick(req.body, TEXT);
     const record = await prisma.workExperience.create({
       data: { ...rest, personId: parseInt(req.params.id), startDate: toDate(startDate), endDate: toDate(endDate), income: toNum(income), workMode: toEnum(workMode) },
     });
@@ -32,7 +35,9 @@ router.post('/:id/workexp', async (req, res) => {
 
 router.put('/:id/workexp/:wid', async (req, res) => {
   try {
-    const { startDate, endDate, income, workMode, ...rest } = req.body;
+    if (!(await ensureOwned(res, 'workExperience', parseInt(req.params.wid), parseInt(req.params.id)))) return;
+    const { startDate, endDate, income, workMode } = req.body;
+    const rest = pick(req.body, TEXT);
     const record = await prisma.workExperience.update({
       where: { id: parseInt(req.params.wid) },
       data: { ...rest, startDate: toDate(startDate), endDate: toDate(endDate), income: toNum(income), workMode: toEnum(workMode) },
@@ -45,6 +50,7 @@ router.put('/:id/workexp/:wid', async (req, res) => {
 
 router.delete('/:id/workexp/:wid', async (req, res) => {
   try {
+    if (!(await ensureOwned(res, 'workExperience', parseInt(req.params.wid), parseInt(req.params.id)))) return;
     await prisma.workExperience.delete({ where: { id: parseInt(req.params.wid) } });
     res.json({ message: 'Deleted' });
   } catch (err) {

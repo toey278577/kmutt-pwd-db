@@ -3,6 +3,8 @@ import { Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getAllFollowUp, getFollowUpDue } from '../api';
 import FollowUpDue from '../components/FollowUpDue';
+import LoadError from '../components/LoadError';
+import { nameInitials } from '../utils/name';
 
 const EMP = {
   EMPLOYED:   { bg: 'bg-emerald-100 text-emerald-700 border-emerald-200', label: 'มีงานทำ' },
@@ -27,14 +29,16 @@ export default function FollowUpList() {
   const [rows, setRows] = useState([]);
   const [due, setDue] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    getAllFollowUp().then(r => {
-      setRows(r.data);
-      setLoading(false);
-    });
+  const load = () => {
+    getAllFollowUp()
+      .then(r => { setRows(r.data); setLoading(false); })
+      .catch(() => { setLoadError(true); setLoading(false); });   // เดิมไม่มี catch → โหลดพังแล้วหมุนค้างตลอด
     getFollowUpDue().then(r => setDue(r.data)).catch(() => {});
-  }, []);
+  };
+  useEffect(() => { load(); }, []);
+  const retry = () => { setLoadError(false); setLoading(true); load(); };
 
   if (loading) return (
     <div className="flex items-center justify-center h-96">
@@ -44,6 +48,8 @@ export default function FollowUpList() {
       </div>
     </div>
   );
+
+  if (loadError) return <LoadError onRetry={retry} />;
 
   return (
     <div className="space-y-4">
@@ -100,7 +106,7 @@ export default function FollowUpList() {
                       <button onClick={() => navigate(`/persons/${f.personId}`)}
                         className="flex items-center gap-2.5 text-left group">
                         <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${AVATAR_COLORS[i % 5]} text-white text-xs font-black flex items-center justify-center flex-shrink-0`}>
-                          {f.personName?.slice(0, 2)}
+                          {nameInitials(f.personName)}
                         </div>
                         <span className="font-semibold text-gray-800 text-sm group-hover:text-orange-600 transition-colors">{f.personName}</span>
                       </button>

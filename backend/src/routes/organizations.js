@@ -2,10 +2,15 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient');
 
+// รับเฉพาะช่องขององค์กร — เดิมส่ง req.body เข้า DB ตรงๆ ใครแนบช่องอื่นมา (id, ความสัมพันธ์) ก็ทะลุเข้าไปได้
+const ORG_FIELDS = ['orgName', 'businessType', 'address', 'contactName', 'phone', 'email', 'note'];
+const pickOrg = (body) => Object.fromEntries(ORG_FIELDS.filter((k) => body[k] !== undefined).map((k) => [k, body[k]]));
+
 router.get('/', async (req, res) => {
   try {
     const orgs = await prisma.organization.findMany({
       orderBy: { orgName: 'asc' },
+      include: { _count: { select: { persons: true } } },   // จำนวนคนพิการที่เชื่อมอยู่ — ใช้เตือนก่อนลบ
     });
     res.json(orgs);
   } catch (err) {
@@ -28,7 +33,9 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const org = await prisma.organization.create({ data: req.body });
+    const data = pickOrg(req.body);
+    if (!String(data.orgName || '').trim()) return res.status(400).json({ error: 'กรุณากรอกชื่อองค์กร' });
+    const org = await prisma.organization.create({ data });
     res.status(201).json(org);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -39,7 +46,7 @@ router.put('/:id', async (req, res) => {
   try {
     const org = await prisma.organization.update({
       where: { id: parseInt(req.params.id) },
-      data: req.body,
+      data: pickOrg(req.body),
     });
     res.json(org);
   } catch (err) {

@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const prisma = require('../prismaClient');
+const { ensureOwned } = require('../utils/owned');
 
 // รูปเก็บเป็นไฟล์จริง ไม่ยัด base64 ลงฐานข้อมูล
 // (DB เก็บแค่ path สั้น ๆ → สำรองข้อมูลเล็กลงมาก และโหลดรายชื่อเร็วขึ้น)
@@ -89,6 +90,7 @@ router.post('/:id/photos', async (req, res) => {
 router.delete('/:id/photos/:pid', async (req, res) => {
   try {
     const pid = parseInt(req.params.pid);
+    if (!(await ensureOwned(res, 'personPhoto', parseInt(req.params.pid), parseInt(req.params.id)))) return;
     const photo = await prisma.personPhoto.findUnique({ where: { id: pid } });
     await prisma.personPhoto.delete({ where: { id: pid } });
     if (photo) removeFile(photo.filePath);
@@ -100,3 +102,4 @@ router.delete('/:id/photos/:pid', async (req, res) => {
 
 module.exports = router;
 module.exports.UPLOAD_DIR = UPLOAD_DIR;
+module.exports.removeFile = removeFile;

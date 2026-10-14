@@ -25,6 +25,46 @@ router.get('/training-all', async (req, res) => {
   }
 });
 
+// คนที่อยู่ในรุ่นอบรมทั้งหมด — หน้า "การอบรม & ฝึกงาน" (เดิมโชว์แค่ประวัติอบรมรายคน คนในรุ่นไม่โผล่เลย หน้าดูว่าง)
+router.get('/batch-enrollments', async (req, res) => {
+  try {
+    const [persons, assessments] = await Promise.all([
+      prisma.person.findMany({
+        where: { batchId: { not: null } },
+        select: {
+          id: true, fullName: true, lifeStatus: true,
+          batch: { select: { id: true, batchNumber: true, year: true, courseName: true, startDate: true, endDate: true, status: true } },
+          course: { select: { name: true } },
+        },
+        orderBy: [{ batch: { year: 'desc' } }, { batch: { batchNumber: 'desc' } }, { fullName: 'asc' }],
+      }),
+      prisma.personAssessment.findMany({ select: { personId: true, batchId: true, preTestScore: true, postTestScore: true } }),
+    ]);
+    // ผลประเมินของคนนั้นในรุ่นที่สังกัดอยู่
+    const score = new Map(assessments.map((a) => [`${a.personId}:${a.batchId}`, a]));
+    res.json(persons.map((p) => {
+      const a = score.get(`${p.id}:${p.batch.id}`);
+      return {
+        personId: p.id,
+        personName: p.fullName,
+        lifeStatus: p.lifeStatus,
+        batchId: p.batch.id,
+        batchNumber: p.batch.batchNumber,
+        year: p.batch.year,
+        program: p.batch.courseName,
+        course: p.course?.name || null,
+        startDate: p.batch.startDate,
+        endDate: p.batch.endDate,
+        status: p.batch.status,
+        preTestScore: a?.preTestScore ?? null,
+        postTestScore: a?.postTestScore ?? null,
+      };
+    }));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ติดตามผลทั้งหมดพร้อมชื่อคน — 1 query แทนที่จะเป็น N+1
 router.get('/followup-all', async (req, res) => {
   try {

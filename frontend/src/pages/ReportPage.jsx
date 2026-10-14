@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Printer, FileText, Award, Building2, Users, ChevronDown, X, Layers, FileSpreadsheet } from 'lucide-react';
+import { Printer, FileText, Award, Building2, Users, ChevronDown, Layers, FileSpreadsheet } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { getPersons, getOrganizations, getBatches } from '../api';
+import LoadError from '../components/LoadError';
 
 const fmtDate = (iso) => {
   if (!iso) return '';
@@ -17,16 +18,6 @@ const calcAge = (birthDate) => {
   const mo = today.getMonth() - birth.getMonth();
   if (mo < 0 || (mo === 0 && today.getDate() < birth.getDate())) age--;
   return age;
-};
-
-const DISABILITY_ABBR = {
-  'การมองเห็น': 'สายตา',
-  'การได้ยิน': 'หู',
-  'การเคลื่อนไหว': 'ร่างกาย',
-  'จิตใจหรือพฤติกรรม': 'จิตใจ',
-  'สติปัญญา': 'สติปัญญา',
-  'การเรียนรู้': 'การเรียนรู้',
-  'ออทิสติก': 'ออทิสติก',
 };
 
 const REPORT_TYPES = [
@@ -77,15 +68,17 @@ export default function ReportPage() {
   });
   const [selectedOrgIds, setSelectedOrgIds] = useState([]);
 
-  useEffect(() => {
-    Promise.all([getPersons({ withPhotos: 'true' }), getOrganizations(), getBatches()])
-      .then(([pRes, oRes, bRes]) => {
-        setPersons(pRes.data);
-        setOrgs(oRes.data);
-        setBatches(bRes.data);
-        setLoading(false);
-      });
-  }, []);
+  const [loadError, setLoadError] = useState(false);
+  const load = () => Promise.all([getPersons({ withPhotos: 'true' }), getOrganizations(), getBatches()])
+    .then(([pRes, oRes, bRes]) => {
+      setPersons(pRes.data);
+      setOrgs(oRes.data);
+      setBatches(bRes.data);
+      setLoading(false);
+    })
+    .catch(() => { setLoadError(true); setLoading(false); });   // เดิมไม่มี catch → โหลดพังแล้วหมุนค้างตลอด
+  useEffect(() => { load(); }, []);
+  const retry = () => { setLoadError(false); setLoading(true); load(); };
 
   const togglePerson = (id) => {
     setSelectedPersonIds(prev =>
@@ -212,6 +205,8 @@ export default function ReportPage() {
       <span className="loading loading-spinner loading-lg text-primary" />
     </div>
   );
+
+  if (loadError) return <LoadError onRetry={retry} />;
 
   return (
     <div>

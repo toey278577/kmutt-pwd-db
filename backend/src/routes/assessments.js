@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient');
+const { ensureOwned } = require('../utils/owned');
 
 // แปลงคะแนนให้ปลอดภัย: ค่าว่าง/ไม่ใช่ตัวเลข → null, นอกช่วง → clamp อยู่ใน [0, max]
 const score = (val, max) => {
@@ -54,6 +55,7 @@ router.post('/:id/assessments', async (req, res) => {
 // DELETE /api/persons/:id/assessments/:aid
 router.delete('/:id/assessments/:aid', async (req, res) => {
   try {
+    if (!(await ensureOwned(res, 'personAssessment', Number(req.params.aid), Number(req.params.id)))) return;
     await prisma.personAssessment.delete({ where: { id: Number(req.params.aid) } });
     res.json({ success: true });
   } catch (err) {

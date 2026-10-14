@@ -118,6 +118,7 @@ export const deleteOrganization = (id) => api.delete(`/organizations/${id}`).the
 export const getDashboardStats = () => cached('dashboard-stats', () => api.get('/dashboard/stats'), 60_000);
 
 export const getAllTraining = () => api.get('/data/training-all');
+export const getBatchEnrollments = () => api.get('/data/batch-enrollments');
 export const getAllFollowUp = () => api.get('/data/followup-all');
 export const getFollowUpDue = () => api.get('/data/followup-due');
 

@@ -30,7 +30,7 @@ web app สำหรับจัดการข้อมูลคนพิกา
 │   │                          photos, assessments, organizations, batches, dashboard,
 │   │                          aggregate, auth, users, system, audit
 │   ├── prisma/              ← schema.prisma, migrations/, seed.js (ประเภทความพิการ 7 ประเภท + แอดมิน)
-│   ├── scripts/             ← backup-db.cjs, restore-db.cjs, fix-buddhist-birthdates.cjs
+│   ├── scripts/             ← backup-db, restore-db + สคริปต์ซ่อมข้อมูล fix-* / cleanup-orphan-photos (ดูก่อน, --apply แก้จริง)
 │   ├── uploads/photos/      ← ไฟล์รูปถ่าย (ไม่ได้เก็บใน DB แล้ว)
 │   └── backups/             ← ไฟล์สำรอง (ไม่ขึ้น git)
 │
@@ -166,6 +166,9 @@ ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /a
 - eslint ยังมี error เก่าค้าง ~18 จุดใน PersonList / ReportPage ฯลฯ (setState ใน effect, ตัวแปรไม่ได้ใช้) — ทำงานปกติ แก้ทีละไฟล์พร้อมทดสอบ
 - Dashboard: "ผู้เข้าอบรม" = คนในรุ่นหรือมีประวัติอบรม · "สถานะการมีงานทำ" นับคนจากผลติดตามล่าสุด · cache สถิติถูกล้างทุกครั้งที่เขียนข้อมูลสำเร็จ
 - error จาก Prisma ถูกแปลงเป็นข้อความไทยกลางที่ `index.js` (ของจริงอยู่ใน log `[DB ERROR]`)
+- route รายการย่อยของคน (`/persons/:id/<sub>/:subId`) ต้องเช็คเจ้าของด้วย `ensureOwned` + รับช่องด้วย `pick` (`utils/owned.js`) — อย่า spread `req.body` เข้า DB
+- หน้าเว็บ: ชื่อ/คำนำหน้า/ตัวย่อ → `utils/name.js` · ช่องวันที่ พ.ศ. → `utils/useThaiDate.js` (ตรวจวันจริง/ปี ค.ศ.) · รูป → `utils/resizeImage.js` ย่อก่อนส่ง · โหลดพัง → `components/LoadError.jsx`
+- ทดสอบหน้าเว็บจริง: backend :5000 + vite :5173 + Chrome `--headless=new --remote-debugging-port` แล้วสั่งผ่าน CDP (ใส่ token ใน sessionStorage แทนการล็อกอิน)
 
 ---
 
@@ -175,4 +178,5 @@ ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /a
 - ค้นหาขั้นสูง (กรองหลายเงื่อนไขพร้อมกัน)
 - Export Excel
 - แท็บ "ประวัติการแก้ไข" ในหน้ารายละเอียดคนพิการ (API รองรับ `?personId=` แล้ว)
+- ย้ายสคริปต์ทดสอบ (scratchpad) เข้าโปรเจกต์ให้รันด้วย `npm test`
 - เพิ่ม/แก้ประเภทความพิการผ่าน UI

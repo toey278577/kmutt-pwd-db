@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient');
+const { ensureOwned, pick } = require('../utils/owned');
 
 const toDate = (val) => (val && String(val).trim() !== '') ? new Date(val) : null;
 const toNum = (val) => (val !== '' && val != null) ? parseFloat(val) : null;
 const toEnum = (val) => (val && String(val).trim() !== '') ? val : null;
+const TEXT = ['jobType', 'satisfaction', 'issues'];
 
 router.get('/:id/followup', async (req, res) => {
   try {
@@ -20,7 +22,8 @@ router.get('/:id/followup', async (req, res) => {
 
 router.post('/:id/followup', async (req, res) => {
   try {
-    const { followUpDate, income, skillMatch, employmentStatus, ...rest } = req.body;
+    const { followUpDate, income, skillMatch, employmentStatus } = req.body;
+    const rest = pick(req.body, TEXT);
     const record = await prisma.followUp.create({
       data: { ...rest, personId: parseInt(req.params.id), followUpDate: toDate(followUpDate), income: toNum(income), skillMatch: toEnum(skillMatch), employmentStatus },
     });
@@ -32,7 +35,9 @@ router.post('/:id/followup', async (req, res) => {
 
 router.put('/:id/followup/:fid', async (req, res) => {
   try {
-    const { followUpDate, income, skillMatch, employmentStatus, ...rest } = req.body;
+    if (!(await ensureOwned(res, 'followUp', parseInt(req.params.fid), parseInt(req.params.id)))) return;
+    const { followUpDate, income, skillMatch, employmentStatus } = req.body;
+    const rest = pick(req.body, TEXT);
     const record = await prisma.followUp.update({
       where: { id: parseInt(req.params.fid) },
       data: { ...rest, followUpDate: toDate(followUpDate), income: toNum(income), skillMatch: toEnum(skillMatch), employmentStatus },
@@ -45,6 +50,7 @@ router.put('/:id/followup/:fid', async (req, res) => {
 
 router.delete('/:id/followup/:fid', async (req, res) => {
   try {
+    if (!(await ensureOwned(res, 'followUp', parseInt(req.params.fid), parseInt(req.params.id)))) return;
     await prisma.followUp.delete({ where: { id: parseInt(req.params.fid) } });
     res.json({ message: 'Deleted' });
   } catch (err) {

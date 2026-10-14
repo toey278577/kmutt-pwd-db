@@ -4,6 +4,8 @@ import { getUsers, createUser, updateUser, deleteUser } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import DangerZone from '../components/DangerZone';
+import LoadError from '../components/LoadError';
+import { nameInitials } from '../utils/name';
 
 const ROLES = {
   ADMIN:  { label: 'ผู้ดูแลระบบ', bg: 'bg-red-100 text-red-700 border-red-200',       icon: Shield,  grad: 'from-red-500 to-orange-500' },
@@ -26,7 +28,10 @@ export default function UserManagement() {
   const [err, setErr] = useState('');
   const modalRef = useRef(null);
 
-  const load = () => getUsers().then((r) => { setUsers(r.data); setLoading(false); });
+  const [loadError, setLoadError] = useState(false);
+  // เดิมไม่มี catch → โหลดพังแล้วหมุนค้างตลอด
+  const load = () => getUsers().then((r) => { setUsers(r.data); setLoading(false); }).catch(() => { setLoadError(true); setLoading(false); });
+  const retry = () => { setLoadError(false); setLoading(true); load(); };
   useEffect(() => { load(); }, []);
 
   const openAdd = () => {
@@ -41,9 +46,11 @@ export default function UserManagement() {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    setSaving(true); setErr('');
+    setErr('');
+    if (form.password && form.password.length < 8) { setErr('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร'); return; }
+    setSaving(true);
     try {
-      const data = { name: form.name, email: form.email, role: form.role };
+      const data = { name: form.name, email: form.email.trim().toLowerCase(), role: form.role };
       if (form.password) data.password = form.password;
       if (editing) {
         await updateUser(editing.id, data);
@@ -92,6 +99,8 @@ export default function UserManagement() {
     </div>
   );
 
+  if (loadError) return <LoadError onRetry={retry} />;
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -133,7 +142,7 @@ export default function UserManagement() {
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
                         <div className={`w-9 h-9 rounded-2xl bg-gradient-to-br ${role.grad} text-white text-xs font-black flex items-center justify-center flex-shrink-0 shadow-sm`}>
-                          {u.name?.slice(0, 2)}
+                          {nameInitials(u.name)}
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
@@ -221,14 +230,18 @@ export default function UserManagement() {
             <div>
               <label className={labelCls}>{editing ? 'รหัสผ่านใหม่ (เว้นว่างถ้าไม่เปลี่ยน)' : 'รหัสผ่าน *'}</label>
               {/* กันพิมพ์ภาษาไทย — อนุญาตเฉพาะอังกฤษ ตัวเลข และสัญลักษณ์ (ASCII) */}
-              <input type="password" className={inputCls} placeholder="รหัสผ่าน (ภาษาอังกฤษ/ตัวเลขเท่านั้น)"
+              <input type="password" className={inputCls} placeholder="อย่างน้อย 8 ตัว (ภาษาอังกฤษ/ตัวเลข/สัญลักษณ์)"
                 autoComplete="new-password" value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value.replace(/[^\x21-\x7E]/g, '') })} />
+              {form.password && form.password.length < 8 && (
+                <p className="text-xs text-amber-600 mt-1">อีก {8 - form.password.length} ตัว (ต้องมีอย่างน้อย 8 ตัวอักษร)</p>
+              )}
             </div>
             <div>
               <label className={labelCls}>บทบาท</label>
               <div className="relative">
-                <select className={inputCls + ' appearance-none pr-9 cursor-pointer'} value={form.role}
+                <select className={inputCls + ' appearance-none pr-9 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed'} value={form.role}
+                  disabled={editing?.id === me?.id}
                   onChange={(e) => setForm({ ...form, role: e.target.value })}>
                   <option value="ADMIN">ผู้ดูแลระบบ (Admin)</option>
                   <option value="STAFF">เจ้าหน้าที่ (Staff)</option>
@@ -236,6 +249,9 @@ export default function UserManagement() {
                 </select>
                 <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
+              {editing?.id === me?.id && (
+                <p className="text-xs text-gray-400 mt-1">เปลี่ยนบทบาทของตัวเองไม่ได้ — กันเผลอลดสิทธิ์แล้วเข้าหน้านี้ไม่ได้อีก</p>
+              )}
             </div>
 
             {err && (

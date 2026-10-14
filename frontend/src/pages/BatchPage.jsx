@@ -3,6 +3,9 @@ import { Layers, Plus, Pencil, Trash2, CheckCircle, Clock, X, Users, BookOpen, C
 import { getBatches, createBatch, updateBatch, deleteBatch, addCourse, updateCourse, deleteCourse } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useThaiDate } from '../utils/useThaiDate';
+import { endBeforeStart } from '../utils/thaiDate';
+import LoadError from '../components/LoadError';
 
 const STATUS_LABEL = { ACTIVE: 'กำลังดำเนินการ', COMPLETED: 'เสร็จสิ้น' };
 const STATUS_STYLE = {
@@ -38,9 +41,11 @@ export default function BatchPage() {
   const [courseInputs, setCourseInputs] = useState({});   // { [batchId]: ชื่อหลักสูตรที่กำลังพิมพ์ }
   const [editingCourse, setEditingCourse] = useState(null); // { id, name }
 
-  const load = (silent = false) => {
-    if (!silent) setLoading(true);
-    getBatches().then(r => { setBatches(r.data); setLoading(false); }).catch(() => setLoading(false));
+  // loading เริ่มเป็น true อยู่แล้วตอนเปิดหน้า โหลดซ้ำหลังแก้ไขทำเงียบๆ ไม่ต้องโชว์หมุน
+  const [loadError, setLoadError] = useState(false);
+  const load = () => {
+    // เดิมโหลดพังแล้วโชว์ "ยังไม่มีรุ่น" เหมือนไม่มีข้อมูล ผู้ใช้เข้าใจผิดว่ารุ่นหาย
+    getBatches().then(r => { setBatches(r.data); setLoadError(false); setLoading(false); }).catch(() => { setLoadError(true); setLoading(false); });
   };
 
   useEffect(() => { load(); }, []);
@@ -71,6 +76,7 @@ export default function BatchPage() {
     if (!form.batchNumber) e.batchNumber = 'กรุณาระบุรุ่นที่';
     if (!form.year) e.year = 'กรุณาระบุปี';
     if (!form.courseName.trim()) e.courseName = 'กรุณาระบุชื่อโครงการ';
+    if (endBeforeStart(form.startDate, form.endDate)) e.endDate = 'วันสิ้นสุดต้องไม่ก่อนวันเริ่ม';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -85,7 +91,7 @@ export default function BatchPage() {
         await createBatch(form);
       }
       setShowModal(false);
-      load(true);
+      load();
       toast.success(editId ? 'แก้ไขรุ่นสำเร็จ!' : 'เพิ่มรุ่นสำเร็จ!');
     } catch (err) {
       toast.error('บันทึกไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง');
@@ -98,7 +104,7 @@ export default function BatchPage() {
     if (!(await toast.confirm({ title: 'ลบรุ่นนี้?', message: 'ข้อมูลผลประเมินในรุ่นนี้จะถูกลบทั้งหมด กู้คืนไม่ได้' }))) return;
     try {
       await deleteBatch(id);
-      load(true);
+      load();
       toast.success('ลบรุ่นสำเร็จ!');
     } catch (err) {
       toast.error('ลบไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด');
@@ -112,7 +118,7 @@ export default function BatchPage() {
     try {
       await addCourse(batchId, { name });
       setCourseInputs(prev => ({ ...prev, [batchId]: '' }));
-      load(true);
+      load();
       toast.success('เพิ่มหลักสูตรสำเร็จ!');
     } catch (err) {
       toast.error('เพิ่มไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด');
@@ -125,7 +131,7 @@ export default function BatchPage() {
     try {
       await updateCourse(batchId, editingCourse.id, { name });
       setEditingCourse(null);
-      load(true);
+      load();
       toast.success('แก้ไขหลักสูตรสำเร็จ!');
     } catch (err) {
       toast.error('แก้ไขไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด');
@@ -136,7 +142,7 @@ export default function BatchPage() {
     if (!(await toast.confirm({ title: 'ลบหลักสูตรนี้?', message: `"${course.name}" — คนในหลักสูตรนี้จะถูกปลดออกจากหลักสูตร (ยังอยู่ในรุ่นเดิม)` }))) return;
     try {
       await deleteCourse(batchId, course.id);
-      load(true);
+      load();
       toast.success('ลบหลักสูตรสำเร็จ!');
     } catch (err) {
       toast.error('ลบไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด');
@@ -186,6 +192,8 @@ export default function BatchPage() {
         <div className="flex items-center justify-center h-48">
           <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
         </div>
+      ) : loadError ? (
+        <LoadError onRetry={load} />
       ) : batches.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <Layers size={40} className="mx-auto mb-3 opacity-30" />
@@ -328,6 +336,8 @@ export default function BatchPage() {
                 <ThaiDate label="วันเริ่ม" value={form.startDate} onChange={v => setForm({...form, startDate: v})} />
                 <ThaiDate label="วันสิ้นสุด" value={form.endDate} onChange={v => setForm({...form, endDate: v})} />
               </div>
+              {errors.endDate && <p className="text-red-400 text-xs -mt-2">{errors.endDate}</p>}
+              <p className="text-xs text-gray-400 -mt-2">วันสิ้นสุดใช้คำนวณรอบติดตามผล 3 เดือน / 6 เดือน / 1 ปี — รุ่นที่อบรมจบแล้วควรใส่ให้ครบ</p>
 
               <div>
                 <label className={labelCls}>สถานะ</label>
@@ -358,28 +368,13 @@ export default function BatchPage() {
 
 /* ช่องวันที่แบบไทย วว/ดด/ปปปป (พ.ศ.) — เก็บค่าเป็น ISO yyyy-mm-dd */
 function ThaiDate({ label, value = '', onChange }) {
-  const toDisplay = (iso) => {
-    if (!iso) return '';
-    const [y, m, d] = iso.slice(0, 10).split('-');
-    if (!y || !m || !d) return '';
-    return `${d}/${m}/${parseInt(y) + 543}`;
-  };
-  const [display, setDisplay] = useState(() => toDisplay(value));
-  useEffect(() => { setDisplay(toDisplay(value)); }, [value]);
-  const handleChange = (e) => {
-    const raw = e.target.value.replace(/\D/g, '').slice(0, 8);
-    const fmt = raw.length <= 2 ? raw : raw.length <= 4 ? `${raw.slice(0,2)}/${raw.slice(2)}` : `${raw.slice(0,2)}/${raw.slice(2,4)}/${raw.slice(4)}`;
-    setDisplay(fmt);
-    if (raw.length === 8) {
-      const yAD = parseInt(raw.slice(4, 8)) - 543;
-      onChange(`${yAD}-${raw.slice(2,4)}-${raw.slice(0,2)}`);
-    } else if (raw.length === 0) onChange('');
-  };
+  const { display, onInput, msg } = useThaiDate(value, onChange);
   return (
     <div>
       <label className={labelCls}>{label}</label>
       <input type="text" inputMode="numeric" placeholder="วว/ดด/ปปปป (พ.ศ.)" maxLength={10}
-        className={inputCls} value={display} onChange={handleChange} />
+        className={`${inputCls} ${msg?.type === 'error' ? '!border-red-400' : ''}`} value={display} onChange={onInput} />
+      {msg && <p className={`text-xs mt-1 ${msg.type === 'error' ? 'text-red-500' : 'text-gray-400'}`}>{msg.text}</p>}
     </div>
   );
 }

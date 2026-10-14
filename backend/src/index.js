@@ -43,8 +43,10 @@ app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { poli
 
 app.use(compression());
 app.use(cors({ origin: allowedOrigins, credentials: true }));
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+// รูปส่งมาเป็น base64 ซึ่งโตขึ้น ~1.37 เท่า — รูป 5MB กลายเป็น ~6.7MB
+// เดิมตั้ง 5mb เลยรับรูปเกิน ~3.7MB ไม่ได้ทั้งที่บอกผู้ใช้ว่ารับได้ 5MB (หน้าเว็บย่อรูปให้ก่อนส่งแล้ว อันนี้เผื่อไว้)
+app.use(express.json({ limit: '8mb' }));
+app.use(express.urlencoded({ extended: true, limit: '8mb' }));
 
 // ── จำกัดอัตราการเรียก API ──
 const msg = (error) => ({ error });
@@ -142,6 +144,20 @@ app.get('/api/health', async (req, res) => {
   } catch {
     res.status(503).json({ status: 'db_not_ready' });
   }
+});
+
+// error ที่หลุดมาถึงตรงนี้ (ข้อมูลใหญ่เกิน / JSON เสีย / พังไม่คาดคิด)
+// เดิม Express ตอบกลับเป็นหน้า HTML ภาษาอังกฤษ หน้าเว็บอ่านไม่ออก ผู้ใช้เห็นแค่ "เกิดข้อผิดพลาด"
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'ไฟล์หรือข้อมูลใหญ่เกินไป (สูงสุด 8MB) — ถ้าเป็นรูป ลองย่อรูปก่อน' });
+  }
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ error: 'ข้อมูลที่ส่งมาไม่ถูกต้อง กรุณาลองใหม่' });
+  }
+  console.error(`[ERROR] ${req.method} ${req.originalUrl}:`, err);
+  res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่อีกครั้ง' });
 });
 
 app.listen(PORT, () => {

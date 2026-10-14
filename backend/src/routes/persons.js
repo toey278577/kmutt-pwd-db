@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient');
+const { ensureOwned } = require('../utils/owned');
 const { canonicalProvince } = require('../utils/province');
 const { cleanText } = require('../utils/text');
+const { removeFile } = require('./photos');
 
 const toDate = (val) => (val && String(val).trim() !== '') ? new Date(val) : null;
 const toEnum = (val) => (val && String(val).trim() !== '') ? val : null;
@@ -44,6 +46,11 @@ router.post('/:id/disability', async (req, res) => {
   try {
     const { disabilityTypeId, disabilityLevel, assistiveDevice, workLimitation, accommodationNeed } = req.body;
     if (!disabilityTypeId) return res.status(400).json({ error: 'กรุณาเลือกประเภทความพิการ' });
+    // กันประเภทซ้ำ — เดิมเลือกซ้ำได้ กราฟประเภทความพิการเลยนับคนเดียวเป็น 2
+    const dup = await prisma.disabilityInfo.findFirst({
+      where: { personId: parseInt(req.params.id), disabilityTypeId: parseInt(disabilityTypeId) },
+    });
+    if (dup) return res.status(400).json({ error: 'คนนี้มีประเภทความพิการนี้อยู่แล้ว' });
     const info = await prisma.disabilityInfo.create({
       data: {
         personId: parseInt(req.params.id),
@@ -63,6 +70,7 @@ router.post('/:id/disability', async (req, res) => {
 
 router.delete('/:id/disability/:did', async (req, res) => {
   try {
+    if (!(await ensureOwned(res, 'disabilityInfo', parseInt(req.params.did), parseInt(req.params.id)))) return;
     await prisma.disabilityInfo.delete({ where: { id: parseInt(req.params.did) } });
     res.json({ message: 'Deleted' });
   } catch (err) {
@@ -277,7 +285,12 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    await prisma.person.delete({ where: { id: parseInt(req.params.id) } });
+    const id = parseInt(req.params.id);
+    // จำ path รูปไว้ก่อน — ลบคนแล้ว DB ลบแถวรูปให้ (cascade) แต่ไฟล์บนดิสก์ไม่หายเอง
+    // เดิมไฟล์รูปค้างอยู่ตลอด ทั้งที่เป็นข้อมูลส่วนบุคคลที่ควรหายไปพร้อมคน (PDPA)
+    const photos = await prisma.personPhoto.findMany({ where: { personId: id }, select: { filePath: true } });
+    await prisma.person.delete({ where: { id } });
+    photos.forEach((p) => removeFile(p.filePath));
     res.json({ message: 'Deleted' });
   } catch (err) {
     res.status(400).json({ error: err.message });

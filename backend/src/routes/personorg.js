@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient');
+const { ensureOwned } = require('../utils/owned');
 
 const toDate = (val) => (val && String(val).trim() !== '') ? new Date(val) : null;
 const toNum = (val) => (val !== '' && val != null) ? parseFloat(val) : null;
@@ -44,6 +45,7 @@ router.post('/:id/personorg', async (req, res) => {
 router.put('/:id/personorg/:pid', async (req, res) => {
   try {
     const { orgId, roleType, startDate, endDate, amount, supportDetail, note } = req.body;
+    if (!(await ensureOwned(res, 'personOrganization', parseInt(req.params.pid), parseInt(req.params.id)))) return;
     const record = await prisma.personOrganization.update({
       where: { id: parseInt(req.params.pid) },
       data: {
@@ -65,6 +67,7 @@ router.put('/:id/personorg/:pid', async (req, res) => {
 
 router.delete('/:id/personorg/:pid', async (req, res) => {
   try {
+    if (!(await ensureOwned(res, 'personOrganization', parseInt(req.params.pid), parseInt(req.params.id)))) return;
     await prisma.personOrganization.delete({ where: { id: parseInt(req.params.pid) } });
     res.json({ message: 'Deleted' });
   } catch (err) {

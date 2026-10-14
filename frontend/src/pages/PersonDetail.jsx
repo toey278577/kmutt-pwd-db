@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, GraduationCap, Briefcase, Star, Target, ChevronDown, Building2, Accessibility, Camera, ClipboardList, TrendingUp, Save } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, GraduationCap, Briefcase, Star, Target, ChevronDown, Building2, Accessibility, Camera, ClipboardList, TrendingUp, Save } from 'lucide-react';
 import {
-  getPerson, getTraining, createTraining, deleteTraining,
-  getWorkExp, createWorkExp, deleteWorkExp,
-  getFollowUp, createFollowUp, deleteFollowUp,
+  getPerson, getTraining, createTraining, updateTraining, deleteTraining,
+  getWorkExp, createWorkExp, updateWorkExp, deleteWorkExp,
+  getFollowUp, createFollowUp, updateFollowUp, deleteFollowUp,
   getSkills, createSkill, deleteSkill,
-  getPersonOrgs, createPersonOrg, deletePersonOrg,
+  getPersonOrgs, createPersonOrg, updatePersonOrg, deletePersonOrg,
   getOrganizations,
   getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo,
   getPersonPhotos, uploadPersonPhoto, deletePersonPhoto,
@@ -14,6 +14,11 @@ import {
 } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { resizeImage } from '../utils/resizeImage';
+import LoadError from '../components/LoadError';
+import { nameInitials } from '../utils/name';
+import { useThaiDate } from '../utils/useThaiDate';
+import { endBeforeStart } from '../utils/thaiDate';
 
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
 const MARITAL_LABELS = { SINGLE: 'โสด', MARRIED: 'สมรส', OTHER: 'อื่นๆ' };
@@ -68,6 +73,7 @@ export default function PersonDetail() {
   const modalRef = useRef(null);
   const [tab, setTab] = useState(0);
   const [person, setPerson] = useState(null);
+  const [personError, setPersonError] = useState(null);   // null | 'notfound' | 'error'
   const [training, setTraining] = useState([]);
   const [workexp, setWorkexp] = useState([]);
   const [followup, setFollowup] = useState([]);
@@ -77,6 +83,8 @@ export default function PersonDetail() {
   const [disabilityTypes, setDisabilityTypes] = useState([]);
   const [dialogType, setDialogType] = useState('');
   const [form, setForm] = useState({});
+  const [editingId, setEditingId] = useState(null);   // null = เพิ่มใหม่
+  const [dialogNonce, setDialogNonce] = useState(0);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const photoInputRef = useRef(null);
   const [assessments, setAssessments] = useState([]);
@@ -86,7 +94,10 @@ export default function PersonDetail() {
   const [assessSaving, setAssessSaving] = useState(false);
 
   const reloadAll = () => {
-    getPerson(id).then((r) => setPerson(r.data));
+    // เดิมไม่มี catch → เปิดลิงก์ของคนที่ถูกลบไปแล้ว (เช่นจากหน้าประวัติการใช้งาน) หมุนค้างตลอด
+    getPerson(id)
+      .then((r) => { setPerson(r.data); setPersonError(null); })
+      .catch((err) => setPersonError(err.response?.status === 404 ? 'notfound' : 'error'));
     getTraining(id).then((r) => setTraining(r.data));
     getWorkExp(id).then((r) => setWorkexp(r.data));
     getFollowUp(id).then((r) => setFollowup(r.data));
@@ -147,20 +158,21 @@ export default function PersonDetail() {
 
   const handlePhotoChange = async (e) => {
     const file = e.target.files[0];
+    e.target.value = '';   // เลือกไฟล์เดิมซ้ำได้
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) return toast.error('ไฟล์ใหญ่เกินไป', 'รูปต้องมีขนาดไม่เกิน 5MB');
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      try {
-        await uploadPersonPhoto(id, { filePath: ev.target.result, photoType: 'profile' });
-        getPersonPhotos(id).then(r => {
-          const p = r.data.find(x => x.photoType === 'profile');
-          setProfilePhoto(p || null);
-        });
-        toast.success('อัปโหลดรูปสำเร็จ!');
-      } catch { toast.error('อัปโหลดรูปไม่สำเร็จ', 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'); }
-    };
-    reader.readAsDataURL(file);
+    let dataUrl;
+    try {
+      dataUrl = await resizeImage(file);   // ย่อให้อัตโนมัติ รูปมือถือใหญ่ๆ ก็ใช้ได้
+    } catch (err) {
+      return toast.error('ใช้รูปนี้ไม่ได้', err.message);
+    }
+    try {
+      const { data } = await uploadPersonPhoto(id, { filePath: dataUrl, photoType: 'profile' });
+      setProfilePhoto(data);
+      toast.success('อัปโหลดรูปสำเร็จ!');
+    } catch (err) {
+      toast.error('อัปโหลดรูปไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง');
+    }
   };
 
   const handleDeletePhoto = async () => {
@@ -175,7 +187,14 @@ export default function PersonDetail() {
 
   useEffect(() => { reloadAll(); }, [id]);
 
-  const openDialog = (type) => { setForm({}); setDialogType(type); modalRef.current?.showModal(); };
+  // record = รายการที่จะแก้ไข (ไม่ส่ง = เพิ่มใหม่) — เดิมเพิ่มได้อย่างเดียว พิมพ์ผิดต้องลบแล้วเพิ่มใหม่
+  const openDialog = (type, record = null) => {
+    setForm(record ? toEditForm(type, record) : {});
+    setEditingId(record?.id ?? null);
+    setDialogType(type);
+    setDialogNonce((n) => n + 1);   // สร้างช่องในหน้าต่างใหม่ทุกครั้ง ไม่ให้ค่าที่พิมพ์ค้างจากรอบก่อนโผล่
+    modalRef.current?.showModal();
+  };
 
   const handleSave = async () => {
     const miss = (msg) => { toast.error('กรอกข้อมูลไม่ครบ', msg); return true; };
@@ -189,15 +208,18 @@ export default function PersonDetail() {
     if (dialogType === 'personorg' && !form.orgId) return miss('กรุณาเลือกสถานประกอบการ');
     if (dialogType === 'personorg' && !form.roleType) return miss('กรุณาเลือกบทบาท');
     if (dialogType === 'disability' && !form.disabilityTypeId) return miss('กรุณาเลือกประเภทความพิการ');
+    if (endBeforeStart(form.startDate, form.endDate)) return miss('วันสิ้นสุดต้องไม่ก่อนวันเริ่ม');
     try {
-      if (dialogType === 'training') { await createTraining(id, form); getTraining(id).then((r) => setTraining(r.data)); }
-      else if (dialogType === 'workexp') { await createWorkExp(id, form); getWorkExp(id).then((r) => setWorkexp(r.data)); }
-      else if (dialogType === 'followup') { await createFollowUp(id, form); getFollowUp(id).then((r) => setFollowup(r.data)); }
+      const eid = editingId;
+      if (dialogType === 'training') { await (eid ? updateTraining(id, eid, form) : createTraining(id, form)); getTraining(id).then((r) => setTraining(r.data)); }
+      else if (dialogType === 'workexp') { await (eid ? updateWorkExp(id, eid, form) : createWorkExp(id, form)); getWorkExp(id).then((r) => setWorkexp(r.data)); }
+      else if (dialogType === 'followup') { await (eid ? updateFollowUp(id, eid, form) : createFollowUp(id, form)); getFollowUp(id).then((r) => setFollowup(r.data)); }
+      else if (dialogType === 'personorg' && eid) { await updatePersonOrg(id, eid, form); getPersonOrgs(id).then((r) => setPersonOrgs(r.data)); }
       else if (dialogType === 'skill') { await createSkill(id, form); getSkills(id).then((r) => setSkills(r.data)); }
       else if (dialogType === 'personorg') { await createPersonOrg(id, form); getPersonOrgs(id).then((r) => setPersonOrgs(r.data)); }
       else if (dialogType === 'disability') { await createDisabilityInfo(id, form); getPerson(id).then((r) => setPerson(r.data)); }
       modalRef.current?.close();
-      toast.success('บันทึกสำเร็จ!');
+      toast.success(editingId ? 'แก้ไขสำเร็จ!' : 'บันทึกสำเร็จ!');
     } catch (err) { toast.error('บันทึกไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'); }
   };
 
@@ -207,6 +229,18 @@ export default function PersonDetail() {
     try { await doDelete(); reload(); toast.success('ลบสำเร็จ!'); }
     catch (err) { toast.error('ลบไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด'); }
   };
+
+  if (personError) return (
+    <div>
+      <LoadError
+        message={personError === 'notfound' ? 'ไม่พบข้อมูลคนพิการคนนี้' : 'โหลดข้อมูลไม่สำเร็จ'}
+        hint={personError === 'notfound' ? 'อาจถูกลบออกจากระบบไปแล้ว' : 'ตรวจสอบอินเทอร์เน็ต แล้วกดลองใหม่'}
+        onRetry={personError === 'notfound' ? null : reloadAll} />
+      <div className="text-center -mt-8">
+        <button className="btn btn-ghost btn-sm gap-1 text-gray-500" onClick={goBack}><ArrowLeft size={15} /> กลับ</button>
+      </div>
+    </div>
+  );
 
   if (!person) return <div className="flex items-center justify-center h-96"><span className="loading loading-spinner loading-lg text-primary" /></div>;
 
@@ -227,7 +261,7 @@ export default function PersonDetail() {
             {profilePhoto?.filePath
               ? <img src={profilePhoto.filePath} alt="รูปถ่าย" className="w-full h-full object-cover" />
               : <div className="w-full h-full flex items-center justify-center text-white text-lg font-black">
-                  {person.fullName?.slice(0, 2).toUpperCase()}
+                  {nameInitials(person.fullName)}
                 </div>
             }
           </div>
@@ -359,7 +393,7 @@ export default function PersonDetail() {
                   <td>{t.trainingType && <span className="badge badge-sm bg-orange-100 text-orange-700 border-0">{t.trainingType}</span>}</td>
                   <td className="text-gray-600 max-w-xs truncate">{t.skillsGained || '—'}</td>
                   <td className="text-gray-600">{t.evaluationResult || '—'}</td>
-                  {canEdit && <td><DelBtn onClick={() => delWith('ประวัติอบรม', () => deleteTraining(id, t.id), () => getTraining(id).then(r => setTraining(r.data)))} /></td>}
+                  {canEdit && <RowActions onEdit={() => openDialog('training', t)} onDelete={() => delWith('ประวัติอบรม', () => deleteTraining(id, t.id), () => getTraining(id).then(r => setTraining(r.data)))} />}
                 </tr>
               ))}
               {training.length === 0 && <EmptyRow cols={canEdit ? 7 : 6} />}
@@ -384,7 +418,7 @@ export default function PersonDetail() {
                   <td className="font-medium text-gray-700">{w.income ? `฿${Number(w.income).toLocaleString()}` : '—'}</td>
                   <td><DateRange start={w.startDate} end={w.endDate} noEndLabel="ปัจจุบัน" /></td>
                   <td className="text-gray-600 max-w-xs truncate">{w.outcome || '—'}</td>
-                  {canEdit && <td><DelBtn onClick={() => delWith('ประสบการณ์งาน', () => deleteWorkExp(id, w.id), () => getWorkExp(id).then(r => setWorkexp(r.data)))} /></td>}
+                  {canEdit && <RowActions onEdit={() => openDialog('workexp', w)} onDelete={() => delWith('ประสบการณ์งาน', () => deleteWorkExp(id, w.id), () => getWorkExp(id).then(r => setWorkexp(r.data)))} />}
                 </tr>
               ))}
               {workexp.length === 0 && <EmptyRow cols={canEdit ? 7 : 6} />}
@@ -436,7 +470,7 @@ export default function PersonDetail() {
                   </td>
                   <td className="text-gray-600 text-xs">{f.satisfaction || '—'}</td>
                   <td className="text-gray-600 text-xs max-w-xs truncate">{f.issues || '—'}</td>
-                  {canEdit && <td><DelBtn onClick={() => delWith('การติดตามผล', () => deleteFollowUp(id, f.id), () => getFollowUp(id).then(r => setFollowup(r.data)))} /></td>}
+                  {canEdit && <RowActions onEdit={() => openDialog('followup', f)} onDelete={() => delWith('การติดตามผล', () => deleteFollowUp(id, f.id), () => getFollowUp(id).then(r => setFollowup(r.data)))} />}
                 </tr>
               ))}
               {followup.length === 0 && <EmptyRow cols={canEdit ? 8 : 7} />}
@@ -460,7 +494,7 @@ export default function PersonDetail() {
                   <td><DateRange start={po.startDate} end={po.endDate} noEndLabel="—" /></td>
                   <td className="font-medium text-gray-700">{po.amount ? `฿${Number(po.amount).toLocaleString()}` : '—'}</td>
                   <td className="text-gray-600 text-xs max-w-xs truncate">{po.supportDetail || '—'}</td>
-                  {canEdit && <td><DelBtn onClick={() => delWith('สถานประกอบการ', () => deletePersonOrg(id, po.id), () => getPersonOrgs(id).then(r => setPersonOrgs(r.data)))} /></td>}
+                  {canEdit && <RowActions onEdit={() => openDialog('personorg', po)} onDelete={() => delWith('สถานประกอบการ', () => deletePersonOrg(id, po.id), () => getPersonOrgs(id).then(r => setPersonOrgs(r.data)))} />}
                 </tr>
               ))}
               {personOrgs.length === 0 && <EmptyRow cols={canEdit ? 6 : 5} />}
@@ -650,18 +684,18 @@ export default function PersonDetail() {
             </div>
             <div>
               <h3 className="text-white font-bold text-base leading-tight">
-                {dialogType === 'training' && 'เพิ่มการอบรม'}
-                {dialogType === 'workexp' && 'เพิ่มประสบการณ์งาน'}
-                {dialogType === 'followup' && 'บันทึกติดตามผล'}
+                {dialogType === 'training' && (editingId ? 'แก้ไขการอบรม' : 'เพิ่มการอบรม')}
+                {dialogType === 'workexp' && (editingId ? 'แก้ไขประสบการณ์งาน' : 'เพิ่มประสบการณ์งาน')}
+                {dialogType === 'followup' && (editingId ? 'แก้ไขการติดตามผล' : 'บันทึกติดตามผล')}
                 {dialogType === 'skill' && 'เพิ่มทักษะ'}
-                {dialogType === 'personorg' && 'เชื่อมสถานประกอบการ'}
+                {dialogType === 'personorg' && (editingId ? 'แก้ไขสถานประกอบการที่เกี่ยวข้อง' : 'เชื่อมสถานประกอบการ')}
                 {dialogType === 'disability' && 'เพิ่มข้อมูลความพิการ'}
               </h3>
               <p className="text-orange-300/80 text-xs mt-0.5">กรุณากรอกข้อมูลให้ครบถ้วน</p>
             </div>
           </div>
 
-          <div className="p-5 grid grid-cols-2 gap-3 max-h-[65vh] overflow-y-auto">
+          <div key={dialogNonce} className="p-5 grid grid-cols-2 gap-3 max-h-[65vh] overflow-y-auto">
             {dialogType === 'training' && <>
               <F12 label="ชื่อหลักสูตร *" value={form.courseName} onChange={v => setForm({...form, courseName: v})} />
               <F12 label="หน่วยงาน" value={form.organizer} onChange={v => setForm({...form, organizer: v})} />
@@ -716,7 +750,9 @@ export default function PersonDetail() {
 
             {dialogType === 'disability' && <>
               <SelData12 label="ประเภทความพิการ *" value={form.disabilityTypeId} onChange={v => setForm({...form, disabilityTypeId: v})}
-                options={[['','— เลือกประเภทความพิการ —'], ...disabilityTypes.map(t => [String(t.id), t.typeName])]} />
+                options={[['','— เลือกประเภทความพิการ —'], ...disabilityTypes
+                  .filter(t => !(person.disabilityInfos || []).some(d => d.disabilityTypeId === t.id))   // ไม่ให้เลือกประเภทที่มีอยู่แล้ว
+                  .map(t => [String(t.id), t.typeName])]} />
               <F12 label="ระดับความพิการ" value={form.disabilityLevel} onChange={v => setForm({...form, disabilityLevel: v})} />
               <F12 label="อุปกรณ์ช่วยเหลือ" value={form.assistiveDevice} onChange={v => setForm({...form, assistiveDevice: v})} />
               <F12 label="ข้อจำกัดด้านงาน" value={form.workLimitation} onChange={v => setForm({...form, workLimitation: v})} />
@@ -747,27 +783,13 @@ const F = ({ label, value = '', onChange, type = 'text' }) => (
 const F12 = (p) => <div className="col-span-2"><F {...p} /></div>;
 
 function ThaiDate({ label, value = '', onChange }) {
-  const toDisplay = (iso) => {
-    if (!iso) return '';
-    const [y, m, d] = iso.split('-');
-    if (!y || !m || !d) return '';
-    return `${d}/${m}/${parseInt(y) + 543}`;
-  };
-  const [display, setDisplay] = useState(() => toDisplay(value));
-  useEffect(() => { setDisplay(toDisplay(value)); }, [value]);
-  const handleChange = (e) => {
-    const raw = e.target.value.replace(/\D/g, '').slice(0, 8);
-    let fmt = raw.length <= 2 ? raw : raw.length <= 4 ? `${raw.slice(0,2)}/${raw.slice(2)}` : `${raw.slice(0,2)}/${raw.slice(2,4)}/${raw.slice(4)}`;
-    setDisplay(fmt);
-    if (raw.length === 8) {
-      const yAD = parseInt(raw.slice(4, 8)) - 543;
-      onChange(`${yAD}-${raw.slice(2,4)}-${raw.slice(0,2)}`);
-    } else if (raw.length === 0) onChange('');
-  };
+  const { display, onInput, msg } = useThaiDate(value, onChange);
   return (
     <div>
       <label className={labelCls}>{label}</label>
-      <input type="text" placeholder="วว/ดด/ปปปป (พ.ศ.)" maxLength={10} className={inputCls} value={display} onChange={handleChange} />
+      <input type="text" inputMode="numeric" placeholder="วว/ดด/ปปปป (พ.ศ.)" maxLength={10}
+        className={`${inputCls} ${msg?.type === 'error' ? '!border-red-400' : ''}`} value={display} onChange={onInput} />
+      {msg && <p className={`text-xs mt-1 ${msg.type === 'error' ? 'text-red-500' : 'text-gray-400'}`}>{msg.text}</p>}
     </div>
   );
 }
@@ -788,8 +810,27 @@ const Sel12 = (p) => <div className="col-span-2"><Sel {...p} /></div>;
 const SelData12 = (p) => <div className="col-span-2"><Sel {...p} /></div>;
 
 const DelBtn = ({ onClick }) => (
-  <button className="btn btn-ghost btn-xs text-red-400 hover:bg-red-50" onClick={onClick}><Trash2 size={13} /></button>
+  <button className="btn btn-ghost btn-xs text-red-400 hover:bg-red-50" title="ลบ" onClick={onClick}><Trash2 size={13} /></button>
 );
+const EditBtn = ({ onClick }) => (
+  <button className="btn btn-ghost btn-xs text-amber-500 hover:bg-amber-50" title="แก้ไข" onClick={onClick}><Pencil size={13} /></button>
+);
+const RowActions = ({ onEdit, onDelete }) => (
+  <td className="whitespace-nowrap text-right"><EditBtn onClick={onEdit} /><DelBtn onClick={onDelete} /></td>
+);
+
+// รายการจากฐานข้อมูล → ค่าในฟอร์มแก้ไข (เอาเฉพาะช่องที่ฟอร์มมี วันที่ตัดเหลือ YYYY-MM-DD ตัวเลขเป็นข้อความ)
+const day = (v) => (v ? String(v).slice(0, 10) : '');
+const txt = (v) => (v == null ? '' : String(v));
+const EDIT_FIELDS = {
+  training: ['courseName', 'organizer', 'startDate', 'endDate', 'trainingType', 'evaluationResult', 'skillsGained'],
+  workexp: ['organizationName', 'jobType', 'workMode', 'income', 'startDate', 'endDate', 'outcome'],
+  followup: ['followUpDate', 'employmentStatus', 'jobType', 'income', 'skillMatch', 'satisfaction', 'issues'],
+  personorg: ['orgId', 'roleType', 'startDate', 'endDate', 'amount', 'note', 'supportDetail'],
+};
+function toEditForm(type, record) {
+  return Object.fromEntries((EDIT_FIELDS[type] || []).map((k) => [k, /Date$/.test(k) ? day(record[k]) : txt(record[k])]));
+}
 const EmptyRow = ({ cols }) => (
   <tr><td colSpan={cols} className="text-center py-8 text-gray-400 text-sm">ไม่มีข้อมูล</td></tr>
 );

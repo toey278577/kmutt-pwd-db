@@ -3,6 +3,8 @@ import { Plus, Pencil, Trash2, Building2 } from 'lucide-react';
 import { getOrganizations, createOrganization, updateOrganization, deleteOrganization } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import LoadError from '../components/LoadError';
+import { orgInitials } from '../utils/name';
 
 const emptyForm = { orgName: '', businessType: '', address: '', contactName: '', phone: '', email: '', note: '' };
 const AVATAR_GRADIENTS = [
@@ -22,11 +24,14 @@ export default function OrganizationList() {
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
 
-  const load = () => getOrganizations().then((r) => setOrgs(r.data));
+  const [loadError, setLoadError] = useState(false);
+  // เดิมโหลดพังแล้วโชว์ "0 แห่ง" เหมือนไม่มีข้อมูล ผู้ใช้เข้าใจผิดว่าข้อมูลหาย
+  const load = () => getOrganizations().then((r) => { setOrgs(r.data); setLoadError(false); }).catch(() => setLoadError(true));
   useEffect(() => { load(); }, []);
 
   const openModal = (org = null) => {
-    if (org) { setForm({ ...emptyForm, ...org }); setEditId(org.id); }
+    // เอาเฉพาะช่องในฟอร์ม (ไม่ส่ง id / จำนวนคนที่เชื่อม กลับไปตอนบันทึก)
+    if (org) { setForm(Object.fromEntries(Object.keys(emptyForm).map((k) => [k, org[k] ?? '']))); setEditId(org.id); }
     else { setForm(emptyForm); setEditId(null); }
     modalRef.current?.showModal();
   };
@@ -42,14 +47,21 @@ export default function OrganizationList() {
     } catch (err) { toast.error('บันทึกไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'); }
   };
 
-  const handleDelete = async (id) => {
-    if (!(await toast.confirm({ title: 'ลบองค์กรนี้?', message: 'ข้อมูลที่ลบแล้วไม่สามารถกู้คืนได้' }))) return;
+  const handleDelete = async (org) => {
+    const linked = org._count?.persons || 0;
+    // บอกให้ชัดว่าจะกระทบคนพิการกี่คน (เดิมลบการเชื่อมโยงทิ้งเงียบๆ)
+    const message = linked > 0
+      ? `มีคนพิการเชื่อมกับองค์กรนี้อยู่ ${linked} คน — ประวัติการฝึกงาน/จ้างงานกับองค์กรนี้ของทั้ง ${linked} คนจะถูกลบด้วย (ข้อมูลคนพิการไม่หาย) กู้คืนไม่ได้`
+      : 'ข้อมูลที่ลบแล้วไม่สามารถกู้คืนได้';
+    if (!(await toast.confirm({ title: `ลบ "${org.orgName}"?`, message }))) return;
     try {
-      await deleteOrganization(id);
+      await deleteOrganization(org.id);
       load();
       toast.success('ลบสำเร็จ!');
     } catch (err) { toast.error('ลบไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด'); }
   };
+
+  if (loadError) return <LoadError onRetry={load} />;
 
   return (
     <div className="space-y-4">
@@ -105,11 +117,12 @@ export default function OrganizationList() {
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-3">
                       <div className={`w-9 h-9 rounded-2xl bg-gradient-to-br ${AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]} text-white text-xs font-black flex items-center justify-center flex-shrink-0 shadow-sm`}>
-                        {o.orgName.slice(0, 2)}
+                        {orgInitials(o.orgName)}
                       </div>
                       <div>
                         <p className="font-bold text-gray-800 text-sm leading-none">{o.orgName}</p>
                         {o.address && <p className="text-gray-400 text-xs mt-0.5 truncate max-w-[160px]">{o.address}</p>}
+                        {o._count?.persons > 0 && <p className="text-orange-500 text-xs mt-0.5 font-semibold">เชื่อมกับคนพิการ {o._count.persons} คน</p>}
                       </div>
                     </div>
                   </td>
@@ -129,7 +142,7 @@ export default function OrganizationList() {
                         <button className="w-7 h-7 rounded-xl flex items-center justify-center text-amber-400 hover:bg-amber-50 hover:text-amber-600 transition-all" onClick={() => openModal(o)}>
                           <Pencil size={14} />
                         </button>
-                        <button className="w-7 h-7 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-50 hover:text-red-600 transition-all" onClick={() => handleDelete(o.id)}>
+                        <button className="w-7 h-7 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-50 hover:text-red-600 transition-all" onClick={() => handleDelete(o)}>
                           <Trash2 size={14} />
                         </button>
                       </div>

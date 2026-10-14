@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient');
+const { ensureOwned, pick } = require('../utils/owned');
 
 const toDate = (val) => (val && String(val).trim() !== '') ? new Date(val) : null;
 const toEnum = (val) => (val && String(val).trim() !== '') ? val : null;
+const TEXT = ['courseName', 'organizer', 'skillsGained', 'evaluationResult'];
 
 router.get('/:id/training', async (req, res) => {
   try {
@@ -19,7 +21,8 @@ router.get('/:id/training', async (req, res) => {
 
 router.post('/:id/training', async (req, res) => {
   try {
-    const { startDate, endDate, trainingType, ...rest } = req.body;
+    const { startDate, endDate, trainingType } = req.body;
+    const rest = pick(req.body, TEXT);
     const record = await prisma.trainingRecord.create({
       data: { ...rest, personId: parseInt(req.params.id), startDate: toDate(startDate), endDate: toDate(endDate), trainingType: toEnum(trainingType) },
     });
@@ -31,7 +34,9 @@ router.post('/:id/training', async (req, res) => {
 
 router.put('/:id/training/:tid', async (req, res) => {
   try {
-    const { startDate, endDate, trainingType, ...rest } = req.body;
+    if (!(await ensureOwned(res, 'trainingRecord', parseInt(req.params.tid), parseInt(req.params.id)))) return;
+    const { startDate, endDate, trainingType } = req.body;
+    const rest = pick(req.body, TEXT);
     const record = await prisma.trainingRecord.update({
       where: { id: parseInt(req.params.tid) },
       data: { ...rest, startDate: toDate(startDate), endDate: toDate(endDate), trainingType: toEnum(trainingType) },
@@ -44,6 +49,7 @@ router.put('/:id/training/:tid', async (req, res) => {
 
 router.delete('/:id/training/:tid', async (req, res) => {
   try {
+    if (!(await ensureOwned(res, 'trainingRecord', parseInt(req.params.tid), parseInt(req.params.id)))) return;
     await prisma.trainingRecord.delete({ where: { id: parseInt(req.params.tid) } });
     res.json({ message: 'Deleted' });
   } catch (err) {
