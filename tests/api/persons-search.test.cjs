@@ -6,6 +6,8 @@ const { prisma, eq, summary, API, SECRET, jwt } = require('../lib.cjs');
   const get = async (q) => (await (await fetch(`${API}/persons${q}`, { headers: H })).json());
   const demo = await prisma.person.findMany({ where: { thaiId: { startsWith: '88888888' } }, orderBy: { id: 'asc' } });
   const [a, b2] = demo;
+  // ใช้คนตัวอย่าง 2 คนแรก — จำผลติดตามเดิมไว้ คืนให้ตอนจบ (เทสต์อื่นที่รันทีหลังอ้างข้อมูลตั้งต้นชุดนี้)
+  const original = await prisma.followUp.findMany({ where: { personId: { in: [a.id, b2.id] } } });
   await prisma.followUp.deleteMany({ where: { personId: { in: [a.id, b2.id] } } });
   // a: ติดตาม 2 ครั้ง ล่าสุด = มีงานทำ · วันเดียวกัน 2 รายการ ต้องเอาที่บันทึกทีหลัง
   await prisma.followUp.create({ data: { personId: a.id, followUpDate: new Date('2026-08-01'), employmentStatus: 'UNEMPLOYED' } });
@@ -34,5 +36,7 @@ const { prisma, eq, summary, API, SECRET, jwt } = require('../lib.cjs');
   eq('ค้นเบอร์: ทุกแถวที่เจอมีเบอร์นั้นจริง', r.every((p) => p.mobile === a.mobile || p.phone === a.mobile), true);
   eq('ค้นด้วยคำที่ไม่มี → ว่าง', await get('?search=' + encodeURIComponent('ไม่มีใครชื่อนี้แน่นอน')), []);
   eq('ค้น + กรองรุ่นพร้อมกัน', ids(await get(`?search=${encodeURIComponent(a.nickname)}&batchId=${a.batchId}`)).includes(a.id), true);
+  await prisma.followUp.deleteMany({ where: { personId: { in: [a.id, b2.id] } } });
+  await prisma.followUp.createMany({ data: original.map(({ id: _id, ...row }) => row) });
   process.exit(summary() ? 1 : 0);
 })();

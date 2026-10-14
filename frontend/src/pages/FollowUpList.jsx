@@ -5,6 +5,7 @@ import { getAllFollowUp, getFollowUpDue } from '../api';
 import FollowUpDue from '../components/FollowUpDue';
 import LoadError from '../components/LoadError';
 import { nameInitials } from '../utils/name';
+import MobileCard, { MobileAvatar } from '../components/MobileCard';
 
 const EMP = {
   EMPLOYED:   { bg: 'bg-emerald-100 text-emerald-700 border-emerald-200', label: 'มีงานทำ' },
@@ -69,9 +70,9 @@ export default function FollowUpList() {
       {/* ถึงรอบติดตามผล */}
       {due && <FollowUpDue data={due} />}
 
-      {/* Table */}
+      {/* จอคอม = ตาราง · มือถือ = การ์ด (เดิมตาราง 8 คอลัมน์ต้องเลื่อนข้าง ป้ายสถานะแตกหลายบรรทัด) */}
       <div className="bg-white rounded-3xl border border-orange-100/80 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-sm" style={{ minWidth: '760px' }}>
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
@@ -130,6 +131,37 @@ export default function FollowUpList() {
               })}
             </tbody>
           </table>
+        </div>
+
+        <div className="md:hidden divide-y divide-gray-100">
+          {rows.length === 0 && (
+            <div className="flex flex-col items-center gap-3 py-12 text-gray-400">
+              <div className="w-16 h-16 rounded-3xl bg-orange-50 flex items-center justify-center">
+                <Target size={28} className="text-orange-200" />
+              </div>
+              <p className="text-sm font-medium">ไม่มีข้อมูลการติดตามผล</p>
+            </div>
+          )}
+          {rows.map((f, i) => {
+            const e = EMP[f.employmentStatus] || EMP.UNEMPLOYED;
+            return (
+              <MobileCard key={f.id} onClick={() => navigate(`/persons/${f.personId}`)}
+                avatar={<MobileAvatar text={nameInitials(f.personName)} i={i} />}
+                title={f.personName}
+                chips={<>
+                  <span className="bg-orange-50 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-lg border border-orange-100">{fmtDate(f.followUpDate) || '—'}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold border whitespace-nowrap ${e.bg}`}>{e.label}</span>
+                  {f.skillMatch === 'MATCH' && <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">ตรงสาย</span>}
+                  {f.skillMatch === 'NOT_MATCH' && <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600 border border-red-200">ไม่ตรงสาย</span>}
+                </>}
+                details={[
+                  ['ประเภทงาน', f.jobType],
+                  ['รายได้', f.income ? `฿${Number(f.income).toLocaleString()}` : ''],
+                  ['ความพึงพอใจ', f.satisfaction],
+                  ['ปัญหา', f.issues],
+                ]} />
+            );
+          })}
         </div>
       </div>
     </div>

@@ -122,6 +122,7 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #4a4a50; }
 
   /* Borders — เส้นบางนุ่ม ไม่แข็ง */
   html.dark main .border-orange-100,
+  html.dark main [class*="border-orange-100/"],
   html.dark main .border-orange-200,
   html.dark main .border-gray-50,
   html.dark main .border-gray-100,
@@ -143,8 +144,11 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #4a4a50; }
   html.dark main .text-orange-800        { color: #fb923c !important; }
   /* ปุ่มส้มอ่อน (เพิ่ม / เปลี่ยนรูป / กลับไปแก้ต่อ) — พื้นกลายเป็นเทาเข้ม ตัวหนังสือส้มเข้มจะจม */
   html.dark main [class*="bg-orange-50"].text-orange-700 { color: #fdba74 !important; }
+  /* เส้นคั่นของ divide-y อยู่ที่ลูกแต่ละตัว ไม่ใช่กล่องนอก — เดิมทับแค่กล่องนอก เส้นระหว่างการ์ดมือถือเลยขาวสว่าง */
   html.dark main .divide-gray-50,
-  html.dark main .divide-y               { border-color: #34343b !important; }
+  html.dark main .divide-y,
+  html.dark main .divide-gray-50 > *,
+  html.dark main .divide-y > *           { border-color: #34343b !important; }
 
   /* Inputs & forms */
   html.dark main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]) {

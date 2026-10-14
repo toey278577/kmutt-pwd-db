@@ -7,6 +7,7 @@ import LoadError from '../components/LoadError';
 import { useDiscardGuard } from '../utils/useDiscardGuard';
 import DiscardBar from '../components/DiscardBar';
 import { orgInitials } from '../utils/name';
+import MobileCard, { MobileEditBtn, MobileDelBtn } from '../components/MobileCard';
 
 const emptyForm = { orgName: '', businessType: '', address: '', contactName: '', phone: '', email: '', note: '' };
 const AVATAR_GRADIENTS = [
@@ -92,9 +93,9 @@ export default function OrganizationList() {
         )}
       </div>
 
-      {/* Table */}
+      {/* จอคอม = ตาราง · มือถือ = การ์ด */}
       <div className="bg-white rounded-3xl border border-orange-100/80 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-sm" style={{ minWidth: '640px' }}>
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
@@ -157,6 +158,31 @@ export default function OrganizationList() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        <div className="md:hidden divide-y divide-gray-100">
+          {orgs.length === 0 && (
+            <div className="flex flex-col items-center gap-3 py-12 text-gray-400">
+              <div className="w-16 h-16 rounded-3xl bg-orange-50 flex items-center justify-center">
+                <Building2 size={28} className="text-orange-200" />
+              </div>
+              <p className="text-sm font-medium">ไม่พบข้อมูล</p>
+            </div>
+          )}
+          {orgs.map((o, i) => (
+            <MobileCard key={o.id}
+              avatar={<div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]} text-white text-sm font-black flex items-center justify-center flex-shrink-0`}>{orgInitials(o.orgName)}</div>}
+              title={o.orgName}
+              chips={(o.businessType || o._count?.persons > 0) && <>
+                {o.businessType && <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-orange-50 text-orange-700 border border-orange-100">{o.businessType}</span>}
+                {o._count?.persons > 0 && <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-50 text-gray-600 border border-gray-200">เชื่อมกับคนพิการ {o._count.persons} คน</span>}
+              </>}
+              details={[['ผู้ติดต่อ', o.contactName], ['เบอร์โทร', o.phone], ['อีเมล', o.email], ['ที่อยู่', o.address]]}
+              actions={canEdit && <>
+                <MobileEditBtn onClick={() => openModal(o)} />
+                <MobileDelBtn onClick={() => handleDelete(o)} />
+              </>} />
+          ))}
         </div>
       </div>
 

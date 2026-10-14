@@ -18,6 +18,7 @@ import { resizeImage } from '../utils/resizeImage';
 import LoadError from '../components/LoadError';
 import { useDiscardGuard } from '../utils/useDiscardGuard';
 import DiscardBar from '../components/DiscardBar';
+import MobileCard, { MobileEditBtn, MobileDelBtn } from '../components/MobileCard';
 import { nameInitials } from '../utils/name';
 import { useThaiDate } from '../utils/useThaiDate';
 import { endBeforeStart } from '../utils/thaiDate';
@@ -32,6 +33,9 @@ const SKILL_COLOR = {
   ADVANCED: 'text-emerald-600 bg-emerald-50 border-emerald-200',
 };
 const ROLE_TYPE_LABELS = { INTERNSHIP: 'ฝึกงาน', EMPLOYMENT: 'จ้างงาน', OTHER: 'อื่นๆ' };
+const TRAINING_TYPE_LABELS = { TRAIN: 'อบรม', LEARN: 'เรียนรู้', EARN: 'ฝึกงาน' };
+const WORK_MODE_LABELS = { INTERNSHIP: 'ฝึกงาน', EMPLOYMENT: 'จ้างงาน', FREELANCE: 'Freelance' };
+const EMP_CHIP = { EMPLOYED: 'bg-emerald-100 text-emerald-700 border-emerald-200', UNEMPLOYED: 'bg-gray-100 text-gray-600 border-gray-200', STUDYING: 'bg-sky-100 text-sky-700 border-sky-200' };
 
 const tabs = ['ข้อมูลพื้นฐาน', 'การอบรม', 'ประสบการณ์งาน', 'ทักษะ', 'ติดตามผล', 'สถานประกอบการ', 'ประเมินทักษะ'];
 
@@ -397,7 +401,19 @@ export default function PersonDetail() {
 
       {/* Tab 1: Training */}
       {tab === 1 && (
-        <SubSection title="ประวัติการอบรม" icon={<GraduationCap size={16} />} onAdd={canEdit ? () => openDialog('training') : null}>
+        <SubSection title="ประวัติการอบรม" icon={<GraduationCap size={16} />} onAdd={canEdit ? () => openDialog('training') : null}
+          mobile={training.length === 0 ? <MobileNone /> : training.map((t) => (
+            <MobileCard key={t.id} title={t.courseName}
+              chips={<>
+                <span className={CHIP_DATE}>{rangeText(t.startDate, t.endDate, '—')}</span>
+                {t.trainingType && <span className={CHIP_ORANGE}>{TRAINING_TYPE_LABELS[t.trainingType] || t.trainingType}</span>}
+              </>}
+              details={[['หน่วยงาน', t.organizer], ['ทักษะที่ได้', t.skillsGained], ['ผลประเมิน', t.evaluationResult]]}
+              actions={canEdit && <>
+                <MobileEditBtn onClick={() => openDialog('training', t)} />
+                <MobileDelBtn onClick={() => delWith('ประวัติอบรม', () => deleteTraining(id, t.id), () => getTraining(id).then(r => setTraining(r.data)))} />
+              </>} />
+          ))}>
           <table className="table table-zebra w-full text-sm">
             <thead><tr className="bg-orange-50 text-orange-600 text-xs uppercase">
               <th>หลักสูตร</th><th>หน่วยงาน</th><th>ช่วงเวลา</th><th>รูปแบบ</th><th>ทักษะที่ได้</th><th>ผลประเมิน</th>{canEdit && <th></th>}
@@ -408,7 +424,7 @@ export default function PersonDetail() {
                   <td className="font-semibold text-orange-950">{t.courseName}</td>
                   <td className="text-gray-500">{t.organizer || '—'}</td>
                   <td><DateRange start={t.startDate} end={t.endDate} noEndLabel="—" /></td>
-                  <td>{t.trainingType && <span className="badge badge-sm bg-orange-100 text-orange-700 border-0">{t.trainingType}</span>}</td>
+                  <td>{t.trainingType && <span className="badge badge-sm bg-orange-100 text-orange-700 border-0">{TRAINING_TYPE_LABELS[t.trainingType] || t.trainingType}</span>}</td>
                   <td className="text-gray-600 max-w-xs truncate">{t.skillsGained || '—'}</td>
                   <td className="text-gray-600">{t.evaluationResult || '—'}</td>
                   {canEdit && <RowActions onEdit={() => openDialog('training', t)} onDelete={() => delWith('ประวัติอบรม', () => deleteTraining(id, t.id), () => getTraining(id).then(r => setTraining(r.data)))} />}
@@ -422,7 +438,19 @@ export default function PersonDetail() {
 
       {/* Tab 2: Work */}
       {tab === 2 && (
-        <SubSection title="ประสบการณ์ทำงาน" icon={<Briefcase size={16} />} onAdd={canEdit ? () => openDialog('workexp') : null}>
+        <SubSection title="ประสบการณ์ทำงาน" icon={<Briefcase size={16} />} onAdd={canEdit ? () => openDialog('workexp') : null}
+          mobile={workexp.length === 0 ? <MobileNone /> : workexp.map((w) => (
+            <MobileCard key={w.id} title={w.organizationName}
+              chips={<>
+                <span className={CHIP_DATE}>{rangeText(w.startDate, w.endDate, 'ปัจจุบัน')}</span>
+                {w.workMode && <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">{WORK_MODE_LABELS[w.workMode] || w.workMode}</span>}
+              </>}
+              details={[['ประเภทงาน', w.jobType], ['รายได้', w.income ? `฿${Number(w.income).toLocaleString()}` : ''], ['ผลลัพธ์', w.outcome]]}
+              actions={canEdit && <>
+                <MobileEditBtn onClick={() => openDialog('workexp', w)} />
+                <MobileDelBtn onClick={() => delWith('ประสบการณ์งาน', () => deleteWorkExp(id, w.id), () => getWorkExp(id).then(r => setWorkexp(r.data)))} />
+              </>} />
+          ))}>
           <table className="table table-zebra w-full text-sm">
             <thead><tr className="bg-orange-50 text-orange-600 text-xs uppercase">
               <th>องค์กร</th><th>ประเภทงาน</th><th>รูปแบบ</th><th>รายได้</th><th>ช่วงเวลา</th><th>ผลลัพธ์</th>{canEdit && <th></th>}
@@ -469,7 +497,20 @@ export default function PersonDetail() {
 
       {/* Tab 4: FollowUp */}
       {tab === 4 && (
-        <SubSection title="ติดตามผล" icon={<Target size={16} />} onAdd={canEdit ? () => openDialog('followup') : null}>
+        <SubSection title="ติดตามผล" icon={<Target size={16} />} onAdd={canEdit ? () => openDialog('followup') : null}
+          mobile={followup.length === 0 ? <MobileNone /> : followup.map((f) => (
+            <MobileCard key={f.id} title={`ติดตามวันที่ ${fmtDate(f.followUpDate) || '—'}`}
+              chips={<>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-bold border ${EMP_CHIP[f.employmentStatus] || EMP_CHIP.UNEMPLOYED}`}>{EMP_LABELS[f.employmentStatus] || f.employmentStatus}</span>
+                {f.skillMatch === 'MATCH' && <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">ทักษะตรง</span>}
+                {f.skillMatch === 'NOT_MATCH' && <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600 border border-red-200">ทักษะไม่ตรง</span>}
+              </>}
+              details={[['ประเภทงาน', f.jobType], ['รายได้', f.income ? `฿${Number(f.income).toLocaleString()}` : ''], ['ความพึงพอใจ', f.satisfaction], ['ปัญหา', f.issues]]}
+              actions={canEdit && <>
+                <MobileEditBtn onClick={() => openDialog('followup', f)} />
+                <MobileDelBtn onClick={() => delWith('การติดตามผล', () => deleteFollowUp(id, f.id), () => getFollowUp(id).then(r => setFollowup(r.data)))} />
+              </>} />
+          ))}>
           <table className="table table-zebra w-full text-sm">
             <thead><tr className="bg-orange-50 text-orange-600 text-xs uppercase">
               <th>วันที่</th><th>สถานะงาน</th><th>ประเภทงาน</th><th>รายได้</th><th>ทักษะตรง</th><th>ความพึงพอใจ</th><th>ปัญหา</th>{canEdit && <th></th>}
@@ -499,7 +540,19 @@ export default function PersonDetail() {
 
       {/* Tab 5: PersonOrg */}
       {tab === 5 && (
-        <SubSection title="สถานประกอบการที่เกี่ยวข้อง" icon={<Building2 size={16} />} onAdd={canEdit ? () => openDialog('personorg') : null}>
+        <SubSection title="สถานประกอบการที่เกี่ยวข้อง" icon={<Building2 size={16} />} onAdd={canEdit ? () => openDialog('personorg') : null}
+          mobile={personOrgs.length === 0 ? <MobileNone /> : personOrgs.map((po) => (
+            <MobileCard key={po.id} title={po.organization?.orgName}
+              chips={<>
+                <span className={CHIP_ORANGE}>{ROLE_TYPE_LABELS[po.roleType] || po.roleType}</span>
+                <span className={CHIP_DATE}>{rangeText(po.startDate, po.endDate, '—')}</span>
+              </>}
+              details={[['เงินสนับสนุน', po.amount ? `฿${Number(po.amount).toLocaleString()}` : ''], ['รายละเอียด', po.supportDetail]]}
+              actions={canEdit && <>
+                <MobileEditBtn onClick={() => openDialog('personorg', po)} />
+                <MobileDelBtn onClick={() => delWith('สถานประกอบการ', () => deletePersonOrg(id, po.id), () => getPersonOrgs(id).then(r => setPersonOrgs(r.data)))} />
+              </>} />
+          ))}>
           <table className="table table-zebra w-full text-sm">
             <thead><tr className="bg-orange-50 text-orange-600 text-xs uppercase">
               <th>สถานประกอบการ</th><th>บทบาท</th><th>ช่วงเวลา</th><th>เงินสนับสนุน</th><th>รายละเอียด</th>{canEdit && <th></th>}
@@ -854,6 +907,12 @@ const EDIT_FIELDS = {
 function toEditForm(type, record) {
   return Object.fromEntries((EDIT_FIELDS[type] || []).map((k) => [k, /Date$/.test(k) ? day(record[k]) : txt(record[k])]));
 }
+// การ์ดบนมือถือ (SubSection mobile=...)
+const MobileNone = () => <p className="text-center py-8 text-gray-400 text-sm">ไม่มีข้อมูล</p>;
+const CHIP_DATE = 'px-2 py-0.5 rounded-lg text-xs font-bold bg-orange-50 text-orange-700 border border-orange-100 whitespace-nowrap';
+const CHIP_ORANGE = 'px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700';
+const rangeText = (start, end, noEnd) => `${fmtDate(start) || '—'} → ${fmtDate(end) || noEnd}`;
+
 const EmptyRow = ({ cols }) => (
   <tr><td colSpan={cols} className="text-center py-8 text-gray-400 text-sm">ไม่มีข้อมูล</td></tr>
 );
@@ -874,7 +933,8 @@ function InfoCard({ title, items }) {
   );
 }
 
-function SubSection({ title, icon, onAdd, children }) {
+// mobile = การ์ดแทนตารางบนมือถือ (ไม่ส่ง = ใช้ children ทุกขนาดจอ)
+function SubSection({ title, icon, onAdd, children, mobile }) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-orange-100">
@@ -887,7 +947,10 @@ function SubSection({ title, icon, onAdd, children }) {
           </button>
         )}
       </div>
-      <div className="overflow-x-auto">{children}</div>
+      {mobile ? <>
+        <div className="overflow-x-auto hidden md:block">{children}</div>
+        <div className="md:hidden divide-y divide-gray-100">{mobile}</div>
+      </> : <div className="overflow-x-auto">{children}</div>}
     </div>
   );
 }

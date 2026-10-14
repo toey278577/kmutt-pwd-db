@@ -8,6 +8,7 @@ import LoadError from '../components/LoadError';
 import { useDiscardGuard } from '../utils/useDiscardGuard';
 import DiscardBar from '../components/DiscardBar';
 import { nameInitials } from '../utils/name';
+import MobileCard, { MobileEditBtn, MobileDelBtn } from '../components/MobileCard';
 
 const ROLES = {
   ADMIN:  { label: 'ผู้ดูแลระบบ', bg: 'bg-red-100 text-red-700 border-red-200',       icon: Shield,  grad: 'from-red-500 to-orange-500' },
@@ -94,7 +95,8 @@ export default function UserManagement() {
     } catch (e) { toast.error('ลบไม่สำเร็จ', e.response?.data?.error || 'เกิดข้อผิดพลาด'); }
   };
 
-  const fmtDate = (iso) => iso?.slice(0, 10) || '—';
+  // วว/ดด/ปปปป พ.ศ. เหมือนทั้งระบบ (เดิมขึ้น 2026-10-14)
+  const fmtDate = (iso) => { if (!iso) return '—'; const [y, m, d] = iso.slice(0, 10).split('-'); return `${d}/${m}/${+y + 543}`; };
 
   if (loading) return (
     <div className="flex items-center justify-center h-96">
@@ -128,9 +130,9 @@ export default function UserManagement() {
         </button>
       </div>
 
-      {/* Table */}
+      {/* จอคอม = ตาราง · มือถือ = การ์ด */}
       <div className="bg-white rounded-3xl border border-orange-100/80 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-sm" style={{ minWidth: '600px' }}>
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
@@ -196,6 +198,32 @@ export default function UserManagement() {
               })}
             </tbody>
           </table>
+        </div>
+
+        <div className="md:hidden divide-y divide-gray-100">
+          {users.map((u) => {
+            const role = ROLES[u.role] || ROLES.STAFF;
+            const RoleIcon = role.icon;
+            const self = u.id === me?.id;
+            return (
+              <MobileCard key={u.id}
+                avatar={<div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${role.grad} text-white text-sm font-black flex items-center justify-center flex-shrink-0`}>{nameInitials(u.name)}</div>}
+                title={<>{u.name}{self && <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200 align-middle">คุณ</span>}</>}
+                subtitle={u.email}
+                chips={<>
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border ${role.bg}`}><RoleIcon size={11} /> {role.label}</span>
+                  <button onClick={() => handleToggle(u)} disabled={self}
+                    className={`px-2 py-0.5 rounded-full text-xs font-bold border ${u.isActive ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-600 border-gray-200'} ${self ? 'opacity-60' : 'active:scale-95'}`}>
+                    {u.isActive ? 'ใช้งาน' : 'ปิดใช้งาน'}
+                  </button>
+                </>}
+                details={[['สร้างเมื่อ', u.createdAt ? fmtDate(u.createdAt) : '']]}
+                actions={<>
+                  <MobileEditBtn onClick={() => openEdit(u)} />
+                  {!self && <MobileDelBtn onClick={() => handleDelete(u)} />}
+                </>} />
+            );
+          })}
         </div>
       </div>
 

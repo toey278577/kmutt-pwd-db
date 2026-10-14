@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import LoadError from '../components/LoadError';
 import { nameInitials } from '../utils/name';
 import { getAllTraining, getBatchEnrollments } from '../api';
+import MobileCard, { MobileAvatar } from '../components/MobileCard';
 
 const TYPE = {
   TRAIN: { bg: 'bg-amber-100 text-amber-700 border-amber-200',   label: 'อบรม' },
@@ -62,6 +63,18 @@ function EmptyRow({ cols, text }) {
     </tr>
   );
 }
+
+function MobileEmpty({ text }) {
+  return (
+    <div className="flex flex-col items-center gap-3 py-12 px-6 text-center text-gray-400">
+      <div className="w-16 h-16 rounded-3xl bg-orange-50 flex items-center justify-center">
+        <GraduationCap size={28} className="text-orange-200" />
+      </div>
+      <p className="text-sm font-medium">{text}</p>
+    </div>
+  );
+}
+const rangeText = (start, end) => (start || end ? `${fmtDate(start) || '—'} → ${fmtDate(end) || '—'}` : '');
 
 // คะแนนก่อน → หลังอบรม (ถ้าบันทึกไว้ในแท็บประเมินทักษะ)
 function ScoreCell({ pre, post }) {
@@ -153,8 +166,9 @@ export default function TrainingList() {
         )}
       </div>
 
+      {/* จอคอม = ตาราง · มือถือ = การ์ด (เดิมตาราง 6-7 คอลัมน์ต้องเลื่อนข้าง) */}
       <div className="bg-white rounded-3xl border border-orange-100/80 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto hidden md:block">
           {tab === 'batch' ? (
             <table className="w-full text-sm" style={{ minWidth: '760px' }}>
               <thead>
@@ -213,6 +227,46 @@ export default function TrainingList() {
               </tbody>
             </table>
           )}
+        </div>
+
+        <div className="md:hidden divide-y divide-gray-100">
+          {tab === 'batch' ? <>
+            {shownEnrolls.length === 0 && <MobileEmpty text="ยังไม่มีคนในรุ่นอบรม — เลือกรุ่นได้ที่ฟอร์มข้อมูลคนพิการ" />}
+            {shownEnrolls.map((e, i) => (
+              <MobileCard key={e.personId} onClick={() => navigate(`/persons/${e.personId}`)}
+                avatar={<MobileAvatar text={nameInitials(e.personName)} i={i} />}
+                title={e.personName}
+                subtitle={[e.course, e.program].filter(Boolean).join(' · ')}
+                chips={<>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-50 text-orange-700 border border-orange-200">รุ่น {e.batchNumber}/{e.year}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold border whitespace-nowrap ${e.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                    {e.status === 'ACTIVE' ? 'กำลังอบรม' : 'จบแล้ว'}
+                  </span>
+                </>}
+                details={[
+                  ['ช่วงเวลา', rangeText(e.startDate, e.endDate)],
+                  ['คะแนน', e.preTestScore != null || e.postTestScore != null ? <ScoreCell pre={e.preTestScore} post={e.postTestScore} /> : ''],
+                ]} />
+            ))}
+          </> : <>
+            {rows.length === 0 && <MobileEmpty text={'ไม่มีประวัติอบรมรายคน — เพิ่มได้ที่แท็บ "การอบรม" ในหน้ารายละเอียดคนพิการ'} />}
+            {rows.map((t, i) => {
+              const tp = TYPE[t.trainingType];
+              return (
+                <MobileCard key={t.id} onClick={() => navigate(`/persons/${t.personId}`)}
+                  avatar={<MobileAvatar text={nameInitials(t.personName)} i={i} />}
+                  title={t.personName}
+                  subtitle={t.courseName}
+                  chips={tp && <span className={`px-2 py-0.5 rounded-full text-xs font-bold border ${tp.bg}`}>{tp.label}</span>}
+                  details={[
+                    ['ช่วงเวลา', rangeText(t.startDate, t.endDate)],
+                    ['หน่วยงาน', t.organizer],
+                    ['ทักษะที่ได้', t.skillsGained],
+                    ['ผลประเมิน', t.evaluationResult],
+                  ]} />
+              );
+            })}
+          </>}
         </div>
       </div>
     </div>
