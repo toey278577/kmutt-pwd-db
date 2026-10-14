@@ -32,7 +32,7 @@ router.get('/:id', async (req, res) => {
         },
       },
     });
-    if (!batch) return res.status(404).json({ error: 'Not found' });
+    if (!batch) return res.status(404).json({ error: 'ไม่พบข้อมูลนี้ อาจถูกลบไปแล้ว' });
     res.json(batch);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -44,7 +44,7 @@ router.post('/', async (req, res) => {
   try {
     const { batchNumber, year, courseName, startDate, endDate, status } = req.body;
     if (!batchNumber || !year || !courseName) {
-      return res.status(400).json({ error: 'batchNumber, year และ courseName จำเป็นต้องมี' });
+      return res.status(400).json({ error: 'กรุณากรอกเลขรุ่น ปี และชื่อหลักสูตร' });
     }
     const batch = await prisma.trainingBatch.create({
       data: {

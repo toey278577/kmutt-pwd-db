@@ -25,24 +25,39 @@ function getAgeGroup(birthDate) {
 let statsCache = null;
 let statsCacheAt = 0;
 const STATS_TTL = 60_000; // 60 วิ
+// ล้าง cache ทันทีที่มีการเพิ่ม/แก้/ลบข้อมูล (เรียกจาก index.js) — ไม่งั้นเพิ่มคนแล้ว Dashboard ไม่ขยับไป 1 นาที
+const invalidateStats = () => { statsCache = null; };
 
 router.get('/stats', async (req, res) => {
   if (statsCache && Date.now() - statsCacheAt < STATS_TTL) {
     return res.json(statsCache);
   }
   try {
-    const [totalPersons, byGender, byDisabilityType, byEmployment, totalOrgs, totalTraining, allPersons, disabilityTypes] =
+    const [totalPersons, byGender, byDisabilityType, allFollowUps, totalOrgs, totalTraining, allPersons, disabilityTypes] =
       await Promise.all([
         prisma.person.count(),
         prisma.person.groupBy({ by: ['gender'], _count: true }),
         prisma.disabilityInfo.groupBy({ by: ['disabilityTypeId'], _count: true }),
-        prisma.followUp.groupBy({ by: ['employmentStatus'], _count: true }),
+        prisma.followUp.findMany({ select: { personId: true, employmentStatus: true, followUpDate: true, id: true } }),
         prisma.organization.count(),
-        prisma.trainingRecord.count(),
+        // ผู้เข้าอบรม = คนที่อยู่ในรุ่น หรือมีประวัติอบรมรายคน (เดิมนับแค่ประวัติรายคน → คนในรุ่นไม่ถูกนับ การ์ดขึ้น 0)
+        prisma.person.count({ where: { OR: [{ batchId: { not: null } }, { trainingRecords: { some: {} } }] } }),
         prisma.person.findMany({ select: { birthDate: true, educationLevel: true, province: true } }),
         prisma.disabilityType.findMany(),
       ]);
     const typeMap = Object.fromEntries(disabilityTypes.map((t) => [t.id, t.typeName]));
+
+    // สถานะการมีงานทำ — นับเป็น "คน" จากผลติดตามล่าสุดของแต่ละคน
+    // (เดิม groupBy ทุกบันทึก → คนที่ตามไป 3 รอบถูกนับ 3 ครั้ง ตัวเลขเกินจริง)
+    const latest = new Map();
+    for (const f of allFollowUps) {
+      const cur = latest.get(f.personId);
+      if (!cur || f.followUpDate > cur.followUpDate || (+f.followUpDate === +cur.followUpDate && f.id > cur.id)) {
+        latest.set(f.personId, f);
+      }
+    }
+    const empCount = {};
+    for (const f of latest.values()) empCount[f.employmentStatus] = (empCount[f.employmentStatus] || 0) + 1;
 
     // วุฒิการศึกษา — จัดกลุ่มด้วย groupKey ข้อความที่หน้าตาเหมือนกันแต่มีตัวล่องหน/ช่องว่างต่างกัน จะรวมเป็นแถวเดียว
     // ชื่อที่โชว์ใช้แบบที่เจอบ่อยสุดในกลุ่มนั้น
@@ -91,10 +106,10 @@ router.get('/stats', async (req, res) => {
         name: typeMap[d.disabilityTypeId] || 'ไม่ระบุ',
         value: d._count,
       })),
-      byEmployment: byEmployment.map((e) => ({
-        name: e.employmentStatus,
-        value: e._count,
-      })),
+      byEmployment: Object.entries(empCount)
+        .sort((a, b) => b[1] - a[1])
+        .map(([name, value]) => ({ name, value })),
+      followedUpPersons: latest.size,
       byEducation,
       byAgeGroup,
       byRegion,
@@ -108,3 +123,4 @@ router.get('/stats', async (req, res) => {
 });
 
 module.exports = router;
+module.exports.invalidateStats = invalidateStats;

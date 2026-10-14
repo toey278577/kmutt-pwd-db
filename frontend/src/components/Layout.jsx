@@ -17,7 +17,6 @@ const menu = [
 
 const ROLE_LABEL = { ADMIN: 'ผู้ดูแลระบบ', STAFF: 'เจ้าหน้าที่', VIEWER: 'ผู้ดูข้อมูล' };
 const ROLE_COLOR = { ADMIN: 'from-rose-400 to-red-500', STAFF: 'from-amber-300 to-orange-500', VIEWER: 'from-sky-300 to-cyan-500' };
-const ROLE_BADGE = 'bg-white/20 text-white border-white/30';
 
 // โทนส้มสว่าง (ลดสว่างลงนิด อิ่มขึ้น) + ลายจุดจางๆ + แสงเรืองมุมบน (รวมใน background เดียว — ปลอดภัย ไม่เพิ่ม DOM)
 const SIDEBAR_BG = `
@@ -25,21 +24,10 @@ const SIDEBAR_BG = `
   radial-gradient(125% 55% at 100% 0%, rgba(255,255,255,0.16), transparent 60%),
   linear-gradient(165deg,#fb923c 0%,#f97316 42%,#ea580c 74%,#c2410c 100%)`;
 
-export default function Layout({ children }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { user, logout, isAdmin } = useAuth();
-  const { dark, toggle } = useTheme();
-  const [open, setOpen] = useState(false);
-
-  const handleLogout = () => { logout(); navigate('/login', { replace: true }); };
-  const handleNav = (path) => { navigate(path); setOpen(false); };
-  const initials = user?.name?.slice(0, 2) || 'U';
-
-  const NavItem = ({ label, icon: Icon, path }) => {
-    const active = location.pathname === path;
-    return (
-      <button onClick={() => handleNav(path)}
+// อยู่นอก Layout — ถ้าประกาศข้างใน React จะสร้างปุ่มเมนูใหม่หมดทุกครั้งที่ Layout render (แอนิเมชันกระตุก)
+function NavItem({ label, icon: Icon, path, active, onNav }) {
+  return (
+      <button onClick={() => onNav(path)}
         className={`group relative overflow-hidden w-full flex items-center gap-3 pl-4 pr-3 py-2.5 rounded-xl text-left transition-all duration-200
           ${active
             ? 'bg-white text-orange-600 shadow-lg shadow-orange-950/25'
@@ -54,8 +42,19 @@ export default function Layout({ children }) {
         <Icon size={17} className={`relative z-10 flex-shrink-0 transition-colors ${active ? 'text-orange-600' : 'text-white/70 group-hover:text-white'}`} />
         <span className={`relative z-10 text-sm flex-1 ${active ? 'font-bold' : 'font-medium'}`}>{label}</span>
       </button>
-    );
-  };
+  );
+}
+
+export default function Layout({ children }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, logout, isAdmin } = useAuth();
+  const { dark, toggle } = useTheme();
+  const [open, setOpen] = useState(false);
+
+  const handleLogout = () => { logout(); navigate('/login', { replace: true }); };
+  const handleNav = (path) => { navigate(path); setOpen(false); };
+  const nav = (path) => ({ path, active: location.pathname === path, onNav: handleNav });
 
   return (
     <div className="flex min-h-screen">
@@ -110,13 +109,13 @@ export default function Layout({ children }) {
         {/* ── Menu ── */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           <p className="text-white/60 text-[10px] font-bold tracking-[0.15em] px-4 mb-2 uppercase">เมนูหลัก</p>
-          {menu.map((m) => <NavItem key={m.path} {...m} />)}
+          {menu.map((m) => <NavItem key={m.path} label={m.label} icon={m.icon} {...nav(m.path)} />)}
 
           {isAdmin && (
             <>
               <p className="text-white/60 text-[10px] font-bold tracking-[0.15em] px-4 mb-2 mt-4 uppercase">ผู้ดูแลระบบ</p>
-              <NavItem label="จัดการผู้ใช้" icon={UserCog} path="/users" />
-              <NavItem label="ประวัติการใช้งาน" icon={History} path="/audit" />
+              <NavItem label="จัดการผู้ใช้" icon={UserCog} {...nav("/users")} />
+              <NavItem label="ประวัติการใช้งาน" icon={History} {...nav("/audit")} />
             </>
           )}
         </nav>

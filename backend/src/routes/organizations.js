@@ -19,7 +19,7 @@ router.get('/:id', async (req, res) => {
       where: { id: parseInt(req.params.id) },
       include: { persons: { include: { person: true } } },
     });
-    if (!org) return res.status(404).json({ error: 'Not found' });
+    if (!org) return res.status(404).json({ error: 'ไม่พบข้อมูลนี้ อาจถูกลบไปแล้ว' });
     res.json(org);
   } catch (err) {
     res.status(500).json({ error: err.message });

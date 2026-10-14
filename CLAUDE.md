@@ -163,7 +163,9 @@ ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /a
 - จังหวัดใน Excel ต้องสะกดตรง ไม่งั้นนำเข้าไม่ได้ (ดู `utils/province.js`)
 - server อยู่หลัง nginx → ตั้ง `trust proxy` แล้ว `req.ip` เป็น IP จริงของผู้ใช้
 - audit log ไม่เก็บ body ของ request (กันข้อมูลส่วนตัว/รหัสผ่านค้างใน log)
-- eslint ใน `Layout.jsx` มี error เดิมค้างอยู่ (NavItem สร้างใน render, ตัวแปรไม่ได้ใช้)
+- eslint ยังมี error เก่าค้าง ~18 จุดใน PersonList / ReportPage ฯลฯ (setState ใน effect, ตัวแปรไม่ได้ใช้) — ทำงานปกติ แก้ทีละไฟล์พร้อมทดสอบ
+- Dashboard: "ผู้เข้าอบรม" = คนในรุ่นหรือมีประวัติอบรม · "สถานะการมีงานทำ" นับคนจากผลติดตามล่าสุด · cache สถิติถูกล้างทุกครั้งที่เขียนข้อมูลสำเร็จ
+- error จาก Prisma ถูกแปลงเป็นข้อความไทยกลางที่ `index.js` (ของจริงอยู่ใน log `[DB ERROR]`)
 
 ---
 

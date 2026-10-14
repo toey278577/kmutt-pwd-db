@@ -84,6 +84,34 @@ app.use('/api/uploads', express.static(path.join(__dirname, '..', 'uploads'), {
 // บันทึกว่าใครเพิ่ม/แก้/ลบอะไร (เขียน log ตอน response ส่งเสร็จ จึงรู้ผู้ใช้จาก authenticate ของแต่ละ route)
 app.use('/api', auditMiddleware);
 
+// เพิ่ม/แก้/ลบสำเร็จ → ล้าง cache สถิติ ให้ Dashboard ขยับทันที ไม่ต้องรอ 1 นาที
+app.use('/api', (req, res, next) => {
+  if (req.method !== 'GET') {
+    res.on('finish', () => { if (res.statusCode < 400) dashboardRouter.invalidateStats(); });
+  }
+  next();
+});
+
+// error จากฐานข้อมูลเป็นภาษาอังกฤษยาวเหยียด ผู้ใช้อ่านไม่รู้เรื่อง → แปลงเป็นภาษาไทย (ของจริงเก็บไว้ใน log ให้คนแก้ระบบดู)
+const DB_ERROR = /prisma|invalid `|argument `|constraint|P20\d\d/i;
+app.use('/api', (req, res, next) => {
+  const json = res.json.bind(res);
+  res.json = (body) => {
+    if (res.statusCode >= 400 && typeof body?.error === 'string' && DB_ERROR.test(body.error)) {
+      console.error(`[DB ERROR] ${req.method} ${req.originalUrl}:`, body.error);
+      const msg = body.error;
+      body = {
+        error: /foreign key/i.test(msg) ? 'ทำรายการไม่ได้ เพราะยังมีข้อมูลอื่นผูกอยู่กับรายการนี้'
+          : /not found|does not exist|no record/i.test(msg) ? 'ไม่พบข้อมูลนี้ อาจถูกลบไปแล้ว ลองรีเฟรชหน้า'
+          : /unique constraint/i.test(msg) ? 'ข้อมูลนี้มีอยู่ในระบบแล้ว (ซ้ำ)'
+          : 'บันทึกไม่สำเร็จ ข้อมูลบางช่องไม่ถูกต้องหรือไม่ครบ กรุณาตรวจสอบแล้วลองใหม่',
+      };
+    }
+    return json(body);
+  };
+  next();
+});
+
 app.use('/api/auth', authRouter);
 
 app.use('/api/persons', authenticate, personsRouter);

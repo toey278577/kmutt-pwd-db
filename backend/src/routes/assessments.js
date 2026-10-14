@@ -29,7 +29,7 @@ router.post('/:id/assessments', async (req, res) => {
   try {
     const personId = Number(req.params.id);
     const { batchId, preTestScore, postTestScore, softSkillComm, softSkillTime, softSkillMotiv, softSkillDuty } = req.body;
-    if (!batchId) return res.status(400).json({ error: 'batchId จำเป็นต้องมี' });
+    if (!batchId) return res.status(400).json({ error: 'กรุณาเลือกรุ่นก่อนบันทึกผลประเมิน' });
 
     const fields = {
       preTestScore: score(preTestScore, 100),

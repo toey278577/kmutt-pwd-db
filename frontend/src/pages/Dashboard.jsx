@@ -10,7 +10,7 @@ const EMP_LABELS = { EMPLOYED: 'มีงานทำ', UNEMPLOYED: 'ว่า�
 const statCards = [
   { key: 'totalPersons', label: 'คนพิการทั้งหมด', icon: Users, grad: 'linear-gradient(135deg,#fb923c,#ea580c)' },
   { key: 'totalOrgs', label: 'สถานประกอบการ', icon: Building2, grad: 'linear-gradient(135deg,#22d3ee,#0891b2)' },
-  { key: 'totalTraining', label: 'บันทึกการอบรม', icon: GraduationCap, grad: 'linear-gradient(135deg,#34d399,#059669)' },
+  { key: 'totalTraining', label: 'ผู้เข้าอบรม', icon: GraduationCap, grad: 'linear-gradient(135deg,#34d399,#059669)' },
 ];
 
 
@@ -22,18 +22,18 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const load = useCallback(() => {
-    setError(false);
     getDashboardStats().then(r => setStats(r.data)).catch(() => setError(true));
     getBatches().then(r => setBatches(r.data)).catch(() => {});
     getFollowUpDue().then(r => setFollowDue(r.data)).catch(() => {});
   }, []);
 
   useEffect(() => { load(); }, [load]);
+  const retry = () => { setError(false); load(); };
 
   if (error) return (
     <div className="flex flex-col items-center justify-center h-96 gap-4">
       <p className="text-gray-500 text-sm">โหลดข้อมูลไม่สำเร็จ</p>
-      <button onClick={load} className="px-4 py-2 rounded-xl text-white text-sm font-bold"
+      <button onClick={retry} className="px-4 py-2 rounded-xl text-white text-sm font-bold"
         style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>ลองใหม่</button>
     </div>
   );
@@ -171,7 +171,8 @@ export default function Dashboard() {
           {stats.byDisabilityType?.length > 0 ? <BarList data={stats.byDisabilityType} /> : <EmptyChart />}
         </ChartCard>
 
-        <ChartCard title="สถานะการมีงานทำ" accent="#10b981" sub="ติดตามผล" center>
+        <ChartCard title="สถานะการมีงานทำ" accent="#10b981"
+          sub={stats.followedUpPersons ? `${stats.followedUpPersons} คน · ผลล่าสุด` : 'ติดตามผล'} center>
           {empData.length > 0 ? <BarList data={empData} /> : <EmptyChart />}
         </ChartCard>
       </div>

@@ -12,9 +12,9 @@ const toMarital = (val) => {
   return MARITAL_ENUMS.includes(val) ? val : 'OTHER';
 };
 const handlePrismaError = (err, res) => {
+  // ช่อง unique ของตาราง persons มีช่องเดียวคือเลขบัตร (เดิมโชว์ชื่อคอลัมน์ "thai_id" ให้ผู้ใช้เห็น)
   if (err.code === 'P2002') {
-    const field = err.meta?.target?.join(', ') || 'ข้อมูล';
-    return res.status(400).json({ error: `${field} นี้มีอยู่ในระบบแล้ว (ซ้ำ)` });
+    return res.status(400).json({ error: 'เลขบัตรประชาชนนี้มีอยู่ในระบบแล้ว (ซ้ำ)' });
   }
   res.status(400).json({ error: err.message });
 };
@@ -118,7 +118,7 @@ router.get('/:id', async (req, res) => {
         batch: true,
       },
     });
-    if (!person) return res.status(404).json({ error: 'Not found' });
+    if (!person) return res.status(404).json({ error: 'ไม่พบข้อมูลนี้ อาจถูกลบไปแล้ว' });
     res.json(person);
   } catch (err) {
     res.status(500).json({ error: err.message });

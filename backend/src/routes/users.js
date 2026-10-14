@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-    if (!name || !email || !password) return res.status(400).json({ error: 'name, email, password required' });
+    if (!name || !email || !password) return res.status(400).json({ error: 'กรุณากรอกชื่อ อีเมล และรหัสผ่าน' });
     const hash = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: { name, email, password: hash, role: role || 'STAFF' },
@@ -29,7 +29,7 @@ router.post('/', async (req, res) => {
     });
     res.status(201).json(user);
   } catch (err) {
-    if (err.code === 'P2002') return res.status(400).json({ error: 'Email already exists' });
+    if (err.code === 'P2002') return res.status(400).json({ error: 'อีเมลนี้มีผู้ใช้แล้ว' });
     res.status(400).json({ error: err.message });
   }
 });

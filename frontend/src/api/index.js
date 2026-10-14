@@ -29,7 +29,11 @@ function rewarm() {
 }
 
 api.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    // เพิ่ม/แก้/ลบอะไรสำเร็จ → ทิ้งสถิติ Dashboard ที่จำไว้ กลับไปหน้าแรกจะได้เห็นตัวเลขใหม่ทันที
+    if (res.config.method !== 'get') invalidate('dashboard-stats');
+    return res;
+  },
   async (err) => {
     const isLoginEndpoint = err.config?.url?.includes('/auth/login');
     if (err.response?.status === 401 && !isLoginEndpoint) {
