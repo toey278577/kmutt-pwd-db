@@ -7,201 +7,168 @@
 ## คือ project อะไร?
 
 **ระบบฐานข้อมูลคนพิการ มจธ. (PWDs Database)**
-ระบบ web app เต็มรูปแบบสำหรับจัดการข้อมูลคนพิการในโครงการฝึกอบรม-ฝึกงาน มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี (มจธ.)
+web app สำหรับจัดการข้อมูลคนพิการในโครงการฝึกอบรม-ฝึกงาน มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี (มจธ.)
+
+- **ระบบจริง:** https://kmutt-pwd.duckdns.org (VPS Vultr สิงคโปร์ — nginx + node)
+- **บันทึกการพัฒนา:** `CHANGELOG.md` · **คู่มือผู้ใช้:** `docs/คู่มือการใช้งาน.pdf/.html`
 
 ---
 
 ## โครงสร้าง project
 
 ```
-project/
-├── backend/          ← Node.js + Express + Prisma + PostgreSQL
+├── backend/                 ← Node.js + Express 5 + Prisma 7 + PostgreSQL
 │   ├── src/
-│   │   ├── index.js            ← entry point ของ server
-│   │   └── routes/
-│   │       ├── persons.js      ← CRUD ข้อมูลคนพิการ
-│   │       ├── training.js     ← ประวัติการอบรม
-│   │       ├── workexp.js      ← ประสบการณ์ทำงาน
-│   │       ├── followup.js     ← ติดตามผล
-│   │       ├── skills.js       ← ทักษะ
-│   │       ├── organizations.js← สถานประกอบการ
-│   │       └── dashboard.js    ← สถิติภาพรวม
-│   ├── prisma/
-│   │   ├── schema.prisma       ← โมเดล database ทั้งหมด
-│   │   ├── migrations/         ← migration files
-│   │   └── seed.js             ← เพิ่มข้อมูลเริ่มต้น (ประเภทความพิการ 7 ประเภท)
-│   └── .env                    ← DATABASE_URL, PORT
+│   │   ├── index.js         ← entry point (helmet, rate limit, ผูก route ทั้งหมด)
+│   │   ├── prismaClient.js
+│   │   ├── reset-admin.js   ← npm run reset-admin (ลืมรหัสแอดมิน)
+│   │   ├── middleware/
+│   │   │   ├── auth.js      ← authenticate (JWT + อ่าน role จาก DB ทุก request), requireRole
+│   │   │   └── audit.js     ← บันทึกทุกการเพิ่ม/แก้/ลบลง audit_logs อัตโนมัติ
+│   │   ├── utils/province.js← ตรวจชื่อจังหวัด/ภูมิภาค
+│   │   └── routes/          ← persons, training, workexp, followup, skills, personorg,
+│   │                          photos, assessments, organizations, batches, dashboard,
+│   │                          aggregate, auth, users, system, audit
+│   ├── prisma/              ← schema.prisma, migrations/, seed.js (ประเภทความพิการ 7 ประเภท + แอดมิน)
+│   ├── scripts/             ← backup-db.cjs, restore-db.cjs, fix-buddhist-birthdates.cjs
+│   ├── uploads/photos/      ← ไฟล์รูปถ่าย (ไม่ได้เก็บใน DB แล้ว)
+│   └── backups/             ← ไฟล์สำรอง (ไม่ขึ้น git)
 │
-├── frontend/         ← React 19 + Vite + Tailwind CSS + DaisyUI
+├── frontend/                ← React 19 + Vite + Tailwind 4 + DaisyUI 5 (PWA)
 │   └── src/
-│       ├── App.jsx             ← router หลัก
-│       ├── index.css           ← global style + DaisyUI theme (สีส้ม)
-│       ├── api/                ← axios API client
-│       ├── components/
-│       │   └── Layout.jsx      ← sidebar + layout หลัก
-│       └── pages/
-│           ├── Dashboard.jsx   ← หน้าแรก สถิติ + กราฟ
-│           ├── PersonList.jsx  ← รายชื่อ + จัดการคนพิการ
-│           ├── PersonDetail.jsx← รายละเอียดคนพิการ (5 tabs)
-│           ├── OrganizationList.jsx ← สถานประกอบการ
-│           └── FollowUpList.jsx← ติดตามผลรวมทุกคน
+│       ├── App.jsx          ← router (lazy load ทุกหน้า)
+│       ├── api/index.js     ← axios client + cache เล็กๆ (utils/apiCache)
+│       ├── context/         ← AuthContext, ThemeContext (dark mode), ToastContext
+│       ├── components/      ← Layout (sidebar), ErrorBoundary, DangerZone (ปุ่มรีเซ็ตระบบ)
+│       └── pages/           ← ดูตารางหน้าเว็บด้านล่าง
 │
-└── CLAUDE.md         ← ไฟล์นี้
+└── docs/deploy/             ← nginx-kmutt.conf, backup.sh (ตี 2 ทุกวัน เก็บ 14 วัน),
+                               healthcheck.sh (ทุก 5 นาที กู้เอง + แจ้ง Telegram)
 ```
 
 ---
 
-## วิธีรัน project
+## วิธีรัน (เครื่อง dev)
 
 ```bash
-# 1. รัน Backend (port 5000)
-cd backend
-npm run dev
-
-# 2. รัน Frontend (port 5173 หรือ 5174 ถ้า port ถูกใช้อยู่)
-cd frontend
-npm run dev
-
-# 3. ถ้าต้องการ seed ข้อมูลเริ่มต้น (ประเภทความพิการ)
-cd backend
-npm run seed
+cd backend && npm run dev      # port 5000 (รัน prisma generate ให้ด้วย)
+cd frontend && npm run dev     # port 5173 (หรือ 5174)
+cd backend && npm run seed     # ข้อมูลเริ่มต้น
+cd backend && npx prisma migrate dev --name <ชื่อ>   # เปลี่ยน schema
 ```
 
-**URL:**
-- Frontend: http://localhost:5173 (หรือ 5174)
-- Backend API: http://localhost:5000/api
-- Health check: http://localhost:5000/api/health
+- Backend API: http://localhost:5000/api · Health: `/api/health` (เช็ค DB ด้วย) · `/api/ping` (ไม่แตะ DB)
+- DB dev: `postgresql://postgres:postgres123@localhost:5432/kmutt_pwd_db`
+- ยังไม่มีชุดเทสต์อัตโนมัติ — ทดสอบโดยรัน server แล้วยิง API จริง
 
 ---
 
-## Database
+## ผู้ใช้ & สิทธิ์
 
-- **ชนิด:** PostgreSQL
-- **ชื่อ DB:** `kmutt_pwd_db`
-- **Connection:** `postgresql://postgres:postgres123@localhost:5432/kmutt_pwd_db`
-- **ORM:** Prisma 7.x
+- ล็อกอินด้วยอีเมล + รหัสผ่าน → JWT อายุ 8 ชม. เก็บใน `sessionStorage`
+- role: `ADMIN` (ผู้ดูแลระบบ) · `STAFF` (เจ้าหน้าที่) · `VIEWER` (ผู้ดูข้อมูล)
+- เฉพาะ ADMIN: จัดการผู้ใช้ (`/users`), ประวัติการใช้งาน (`/audit`), รีเซ็ตระบบ (`/api/system`)
+- ล็อกอินผิดเกิน 8 ครั้ง / 15 นาที โดนบล็อก
 
-### โมเดลหลักใน database (11 ตาราง)
+---
+
+## Database (15 ตาราง)
 
 | ตาราง | ความหมาย |
 |-------|----------|
-| `persons` | ข้อมูลส่วนตัวคนพิการ (ชื่อ, บัตร, เพศ, วันเกิด, ที่อยู่) |
+| `persons` | ข้อมูลส่วนตัวคนพิการ (ชื่อ, บัตร 13 หลัก, ที่อยู่แยกช่อง, รุ่น/หลักสูตรที่สังกัด) |
 | `disability_types` | ประเภทความพิการ (7 ประเภท) |
-| `disability_infos` | ข้อมูลความพิการของแต่ละคน (ระดับ, อุปกรณ์) |
+| `disability_infos` | ความพิการของแต่ละคน (ระดับ, อุปกรณ์, ข้อจำกัด) |
 | `training_records` | ประวัติการอบรม/ฝึกงาน |
 | `work_experiences` | ประวัติการทำงาน |
 | `skills` | ทักษะ (BEGINNER/INTERMEDIATE/ADVANCED) |
-| `follow_ups` | ติดตามผลหลังอบรม (มีงานทำ/ว่างงาน/ศึกษาต่อ) |
+| `follow_ups` | ติดตามผลหลังอบรม |
 | `organizations` | สถานประกอบการ/นายจ้าง |
-| `person_organizations` | ความสัมพันธ์คน ↔ องค์กร |
-| `person_photos` | รูปภาพของคนพิการ |
+| `person_organizations` | คน ↔ องค์กร (ฝึกงาน/จ้างงาน + เงินสนับสนุน) |
+| `person_photos` | รูปถ่าย (เก็บแค่ path ไฟล์) |
+| `training_batches` | รุ่นอบรม (เลขรุ่น/ปี, สถานะ) |
+| `courses` | หลักสูตรในแต่ละรุ่น (1-4 หลักสูตร) |
+| `person_assessments` | คะแนน pre/post test + soft skill ต่อรุ่น |
+| `users` | บัญชีผู้ใช้งานระบบ |
+| `audit_logs` | ประวัติว่าใครเพิ่ม/แก้/ลบอะไร + ล็อกอิน (ไม่ผูก FK เก็บไว้แม้ข้อมูลถูกลบ) |
 
----
+**สำคัญ:** เพิ่มตารางใหม่ต้องเพิ่มใน `scripts/backup-db.cjs` + `scripts/restore-db.cjs` และพิจารณา `WIPE_ORDER` ใน `routes/system.js` ด้วย (audit_logs ตั้งใจไม่ล้างตอนรีเซ็ต)
 
-## API Endpoints หลัก
-
+### Enum
 ```
-GET/POST   /api/persons                    ← รายชื่อ / เพิ่มคนพิการ
-GET/PUT/DELETE /api/persons/:id            ← รายละเอียด / แก้ไข / ลบ
-
-GET/POST   /api/persons/:id/training       ← ประวัติอบรม
-DELETE     /api/persons/:id/training/:tid
-
-GET/POST   /api/persons/:id/workexp        ← ประสบการณ์งาน
-DELETE     /api/persons/:id/workexp/:wid
-
-GET/POST   /api/persons/:id/followup       ← ติดตามผล
-DELETE     /api/persons/:id/followup/:fid
-
-GET/POST   /api/persons/:id/skills         ← ทักษะ
-DELETE     /api/persons/:id/skills/:sid
-
-GET/POST   /api/organizations              ← สถานประกอบการ
-PUT/DELETE /api/organizations/:id
-
-GET        /api/dashboard                  ← สถิติภาพรวม
+Gender: MALE|FEMALE|OTHER          MaritalStatus: SINGLE|MARRIED|OTHER
+LifeStatus: ALIVE|DECEASED         TrainingType: TRAIN|LEARN|EARN
+WorkMode: INTERNSHIP|EMPLOYMENT|FREELANCE
+SkillLevel: BEGINNER|INTERMEDIATE|ADVANCED
+EmploymentStatus: EMPLOYED|UNEMPLOYED|STUDYING
+SkillMatch: MATCH|NOT_MATCH        RoleType: INTERNSHIP|EMPLOYMENT|OTHER
+BatchStatus: ACTIVE|COMPLETED      UserRole: ADMIN|STAFF|VIEWER
 ```
 
 ---
 
-## Tech Stack
+## API Endpoints หลัก (ทุกตัวต้องมี token ยกเว้น login/health/ping)
 
-| ส่วน | เทคโนโลยี | เวอร์ชัน |
-|------|-----------|---------|
-| Frontend framework | React | 19.x |
-| Build tool | Vite | 8.x |
-| CSS | Tailwind CSS + DaisyUI | 4.x / 5.x |
-| Charts | Recharts | 3.x |
-| Icons | Lucide React | 1.x |
-| HTTP client | Axios | 1.x |
-| Routing | React Router | 7.x |
-| Backend | Express.js | 5.x |
-| ORM | Prisma | 7.x |
-| Database | PostgreSQL | - |
-| Font | Sarabun (Google Fonts) | - |
+```
+POST   /api/auth/login · GET /api/auth/me
 
----
+GET/POST       /api/persons              ← รายชื่อ (filter/แบ่งหน้า) / เพิ่ม
+POST           /api/persons/import       ← นำเข้า Excel (เทมเพลต v2 22 คอลัมน์)
+GET/PUT/DELETE /api/persons/:id
+GET            /api/persons/disability-types
 
-## ธีมสี (อัปเดตล่าสุด)
+/api/persons/:id/{disability|training|workexp|followup|skills|personorg|photos|assessments}[/:subId]
+GET            /api/persons/batch/:batchId/assessments
 
-- **Primary:** สีส้ม (`orange-600` / `#ea580c`)
-- **Sidebar:** gradient น้ำตาลส้มเข้ม (`#431407 → #9a3412`)
-- **Background:** `orange-50` (#fff7ed)
-- **Card border:** `orange-100`
-- **Table header:** `orange-50 / text-orange-600`
+/api/organizations[/:id]  ·  /api/batches[/:id]  ·  /api/batches/:id/courses[/:courseId]
+GET  /api/dashboard/stats  ·  /api/data/training-all  ·  /api/data/followup-all
+
+ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /api/audit-logs
+```
 
 ---
 
-## หน้าเว็บที่มีใน Frontend
+## หน้าเว็บ (Frontend)
 
 | Route | หน้า | ไฟล์ |
 |-------|------|------|
-| `/` | Dashboard (สถิติ + กราฟ) | `Dashboard.jsx` |
-| `/persons` | รายชื่อคนพิการ + CRUD | `PersonList.jsx` |
-| `/persons/:id` | รายละเอียดคนพิการ (5 แท็บ) | `PersonDetail.jsx` |
-| `/training` | การอบรม (ใช้ PersonList) | `PersonList.jsx` |
+| `/login` | เข้าสู่ระบบ | `Login.jsx` |
+| `/` | Dashboard สถิติ + กราฟ | `Dashboard.jsx` |
+| `/persons` | รายชื่อคนพิการ + CRUD + นำเข้า Excel | `PersonList.jsx` |
+| `/persons/:id` | รายละเอียดคนพิการ (หลายแท็บ + รูปถ่าย) | `PersonDetail.jsx` |
+| `/training` | การอบรม & ฝึกงาน รวมทุกคน | `TrainingList.jsx` |
 | `/followup` | ติดตามผลทุกคน | `FollowUpList.jsx` |
-| `/organizations` | สถานประกอบการ + CRUD | `OrganizationList.jsx` |
-
-### PersonDetail มี 5 แท็บ:
-1. ข้อมูลพื้นฐาน — ส่วนตัว, ติดต่อ, ความพิการ
-2. การอบรม — ประวัติหลักสูตร
-3. ประสบการณ์งาน — ประวัติการทำงาน
-4. ทักษะ — tag ทักษะพร้อมระดับ
-5. ติดตามผล — สถานะงานหลังจบ
+| `/organizations` | สถานประกอบการ | `OrganizationList.jsx` |
+| `/batches` | จัดการรุ่น + หลักสูตร + ผลประเมิน | `BatchPage.jsx` |
+| `/report` | ออกรายงาน (พิมพ์/PDF) | `ReportPage.jsx` |
+| `/help` | คู่มือการใช้งาน | `Help.jsx` |
+| `/users` | จัดการผู้ใช้ (ADMIN) | `UserManagement.jsx` |
+| `/audit` | ประวัติการใช้งาน (ADMIN) | `AuditLog.jsx` |
 
 ---
 
-## Enum ที่ใช้ใน Prisma
+## ธีม
 
-```
-Gender:           MALE | FEMALE | OTHER
-MaritalStatus:    SINGLE | MARRIED | OTHER
-LifeStatus:       ALIVE | DECEASED
-TrainingType:     TRAIN | LEARN | EARN
-WorkMode:         INTERNSHIP | EMPLOYMENT | FREELANCE
-SkillLevel:       BEGINNER | INTERMEDIATE | ADVANCED
-EmploymentStatus: EMPLOYED | UNEMPLOYED | STUDYING
-SkillMatch:       MATCH | NOT_MATCH
-RoleType:         INTERNSHIP | EMPLOYMENT | OTHER
-```
+- **Primary:** สีส้ม `orange-600` (#ea580c) · พื้นหลัง `orange-50` · การ์ดขอบ `orange-100`
+- **Sidebar:** ไล่ส้มสว่าง `#fb923c → #c2410c` + ลายจุดจางๆ
+- รองรับ dark mode (ThemeContext) · ฟอนต์ Sarabun
 
 ---
 
-## สิ่งที่ทำไปแล้ว
+## ข้อควรรู้ / กับดักที่เคยเจอ
 
-- [x] สร้าง project fullstack ครบ (backend + frontend)
-- [x] ออกแบบ database 11 ตาราง
-- [x] CRUD ครบทุก entity
-- [x] Dashboard พร้อมกราฟ (Pie + Bar)
-- [x] เปลี่ยนธีมจาก indigo → **สีส้มขาว** ทั้ง app
+- วันเกิดจาก Excel อาจมาเป็นปี พ.ศ. → ต้องแปลงเป็น ค.ศ. (เคยเพี้ยนเป็นปี 3082)
+- จังหวัดใน Excel ต้องสะกดตรง ไม่งั้นนำเข้าไม่ได้ (ดู `utils/province.js`)
+- server อยู่หลัง nginx → ตั้ง `trust proxy` แล้ว `req.ip` เป็น IP จริงของผู้ใช้
+- audit log ไม่เก็บ body ของ request (กันข้อมูลส่วนตัว/รหัสผ่านค้างใน log)
+- eslint ใน `Layout.jsx` มี error เดิมค้างอยู่ (NavItem สร้างใน render, ตัวแปรไม่ได้ใช้)
 
 ---
 
-## สิ่งที่อาจทำต่อในอนาคต
+## สิ่งที่อาจทำต่อ
 
-- อัปโหลดรูปภาพคนพิการ (PersonPhoto มี model แล้ว แต่ยังไม่มี UI)
-- Export รายงานเป็น PDF/Excel
-- ระบบ login / authentication
-- ค้นหาขั้นสูง (filter หลายเงื่อนไข)
-- เพิ่มข้อมูลประเภทความพิการผ่าน UI
+- ชุดเทสต์อัตโนมัติ (นำเข้า Excel, CRUD คนพิการ, สิทธิ์ผู้ใช้)
+- ค้นหาขั้นสูง (กรองหลายเงื่อนไขพร้อมกัน)
+- Export Excel
+- แท็บ "ประวัติการแก้ไข" ในหน้ารายละเอียดคนพิการ (API รองรับ `?personId=` แล้ว)
+- เพิ่ม/แก้ประเภทความพิการผ่าน UI
