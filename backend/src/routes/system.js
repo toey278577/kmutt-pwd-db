@@ -112,7 +112,7 @@ router.post('/reset', async (req, res) => {
 
     // ลบไฟล์รูปถ่ายบนดิสก์ด้วย (ข้อมูลใน DB ถูกลบไปแล้ว ไฟล์จะกลายเป็นขยะ)
     try {
-      const photoDir = path.join(__dirname, '..', '..', 'uploads', 'photos');
+      const photoDir = require('../utils/uploadDir').PHOTO_DIR;
       if (fs.existsSync(photoDir)) {
         const imgs = fs.readdirSync(photoDir);
         for (const f of imgs) fs.unlinkSync(path.join(photoDir, f));

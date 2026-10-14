@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { readFileSync } from 'node:fs'
+import process from 'node:process'
 
 // ฉีดเลขเวอร์ชัน + วันที่ build เข้าไปในแอป (ใช้โชว์หน้า login)
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'))
@@ -16,7 +17,8 @@ export default defineConfig({
   // ถ้าไม่ proxy รูปจะไม่ขึ้นตอน dev (บน production nginx จัดการให้อยู่แล้ว)
   server: {
     proxy: {
-      '/api': { target: 'http://localhost:5000', changeOrigin: true },
+      // ชุดทดสอบ (tests/run.cjs) ชี้ไปหลังบ้านตัวทดสอบผ่าน API_PROXY_TARGET
+      '/api': { target: process.env.API_PROXY_TARGET || 'http://localhost:5000', changeOrigin: true },
     },
   },
   plugins: [

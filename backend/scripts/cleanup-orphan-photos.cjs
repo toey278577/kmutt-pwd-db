@@ -16,7 +16,7 @@ if (!url) { console.error('ไม่พบ DB_URL หรือ DATABASE_URL'); p
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
 
 const APPLY = process.argv.includes('--apply');
-const DIR = path.join(__dirname, '..', 'uploads', 'photos');
+const DIR = require('../src/utils/uploadDir').PHOTO_DIR;
 
 (async () => {
   if (!fs.existsSync(DIR)) { console.log('ยังไม่มีโฟลเดอร์รูป — ไม่มีอะไรต้องลบ'); return; }

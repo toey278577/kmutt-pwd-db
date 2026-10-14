@@ -42,6 +42,10 @@ web app สำหรับจัดการข้อมูลคนพิกา
 │       ├── components/      ← Layout (sidebar), ErrorBoundary, DangerZone (ปุ่มรีเซ็ตระบบ)
 │       └── pages/           ← ดูตารางหน้าเว็บด้านล่าง
 │
+├── tests/                   ← ชุดทดสอบ (npm test): run.cjs ตัวรัน · lib.cjs ตัวช่วย · fixtures/seed.cjs ข้อมูลตั้งต้น
+│                              unit/ (ฟังก์ชันล้วน) · api/ (ยิง API จริง) · e2e/ (กดหน้าเว็บจริงผ่าน Chrome headless)
+│                              ผล + ภาพหน้าจอ → tests/.output/ (ไม่ขึ้น git)
+│
 └── docs/deploy/             ← nginx-kmutt.conf, backup.sh (ตี 2 ทุกวัน เก็บ 14 วัน),
                                healthcheck.sh (ทุก 5 นาที กู้เอง + แจ้ง Telegram)
 ```
@@ -59,7 +63,7 @@ cd backend && npx prisma migrate dev --name <ชื่อ>   # เปลี่�
 
 - Backend API: http://localhost:5000/api · Health: `/api/health` (เช็ค DB ด้วย) · `/api/ping` (ไม่แตะ DB)
 - DB dev: `postgresql://postgres:postgres123@localhost:5432/kmutt_pwd_db`
-- ยังไม่มีชุดเทสต์อัตโนมัติ — ทดสอบโดยรัน server แล้วยิง API จริง
+- **ชุดทดสอบ:** `cd backend && npm test` (ทั้งหมด ~2 นาที) · `npm test -- unit|api|e2e|<ชื่อไฟล์บางส่วน>` → ดู `tests/` ด้านล่าง
 
 ---
 
@@ -170,15 +174,16 @@ ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /a
 - หน้าเว็บ: ชื่อ/คำนำหน้า/ตัวย่อ → `utils/name.js` · ช่องวันที่ พ.ศ. → `utils/useThaiDate.js` (ตรวจวันจริง/ปี ค.ศ.) · รูป → `utils/resizeImage.js` ย่อก่อนส่ง · โหลดพัง → `components/LoadError.jsx`
 - ฟอร์มใหม่ทุกอัน: ใส่ตัวถามก่อนปิดเมื่อยังไม่บันทึก `utils/useDiscardGuard.js` + `components/DiscardBar.jsx` (arm ตอนเปิด, request ตอนปิด/Esc/คลิกนอกฟอร์ม)
 - สีเทา `gray-400/500` ถูกปรับเข้มขึ้นใน `@theme` ของ `index.css` (ให้ตัวหนังสืออ่านง่าย ≥4.5:1) — **ห้ามปรับ `gray-300`** เพราะใช้เป็นเส้นขอบ 71 จุด · ตัวหนังสือห้ามใช้ gray-200/300
-- ทดสอบหน้าเว็บจริง: backend :5000 + vite :5173 + Chrome `--headless=new --remote-debugging-port` แล้วสั่งผ่าน CDP (ใส่ token ใน sessionStorage แทนการล็อกอิน)
+- **ชุดทดสอบใช้ฐาน `kmutt_pwd_db_test` ของมันเอง** ล้างใหม่ทุกครั้งที่รัน (พี่เต้ยอนุญาตแล้ว เฉพาะ *_test) + เปิดหลังบ้าน :5055 / หน้าเว็บ :5180 / Chrome :9341 เองแล้วปิดให้
+  · ไม่แตะฐาน dev / รูปในเครื่อง (ใช้ `UPLOAD_ROOT` แยก) · ไฟล์ทดสอบรันตรงๆ ไม่ได้ (กันเผลอเขียนฐาน dev)
+  · e2e สั่ง Chrome ผ่าน CDP ใส่ token ใน sessionStorage แทนการล็อกอิน · เขียนเทสต์ใหม่: `tests/<กลุ่ม>/<เรื่อง>.test.cjs` ใช้ `require('../lib.cjs')` จบด้วย `process.exit(summary() ? 1 : 0)`
+  · แก้ฟีเจอร์แล้ว **รัน npm test ให้ผ่านหมดก่อน commit**
 
 ---
 
 ## สิ่งที่อาจทำต่อ
 
-- ชุดเทสต์อัตโนมัติ (นำเข้า Excel, CRUD คนพิการ, สิทธิ์ผู้ใช้)
 - ค้นหาขั้นสูง (กรองหลายเงื่อนไขพร้อมกัน)
 - Export Excel
 - แท็บ "ประวัติการแก้ไข" ในหน้ารายละเอียดคนพิการ (API รองรับ `?personId=` แล้ว)
-- ย้ายสคริปต์ทดสอบ (scratchpad) เข้าโปรเจกต์ให้รันด้วย `npm test`
 - เพิ่ม/แก้ประเภทความพิการผ่าน UI

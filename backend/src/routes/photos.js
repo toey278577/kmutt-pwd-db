@@ -8,7 +8,7 @@ const { ensureOwned } = require('../utils/owned');
 
 // รูปเก็บเป็นไฟล์จริง ไม่ยัด base64 ลงฐานข้อมูล
 // (DB เก็บแค่ path สั้น ๆ → สำรองข้อมูลเล็กลงมาก และโหลดรายชื่อเร็วขึ้น)
-const UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads', 'photos');
+const UPLOAD_DIR = require('../utils/uploadDir').PHOTO_DIR;
 const PUBLIC_PREFIX = '/api/uploads/photos';   // nginx proxy /api/ → backend อยู่แล้ว
 
 const MIME_EXT = {
