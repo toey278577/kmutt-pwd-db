@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Users, Building2, GraduationCap, TrendingUp, Layers, CheckCircle, Clock, ArrowRight, Sparkles, UserPlus, ClipboardList } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getDashboardStats, getBatches } from '../api';
+import { getDashboardStats, getBatches, getFollowUpDue } from '../api';
+import FollowUpDue from '../components/FollowUpDue';
 
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
 const EMP_LABELS = { EMPLOYED: 'มีงานทำ', UNEMPLOYED: 'ว่างงาน', STUDYING: 'ศึกษาต่อ' };
@@ -16,6 +17,7 @@ const statCards = [
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [batches, setBatches] = useState([]);
+  const [followDue, setFollowDue] = useState(null);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
 
@@ -23,6 +25,7 @@ export default function Dashboard() {
     setError(false);
     getDashboardStats().then(r => setStats(r.data)).catch(() => setError(true));
     getBatches().then(r => setBatches(r.data)).catch(() => {});
+    getFollowUpDue().then(r => setFollowDue(r.data)).catch(() => {});
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -130,6 +133,11 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
+      )}
+
+      {/* ═══ ถึงรอบติดตามผล — โชว์เฉพาะตอนมีคนต้องตาม หรือมีรุ่นที่ยังไม่ใส่วันสิ้นสุด ═══ */}
+      {(followDue?.items.length > 0 || followDue?.noEndDateBatches.length > 0) && (
+        <FollowUpDue data={followDue} limit={5} onViewAll={() => navigate('/followup')} />
       )}
 
       {/* ═══ EMPTY STATE — ยังไม่มีข้อมูล (แบบ onboarding) ═══ */}

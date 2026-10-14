@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getAllFollowUp } from '../api';
+import { getAllFollowUp, getFollowUpDue } from '../api';
+import FollowUpDue from '../components/FollowUpDue';
 
 const EMP = {
   EMPLOYED:   { bg: 'bg-emerald-100 text-emerald-700 border-emerald-200', label: 'มีงานทำ' },
@@ -24,6 +25,7 @@ const fmtDate = (iso) => {
 export default function FollowUpList() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
+  const [due, setDue] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,6 +33,7 @@ export default function FollowUpList() {
       setRows(r.data);
       setLoading(false);
     });
+    getFollowUpDue().then(r => setDue(r.data)).catch(() => {});
   }, []);
 
   if (loading) return (
@@ -56,6 +59,9 @@ export default function FollowUpList() {
           </p>
         </div>
       </div>
+
+      {/* ถึงรอบติดตามผล */}
+      {due && <FollowUpDue data={due} />}
 
       {/* Table */}
       <div className="bg-white rounded-3xl border border-orange-100/80 shadow-sm overflow-hidden">

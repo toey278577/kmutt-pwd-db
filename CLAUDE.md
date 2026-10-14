@@ -69,6 +69,7 @@ cd backend && npx prisma migrate dev --name <ชื่อ>   # เปลี่�
 - role: `ADMIN` (ผู้ดูแลระบบ) · `STAFF` (เจ้าหน้าที่) · `VIEWER` (ผู้ดูข้อมูล)
 - เฉพาะ ADMIN: จัดการผู้ใช้ (`/users`), ประวัติการใช้งาน (`/audit`), รีเซ็ตระบบ (`/api/system`)
 - ล็อกอินผิดเกิน 8 ครั้ง / 15 นาที โดนบล็อก
+- VIEWER อ่านอย่างเดียว — กันที่ `authenticate` (POST/PUT/PATCH/DELETE → 403) ไม่ต้องใส่เองทีละ route
 
 ---
 
@@ -122,6 +123,7 @@ GET            /api/persons/batch/:batchId/assessments
 
 /api/organizations[/:id]  ·  /api/batches[/:id]  ·  /api/batches/:id/courses[/:courseId]
 GET  /api/dashboard/stats  ·  /api/data/training-all  ·  /api/data/followup-all
+GET  /api/data/followup-due   ← ใครถึงรอบติดตามผล 3ด/6ด/1ปี (คำนวณใน utils/followupDue.js)
 
 ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /api/audit-logs
 ```

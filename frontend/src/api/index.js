@@ -115,6 +115,7 @@ export const getDashboardStats = () => cached('dashboard-stats', () => api.get('
 
 export const getAllTraining = () => api.get('/data/training-all');
 export const getAllFollowUp = () => api.get('/data/followup-all');
+export const getFollowUpDue = () => api.get('/data/followup-due');
 
 export const getPersonPhotos = (id) => api.get(`/persons/${id}/photos`);
 export const uploadPersonPhoto = (id, data) => api.post(`/persons/${id}/photos`, data);
