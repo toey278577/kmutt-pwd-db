@@ -10,8 +10,17 @@ import { PREFIXES, splitPrefix, nameInitials } from '../utils/name';
 import { resizeImage } from '../utils/resizeImage';
 import { useThaiDate } from '../utils/useThaiDate';
 import { matchBatch, matchCourse, matchDisabilities } from '../utils/importCheck';
+import { useDiscardGuard } from '../utils/useDiscardGuard';
+import DiscardBar from '../components/DiscardBar';
 
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
+// ผลติดตามล่าสุด — สีเดียวกับหน้าติดตามผล
+const EMP = {
+  EMPLOYED:   { cls: 'bg-emerald-100 text-emerald-700 border-emerald-200', label: 'มีงานทำ' },
+  UNEMPLOYED: { cls: 'bg-gray-100 text-gray-600 border-gray-200',          label: 'ว่างงาน' },
+  STUDYING:   { cls: 'bg-sky-100 text-sky-700 border-sky-200',             label: 'ศึกษาต่อ' },
+};
+const fmtShortDate = (d) => d ? new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }) : '';
 const GENDER_BADGE = { MALE: 'bg-sky-100 text-sky-600 border-sky-200', FEMALE: 'bg-pink-100 text-pink-500 border-pink-200', OTHER: 'bg-gray-100 text-gray-500 border-gray-200' };
 
 
@@ -71,6 +80,13 @@ export default function PersonList() {
   const [importRows, setImportRows] = useState([]);
   const [importing, setImporting] = useState(false);
   const importInputRef = useRef(null);
+  const guard = useDiscardGuard(() => modalRef.current?.close());
+  // ค่าที่ใช้เทียบว่าแก้อะไรไปหรือยัง (รูปเทียบแค่ว่าเลือกรูปใหม่ / กดลบรูปเดิม เพราะรูปเดิมโหลดตามมาทีหลัง)
+  const formState = () => ({
+    form, prefix, nameOnly, disabilityTypeId, removedDisabilityIds,
+    photoNew: photoBase64.startsWith('data:'), photoRemoved: !!existingPhotoId && !photoBase64,
+  });
+  const requestClose = () => guard.request(formState());
 
   const PAGE_SIZE = 10;
   const totalPages = Math.ceil(persons.length / PAGE_SIZE);
@@ -85,18 +101,24 @@ export default function PersonList() {
   }, { replace: true });
 
   // โหลดซ้ำโดยอยู่หน้าเดิม — ใช้หลังแก้ไข/ลบ
+  // ค้นหาแบบพิมพ์แล้วขึ้นเลย ยิงหลายครั้งติดกัน → ใช้แค่ผลของครั้งล่าสุด (เน็ตช้า ผลเก่าอาจกลับมาทีหลังแล้วทับผลใหม่)
+  const loadSeq = useRef(0);
   const load = (q = '', b = batchFilter) => {
     setLoadError(false);
     const params = {};
-    if (q) params.search = q;
+    if (q.trim()) params.search = q.trim();
     if (b) params.batchId = b;
+    const seq = ++loadSeq.current;
     return getPersons(params)
-      .then((r) => setPersons(r.data))
-      .catch(() => setLoadError(true));
+      .then((r) => { if (seq === loadSeq.current) setPersons(r.data); })
+      .catch(() => { if (seq === loadSeq.current) setLoadError(true); });
   };
   // ผลลัพธ์ชุดใหม่ (ค้นหา / เปลี่ยนรุ่น / เพิ่มคน / นำเข้า) → จำคำค้น+รุ่นลง URL แล้วเริ่มหน้า 1
   // เขียน URL ตอนผู้ใช้กดเท่านั้น ไม่เขียนตอนโหลดเสร็จ กันกรณีกดไปหน้าอื่นแล้วโดนดึงกลับ
+  const searchTimer = useRef(null);
   const applyFilter = (q = search, b = batchFilter) => {
+    clearTimeout(searchTimer.current);   // มีค้นหาที่รอยิงอยู่ → ยกเลิก ใช้ค่าล่าสุดนี้แทน
+    q = q.trim();
     setUrlParams(() => {
       const p = new URLSearchParams();
       if (q) p.set('q', q);
@@ -109,6 +131,13 @@ export default function PersonList() {
     setBatchFilter(b);
     applyFilter(search, b);
   };
+  // พิมพ์แล้วค้นให้เอง เมื่อหยุดพิมพ์ 0.35 วินาที (เดิมต้องกดปุ่ม "ค้นหา" หรือ Enter)
+  const handleSearchInput = (v) => {
+    setSearch(v);
+    clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => applyFilter(v), 350);
+  };
+  useEffect(() => () => clearTimeout(searchTimer.current), []);   // ออกจากหน้าก่อนครบเวลา → ไม่ต้องค้น
   useEffect(() => {
     load(search);   // search / batchFilter / page เริ่มจากค่าใน URL แล้ว
     getDisabilityTypes().then((r) => setDisabilityTypes(r.data)).catch(() => {});
@@ -132,7 +161,9 @@ export default function PersonList() {
       const { prefix: p, nameOnly: n } = splitPrefix(person.fullName || '');
       // แปลง null → '' ทุก field ก่อน spread เพื่อป้องกัน controlled input error
       const cleaned = Object.fromEntries(Object.entries(person).map(([k, v]) => [k, v === null ? '' : v]));
-      setForm({ ...emptyForm, ...cleaned, birthDate: person.birthDate?.slice(0, 10) || '' });
+      const initial = { ...emptyForm, ...cleaned, birthDate: person.birthDate?.slice(0, 10) || '' };
+      setForm(initial);
+      guard.arm({ form: initial, prefix: p, nameOnly: n, disabilityTypeId: '', removedDisabilityIds: [], photoNew: false, photoRemoved: false });
       setPrefix(p);   // ไม่มีคำนำหน้า = "ไม่ระบุ" (เดิมเติม "นาย" ให้เอง ผู้หญิงที่นำเข้าจาก Excel ก็โดน)
       setNameOnly(n);
       setEditId(person.id);
@@ -146,6 +177,7 @@ export default function PersonList() {
       setForm(emptyForm);
       setPrefix('นาย');
       setNameOnly('');
+      guard.arm({ form: emptyForm, prefix: 'นาย', nameOnly: '', disabilityTypeId: '', removedDisabilityIds: [], photoNew: false, photoRemoved: false });
       setEditId(null);
       setEditPersonDisabilities([]);
     }
@@ -421,29 +453,33 @@ export default function PersonList() {
   };
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 56px)' }}>
+    // จอคอม: ความสูงพอดีจอ ตารางเลื่อนข้างใน · มือถือ: เลื่อนทั้งหน้าตามปกติ
+    <div className="flex flex-col md:h-[calc(100vh-56px)]">
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between gap-4 flex-shrink-0">
-        <div className="flex items-center gap-3">
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 flex-shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
             <Users size={22} className="text-orange-600" />
           </div>
           <div>
             <h1 className="text-xl font-black page-title leading-tight">ข้อมูลคนพิการ</h1>
-            <p className="text-gray-400 text-sm mt-0.5">
-              <span className="text-orange-600 font-bold">{persons.length}</span> รายการในระบบ
+            <p className="text-gray-500 text-sm mt-0.5">
+              {/* กำลังค้น/กรองรุ่นอยู่ → บอกว่า "พบ" ไม่ใช่ "ในระบบ" (เดิมค้นเจอ 1 คน ขึ้นว่าในระบบมี 1 รายการ) */}
+              {urlParams.get('q') || urlParams.get('batch')
+                ? <>ค้นพบ <span className="text-orange-600 font-bold">{persons.length}</span> รายการ</>
+                : <><span className="text-orange-600 font-bold">{persons.length}</span> รายการในระบบ</>}
             </p>
           </div>
         </div>
         {canEdit && (
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto">
             <button
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 active:scale-95 transition-all shadow-sm"
+              className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 active:scale-95 transition-all shadow-sm"
               onClick={() => { setImportRows([]); setImportModal(true); }}>
               <FileSpreadsheet size={16} /> นำเข้า Excel
             </button>
             <button
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm"
+              className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm"
               onClick={() => openModal()}>
               <Plus size={16} /> เพิ่มคนพิการ
             </button>
@@ -463,33 +499,27 @@ export default function PersonList() {
           {/* Input */}
           <input
             type="text"
-            placeholder="ค้นหาชื่อ-นามสกุล หรือเลขบัตรประชาชน..."
-            className="flex-1 text-sm bg-transparent outline-none text-gray-700 placeholder:text-gray-300 min-w-0"
+            placeholder="ค้นหาชื่อ ชื่อเล่น เลขบัตร หรือเบอร์โทร"
+            aria-label="ค้นหาคนพิการ"
+            className="flex-1 text-sm bg-transparent outline-none text-gray-700 placeholder:text-gray-400 min-w-0 py-1.5"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && applyFilter(search)}
           />
 
           {/* Clear */}
           {search && (
-            <button onClick={() => { setSearch(''); applyFilter(''); }}
-              className="p-1.5 rounded-lg text-gray-300 hover:text-orange-500 hover:bg-orange-50 transition-all flex-shrink-0">
-              <X size={13} />
+            <button onClick={() => { setSearch(''); applyFilter(''); }} title="ล้างคำค้น"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all flex-shrink-0">
+              <X size={14} /> ล้าง
             </button>
           )}
-
-          {/* Search button — float inside, not flush to edge */}
-          <button onClick={() => applyFilter(search)}
-            className="px-4 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
-            ค้นหา
-          </button>
         </div>
 
         {/* Batch filter — รายชื่อแยกรุ่น (Dropdown) */}
         {batches.length > 0 && (
           <div className="flex items-center gap-2 mt-3">
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-400">
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-500">
               <Layers size={13} className="text-orange-400" /> แยกรุ่น:
             </span>
             <div className="relative">
@@ -509,20 +539,21 @@ export default function PersonList() {
       </div>
 
       {/* Table */}
-      <div className="flex-1 min-h-0 bg-white rounded-3xl border border-orange-100/80 shadow-sm overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-auto">
+      <div className="md:flex-1 md:min-h-0 bg-white rounded-3xl border border-orange-100/80 shadow-sm overflow-hidden flex flex-col">
+        {/* จอคอม = ตาราง · มือถือ = การ์ดทีละคน (เดิมตารางบีบจนชื่อขาด 3-4 บรรทัด ต้องเลื่อนซ้าย-ขวาหาปุ่ม) */}
+        <div className="flex-1 overflow-auto hidden md:block">
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10">
               <tr className="bg-gray-50 border-b border-gray-200">
-                {['#','ชื่อ-นามสกุล','เลขบัตร','เพศ','จังหวัด','การศึกษา','สถานะ','จัดการ'].map((h, i) => (
-                  <th key={h} className={`px-4 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider ${i === 0 ? 'w-10' : ''} ${i === 7 ? 'text-center w-28' : 'text-left'}`}>{h}</th>
+                {['#','ชื่อ-นามสกุล','เลขบัตร','เพศ','จังหวัด','การศึกษา','รุ่น','งานล่าสุด','จัดการ'].map((h, i) => (
+                  <th key={h} className={`px-3 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap ${i === 0 ? 'w-10' : ''} ${i === 8 ? 'text-center w-28 sticky right-0 bg-gray-50' : 'text-left'}`}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loadError && (
                 <tr>
-                  <td colSpan={8} className="text-center py-16">
+                  <td colSpan={9} className="text-center py-16">
                     <div className="flex flex-col items-center gap-3">
                       <p className="text-sm text-gray-400">โหลดข้อมูลไม่สำเร็จ</p>
                       <button onClick={() => load(search)} className="px-4 py-2 rounded-xl text-white text-sm font-bold"
@@ -533,7 +564,7 @@ export default function PersonList() {
               )}
               {!loadError && persons.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="text-center py-16 text-gray-300">
+                  <td colSpan={9} className="text-center py-16 text-gray-400">
                     <div className="flex flex-col items-center gap-3">
                       <div className="w-16 h-16 rounded-3xl bg-orange-50 flex items-center justify-center">
                         <UserRound size={28} className="text-orange-200" />
@@ -543,37 +574,49 @@ export default function PersonList() {
                   </td>
                 </tr>
               )}
-              {paged.map((p, i) => (
+              {paged.map((p, i) => {
+                const b = batches.find((x) => x.id === p.batchId);
+                const fu = p.followUps?.[0];
+                return (
                 <tr key={p.id}
                   className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors cursor-pointer group"
                   onClick={() => navigate(`/persons/${p.id}`)}>
-                  <td className="px-4 py-3.5 text-gray-300 text-xs font-mono">{(page - 1) * PAGE_SIZE + i + 1}</td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-3 py-3.5 text-gray-400 text-xs font-mono">{(page - 1) * PAGE_SIZE + i + 1}</td>
+                  <td className="px-3 py-3.5">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-2xl text-white text-xs font-black flex items-center justify-center flex-shrink-0 shadow-sm"
                         style={{ background: `linear-gradient(135deg,${['#ea580c','#06b6d4','#10b981','#8b5cf6','#ec4899'][i % 5]},${['#c2410c','#0284c7','#047857','#7c3aed','#db2777'][i % 5]})` }}>
                         {nameInitials(p.fullName)}
                       </div>
                       <div>
-                        <p className="font-bold text-gray-800 text-sm leading-none">{p.fullName}</p>
-                        <p className="text-gray-300 text-xs mt-0.5">{p.disabilityInfos?.[0]?.disabilityType?.typeName || ''}</p>
+                        <p className="font-bold text-gray-800 text-sm leading-none whitespace-nowrap">
+                          {p.fullName}{p.nickname && <span className="font-normal text-gray-500"> ({p.nickname})</span>}
+                          {p.lifeStatus === 'DECEASED' && <span className="ml-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold bg-gray-100 text-gray-600 border border-gray-300 align-middle">เสียชีวิต</span>}
+                        </p>
+                        <p className="text-gray-400 text-xs mt-0.5 truncate max-w-[220px]" title={p.disabilityInfos?.map((d) => d.disabilityType?.typeName).join(', ')}>{p.disabilityInfos?.[0]?.disabilityType?.typeName || ''}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3.5 font-mono text-xs text-gray-400">{p.thaiId || '—'}</td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-3 py-3.5 font-mono text-xs text-gray-400">{p.thaiId || '—'}</td>
+                  <td className="px-3 py-3.5">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${GENDER_BADGE[p.gender]}`}>
                       {GENDER_LABELS[p.gender]}
                     </span>
                   </td>
-                  <td className="px-4 py-3.5 text-gray-500 text-sm">{p.province || '—'}</td>
-                  <td className="px-4 py-3.5 text-gray-400 text-xs max-w-[120px] truncate">{p.educationLevel || '—'}</td>
-                  <td className="px-4 py-3.5">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${p.lifeStatus === 'ALIVE' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-gray-100 text-gray-400 border border-gray-200'}`}>
-                      {p.lifeStatus === 'ALIVE' ? 'มีชีวิต' : 'เสียชีวิต'}
-                    </span>
+                  <td className="px-3 py-3.5 text-gray-500 text-sm">{p.province || '—'}</td>
+                  <td className="px-3 py-3.5 text-gray-400 text-xs max-w-[120px] truncate">{p.educationLevel || '—'}</td>
+                  <td className="px-3 py-3.5 whitespace-nowrap">
+                    {b
+                      ? <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-50 text-orange-700 border border-orange-200">{b.batchNumber}/{b.year}</span>
+                      : <span className="text-gray-400">—</span>}
                   </td>
-                  <td className="px-4 py-3.5" onClick={e => e.stopPropagation()}>
+                  <td className="px-3 py-3.5 whitespace-nowrap">
+                    {fu
+                      ? <span title={`ติดตามล่าสุด ${fmtShortDate(fu.followUpDate)}`} className={`px-2.5 py-1 rounded-full text-xs font-bold border ${EMP[fu.employmentStatus]?.cls || ''}`}>{EMP[fu.employmentStatus]?.label || fu.employmentStatus}</span>
+                      : <span className="text-xs text-gray-400">ยังไม่ติดตาม</span>}
+                  </td>
+                  {/* ปุ่มจัดการติดขอบขวา — จอแคบเลื่อนตารางได้ แต่ปุ่มยังเห็นตลอด */}
+                  <td className="px-3 py-3.5 sticky right-0 bg-white" onClick={e => e.stopPropagation()}>
                     <div className="flex items-center justify-center gap-1">
                       <button className="w-7 h-7 rounded-xl flex items-center justify-center text-orange-400 hover:bg-orange-50 hover:text-orange-600 transition-all" onClick={() => navigate(`/persons/${p.id}`)}>
                         <Eye size={14} />
@@ -589,16 +632,73 @@ export default function PersonList() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
+        </div>
+
+        <div className="md:hidden divide-y divide-gray-100">
+          {loadError && (
+            <div className="text-center py-12">
+              <p className="text-sm text-gray-500 mb-3">โหลดข้อมูลไม่สำเร็จ</p>
+              <button onClick={() => load(search)} className="px-4 py-2 rounded-xl text-white text-sm font-bold"
+                style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>ลองใหม่</button>
+            </div>
+          )}
+          {!loadError && persons.length === 0 && (
+            <div className="flex flex-col items-center gap-3 py-12 text-gray-400">
+              <div className="w-16 h-16 rounded-3xl bg-orange-50 flex items-center justify-center">
+                <UserRound size={28} className="text-orange-200" />
+              </div>
+              <p className="text-sm font-medium">ไม่พบข้อมูล</p>
+            </div>
+          )}
+          {paged.map((p, i) => {
+            const b = batches.find((x) => x.id === p.batchId);
+            return (
+              <div key={p.id} className="p-4 active:bg-orange-50/50" onClick={() => navigate(`/persons/${p.id}`)}>
+                <div className="flex items-start gap-3">
+                  <div className="w-11 h-11 rounded-2xl text-white text-sm font-black flex items-center justify-center flex-shrink-0 shadow-sm"
+                    style={{ background: `linear-gradient(135deg,${['#ea580c','#06b6d4','#10b981','#8b5cf6','#ec4899'][i % 5]},${['#c2410c','#0284c7','#047857','#7c3aed','#db2777'][i % 5]})` }}>
+                    {nameInitials(p.fullName)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-gray-800 text-[15px] leading-snug">
+                      {p.fullName}{p.nickname && <span className="font-normal text-gray-500"> ({p.nickname})</span>}
+                    </p>
+                    {p.disabilityInfos?.[0] && (
+                      <p className="text-gray-500 text-xs mt-0.5">{p.disabilityInfos.map((d) => d.disabilityType?.typeName).join(', ')}</p>
+                    )}
+                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold border ${GENDER_BADGE[p.gender]}`}>{GENDER_LABELS[p.gender]}</span>
+                      {p.province && <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-50 text-gray-600 border border-gray-200">{p.province}</span>}
+                      {b && <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-50 text-orange-700 border border-orange-200">รุ่น {b.batchNumber}/{b.year}</span>}
+                      {p.followUps?.[0] && <span className={`px-2 py-0.5 rounded-full text-xs font-bold border ${EMP[p.followUps[0].employmentStatus]?.cls || ''}`}>{EMP[p.followUps[0].employmentStatus]?.label}</span>}
+                      {p.lifeStatus === 'DECEASED' && <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border border-gray-300">เสียชีวิต</span>}
+                    </div>
+                  </div>
+                  {canEdit && (
+                    <div className="flex flex-col gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <button title="แก้ไข" className="w-10 h-10 rounded-xl flex items-center justify-center text-amber-600 bg-amber-50 border border-amber-100 active:scale-95" onClick={() => openModal(p)}>
+                        <Pencil size={16} />
+                      </button>
+                      <button title="ลบ" className="w-10 h-10 rounded-xl flex items-center justify-center text-red-500 bg-red-50 border border-red-100 active:scale-95" onClick={() => handleDelete(p.id)}>
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-3.5 border-t border-gray-50 flex-shrink-0">
             <span className="text-xs text-gray-400">
               หน้า <span className="font-bold text-orange-600">{page}</span> / {totalPages}
-              <span className="ml-1.5 text-gray-300">· {persons.length} รายการ</span>
+              <span className="ml-1.5 text-gray-400">· {persons.length} รายการ</span>
             </span>
             <div className="flex items-center gap-1">
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
@@ -607,7 +707,7 @@ export default function PersonList() {
                 .filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
                 .reduce((acc, n, idx, arr) => { if (idx > 0 && n - arr[idx-1] > 1) acc.push('…'); acc.push(n); return acc; }, [])
                 .map((n, idx) => n === '…'
-                  ? <span key={`e-${idx}`} className="px-1 text-gray-200 text-xs">…</span>
+                  ? <span key={`e-${idx}`} className="px-1 text-gray-400 text-xs">…</span>
                   : <button key={n} onClick={() => setPage(n)}
                       className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${page === n ? 'text-white shadow-sm' : 'border border-gray-100 text-gray-400 hover:bg-orange-50 hover:text-orange-600'}`}
                       style={page === n ? { background: 'linear-gradient(135deg,#ea580c,#c2410c)' } : {}}>{n}</button>
@@ -620,7 +720,7 @@ export default function PersonList() {
       </div>
 
       {/* Modal */}
-      <dialog ref={modalRef} className="modal">
+      <dialog ref={modalRef} className="modal" onCancel={(e) => { e.preventDefault(); requestClose(); }}>
         <div className="modal-box max-w-3xl p-0 overflow-hidden bg-white shadow-2xl rounded-3xl">
           {/* Header */}
           <div className="relative px-6 py-5 flex items-center gap-4 overflow-hidden"
@@ -683,7 +783,7 @@ export default function PersonList() {
                     </button>
                   )}
                   <p className="text-xs text-gray-400">JPG/PNG/WebP ไม่เกิน 20MB</p>
-                  <p className="text-xs text-gray-300">ระบบย่อรูปให้อัตโนมัติ</p>
+                  <p className="text-xs text-gray-400">ระบบย่อรูปให้อัตโนมัติ</p>
                 </div>
                 <input
                   ref={photoInputRef}
@@ -860,16 +960,18 @@ export default function PersonList() {
           </div>
           {/* Footer */}
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
-            <button
-              className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-all active:scale-95"
-              onClick={() => modalRef.current?.close()}>ยกเลิก</button>
-            <button
-              className="px-6 py-2.5 rounded-2xl text-sm font-bold text-white shadow-lg active:scale-95 transition-all"
-              style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', boxShadow: '0 4px 15px rgba(234,88,12,0.3)' }}
-              onClick={handleSave}>บันทึกข้อมูล</button>
+            {guard.asking ? <DiscardBar guard={guard} /> : (<>
+              <button
+                className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-all active:scale-95"
+                onClick={requestClose}>ยกเลิก</button>
+              <button
+                className="px-6 py-2.5 rounded-2xl text-sm font-bold text-white shadow-lg active:scale-95 transition-all"
+                style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', boxShadow: '0 4px 15px rgba(234,88,12,0.3)' }}
+                onClick={handleSave}>บันทึกข้อมูล</button>
+            </>)}
           </div>
         </div>
-        <form method="dialog" className="modal-backdrop"><button>close</button></form>
+        <form method="dialog" className="modal-backdrop"><button type="button" onClick={requestClose}>close</button></form>
       </dialog>
 
       {/* Import Excel Modal */}
@@ -1062,7 +1164,7 @@ function FormField({ label, value, onChange, type = 'text', maxLength, numericOn
       <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">
         {label}
         {required && <span className="text-red-500 ml-0.5">*</span>}
-        {maxLength && <span className="ml-1 font-normal text-gray-300">({safeVal.length}/{maxLength})</span>}
+        {maxLength && <span className="ml-1 font-normal text-gray-400">({safeVal.length}/{maxLength})</span>}
       </label>
       <input
         type={type}

@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import DangerZone from '../components/DangerZone';
 import LoadError from '../components/LoadError';
+import { useDiscardGuard } from '../utils/useDiscardGuard';
+import DiscardBar from '../components/DiscardBar';
 import { nameInitials } from '../utils/name';
 
 const ROLES = {
@@ -27,6 +29,7 @@ export default function UserManagement() {
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
   const modalRef = useRef(null);
+  const guard = useDiscardGuard(() => modalRef.current?.close());
 
   const [loadError, setLoadError] = useState(false);
   // เดิมไม่มี catch → โหลดพังแล้วหมุนค้างตลอด
@@ -36,11 +39,14 @@ export default function UserManagement() {
 
   const openAdd = () => {
     setEditing(null); setForm(empty); setErr('');
+    guard.arm(empty);
     modalRef.current?.showModal();
   };
 
   const openEdit = (u) => {
-    setEditing(u); setForm({ name: u.name, email: u.email, password: '', role: u.role }); setErr('');
+    const initial = { name: u.name, email: u.email, password: '', role: u.role };
+    setEditing(u); setForm(initial); setErr('');
+    guard.arm(initial);
     modalRef.current?.showModal();
   };
 
@@ -104,20 +110,20 @@ export default function UserManagement() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
             <UserCog size={22} className="text-orange-600" />
           </div>
           <div>
             <h1 className="text-xl font-black page-title leading-tight">จัดการผู้ใช้งาน</h1>
-            <p className="text-gray-400 text-sm mt-0.5">
+            <p className="text-gray-500 text-sm mt-0.5">
               <span className="text-orange-600 font-bold">{users.length}</span> บัญชีในระบบ
             </p>
           </div>
         </div>
         <button onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm flex-shrink-0">
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm flex-shrink-0">
           <Plus size={16} /> เพิ่มผู้ใช้
         </button>
       </div>
@@ -146,7 +152,7 @@ export default function UserManagement() {
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-gray-800 text-sm leading-none">{u.name}</span>
+                            <span className="font-bold text-gray-800 text-sm leading-none whitespace-nowrap">{u.name}</span>
                             {u.id === me?.id && (
                               <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500 border border-gray-200">คุณ</span>
                             )}
@@ -197,7 +203,7 @@ export default function UserManagement() {
       <DangerZone />
 
       {/* Modal */}
-      <dialog ref={modalRef} className="modal">
+      <dialog ref={modalRef} className="modal" onCancel={(e) => { e.preventDefault(); guard.request(form); }}>
         <div className="modal-box bg-white rounded-3xl shadow-2xl p-0 max-w-md w-full overflow-hidden">
           <div className="relative px-6 py-5 flex items-center gap-4 overflow-hidden"
             style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
@@ -212,8 +218,8 @@ export default function UserManagement() {
               </h3>
               <p className="text-orange-200/60 text-xs mt-0.5">{editing ? editing.email : 'กรอกข้อมูลผู้ใช้'}</p>
             </div>
-            <button className="relative text-white/50 hover:text-white text-xl leading-none transition-colors"
-              onClick={() => modalRef.current?.close()}>✕</button>
+            <button type="button" className="relative text-white/50 hover:text-white text-xl leading-none transition-colors"
+              onClick={() => guard.request(form)}>✕</button>
           </div>
 
           <form onSubmit={handleSave} className="px-6 py-5 space-y-4">
@@ -261,8 +267,8 @@ export default function UserManagement() {
               </div>
             )}
 
-            <div className="flex gap-3 pt-1">
-              <button type="button" onClick={() => modalRef.current?.close()}
+            {guard.asking ? <div className="pt-1"><DiscardBar guard={guard} /></div> : <div className="flex gap-3 pt-1">
+              <button type="button" onClick={() => guard.request(form)}
                 className="flex-1 py-2.5 rounded-2xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 font-semibold transition-colors">
                 ยกเลิก
               </button>
@@ -274,10 +280,10 @@ export default function UserManagement() {
                   : (editing ? 'บันทึก' : 'เพิ่มผู้ใช้')
                 }
               </button>
-            </div>
+            </div>}
           </form>
         </div>
-        <form method="dialog" className="modal-backdrop"><button>close</button></form>
+        <form method="dialog" className="modal-backdrop"><button type="button" onClick={() => guard.request(form)}>close</button></form>
       </dialog>
     </div>
   );

@@ -16,6 +16,8 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { resizeImage } from '../utils/resizeImage';
 import LoadError from '../components/LoadError';
+import { useDiscardGuard } from '../utils/useDiscardGuard';
+import DiscardBar from '../components/DiscardBar';
 import { nameInitials } from '../utils/name';
 import { useThaiDate } from '../utils/useThaiDate';
 import { endBeforeStart } from '../utils/thaiDate';
@@ -54,7 +56,7 @@ const DateRange = ({ start, end, noEndLabel = 'ปัจจุบัน' }) => (
     <span className="bg-orange-50 text-orange-600 text-xs font-bold px-2 py-0.5 rounded-lg border border-orange-100">
       {fmtDate(start) || '—'}
     </span>
-    <span className="text-gray-300 text-xs">→</span>
+    <span className="text-gray-400 text-xs">→</span>
     <span className="bg-gray-50 text-gray-400 text-xs font-medium px-2 py-0.5 rounded-lg border border-gray-100">
       {fmtDate(end) || noEndLabel}
     </span>
@@ -71,6 +73,7 @@ export default function PersonDetail() {
   const { canEdit } = useAuth();
   const toast = useToast();
   const modalRef = useRef(null);
+  const guard = useDiscardGuard(() => modalRef.current?.close());
   const [tab, setTab] = useState(0);
   const [person, setPerson] = useState(null);
   const [personError, setPersonError] = useState(null);   // null | 'notfound' | 'error'
@@ -189,7 +192,9 @@ export default function PersonDetail() {
 
   // record = รายการที่จะแก้ไข (ไม่ส่ง = เพิ่มใหม่) — เดิมเพิ่มได้อย่างเดียว พิมพ์ผิดต้องลบแล้วเพิ่มใหม่
   const openDialog = (type, record = null) => {
-    setForm(record ? toEditForm(type, record) : {});
+    const initial = record ? toEditForm(type, record) : {};
+    setForm(initial);
+    guard.arm(initial);
     setEditingId(record?.id ?? null);
     setDialogType(type);
     setDialogNonce((n) => n + 1);   // สร้างช่องในหน้าต่างใหม่ทุกครั้ง ไม่ให้ค่าที่พิมพ์ค้างจากรอบก่อนโผล่
@@ -272,34 +277,47 @@ export default function PersonDetail() {
               <Camera size={16} color="white" />
             </button>
           )}
-          {canEdit && profilePhoto && (
-            <button
-              onClick={handleDeletePhoto}
-              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition-colors">
-              <Trash2 size={10} />
-            </button>
-          )}
           <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handlePhotoChange} />
         </div>
-        <div className="flex-1">
-          <h1 className="text-xl font-extrabold text-orange-950">{person.fullName}</h1>
-          <p className="text-sm text-gray-400">
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+            <h1 className="text-xl font-extrabold text-orange-950">
+              {person.fullName}
+              {person.nickname && <span className="text-base font-semibold text-gray-500"> ({person.nickname})</span>}
+            </h1>
+            {/* โชว์เฉพาะคนที่เสียชีวิต — เดิมขึ้น "มีชีวิต" ทุกคน ไม่ได้บอกอะไร */}
+            {person.lifeStatus === 'DECEASED' && (
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border border-gray-200">เสียชีวิต</span>
+            )}
+          </div>
+          <p className="text-sm text-gray-500">
             {GENDER_LABELS[person.gender]} · {person.province || 'ไม่ระบุจังหวัด'}
             {age !== null && <> · <span className="font-semibold text-orange-600">{age} ปี</span></>}
           </p>
-          {canEdit && <p className="text-xs text-orange-300 mt-1">hover ที่รูปเพื่อเปลี่ยน</p>}
+          {/* ปุ่มจริงแทน "hover ที่รูปเพื่อเปลี่ยน" — มือถือ hover ไม่ได้ เลยไม่รู้ว่าเปลี่ยนรูปได้ */}
+          {canEdit && (
+            <div className="flex flex-wrap gap-2 mt-2.5">
+              <button onClick={() => photoInputRef.current?.click()} className={SMALL_BTN}>
+                <Camera size={13} /> {profilePhoto ? 'เปลี่ยนรูป' : 'เพิ่มรูป'}
+              </button>
+              {profilePhoto && (
+                <button onClick={handleDeletePhoto}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 active:scale-95 transition-all">
+                  <Trash2 size={13} /> ลบรูป
+                </button>
+              )}
+            </div>
+          )}
         </div>
-        <span className={`badge badge-lg font-semibold ${person.lifeStatus === 'ALIVE' ? 'badge-success' : 'badge-ghost'}`}>
-          {person.lifeStatus === 'ALIVE' ? 'มีชีวิต' : 'เสียชีวิต'}
-        </span>
       </div>
 
       {/* Tabs */}
-      <div role="tablist" className="tabs tabs-bordered bg-white rounded-2xl shadow-sm border border-orange-100 px-4 mb-5 flex-wrap">
+      {/* มือถือ: แท็บเรียงแถวเดียว ปัดซ้าย-ขวาได้ (เดิมซ้อน 3 บรรทัด และไม่มีขีดบอกว่าอยู่แท็บไหน) */}
+      <div role="tablist" className="flex overflow-x-auto bg-white rounded-2xl shadow-sm border border-orange-100 px-2 mb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {tabs.map((t, i) => (
-          <button key={i} role="tab"
-            className={`tab text-sm font-semibold py-4 ${tab === i ? 'tab-active text-orange-600' : 'text-gray-400'}`}
-            onClick={() => setTab(i)}>
+          <button key={i} role="tab" aria-selected={tab === i}
+            className={`flex-shrink-0 whitespace-nowrap px-3.5 py-3.5 text-sm font-semibold border-b-2 transition-colors ${tab === i ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-orange-600'}`}
+            onClick={(e) => { setTab(i); e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }); }}>
             {t}
           </button>
         ))}
@@ -320,7 +338,7 @@ export default function PersonDetail() {
           <InfoCard title="ข้อมูลติดต่อ" items={[
             ['โทรศัพท์', person.phone],
             ['มือถือ', person.mobile],
-            ['Email', person.email],
+            ['อีเมล', person.email],
             ['สถานที่ใกล้เคียง', person.landmark],
           ]} />
           <div className="md:col-span-2 bg-white rounded-2xl shadow-sm border border-orange-100 p-5">
@@ -335,7 +353,7 @@ export default function PersonDetail() {
               ].map(([label, val]) => (
                 <div key={label}>
                   <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-0.5">{label}</p>
-                  <p className="text-sm text-orange-950 font-medium">{val || <span className="text-gray-200">—</span>}</p>
+                  <p className="text-sm text-orange-950 font-medium">{val || <span className="text-gray-400">—</span>}</p>
                 </div>
               ))}
             </div>
@@ -344,7 +362,7 @@ export default function PersonDetail() {
             <div className="flex items-center justify-between mb-3">
               <p className="font-bold text-orange-950 text-sm">ข้อมูลความพิการ</p>
               {canEdit && (
-                <button className="btn btn-outline btn-primary btn-xs gap-1" onClick={() => openDialog('disability')}>
+                <button className={SMALL_BTN} onClick={() => openDialog('disability')}>
                   <Plus size={13} /> เพิ่ม
                 </button>
               )}
@@ -354,13 +372,13 @@ export default function PersonDetail() {
                 {person.disabilityInfos.map((d) => (
                   <div key={d.id} className="rounded-xl bg-orange-50 border border-orange-100 p-3 relative">
                     {canEdit && (
-                      <button
-                        className="absolute top-2 right-2 text-red-300 hover:text-red-500 transition-colors"
+                      <button title="ลบ"
+                        className="absolute top-1.5 right-1.5 w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                         onClick={() => delWith('ข้อมูลความพิการ', () => deleteDisabilityInfo(id, d.id), () => getPerson(id).then(r => setPerson(r.data)))}>
                         <Trash2 size={13} />
                       </button>
                     )}
-                    <span className="badge badge-sm bg-orange-100 text-orange-700 font-semibold border-0 mb-2">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700 mb-2 mr-8">
                       {d.disabilityType?.typeName}
                     </span>
                     <p className="text-xs text-gray-600">ระดับ: {d.disabilityLevel || '—'}</p>
@@ -371,7 +389,7 @@ export default function PersonDetail() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-gray-300 text-center py-4">ยังไม่มีข้อมูลความพิการ</p>
+              <p className="text-sm text-gray-400 text-center py-4">ยังไม่มีข้อมูลความพิการ</p>
             )}
           </div>
         </div>
@@ -671,7 +689,7 @@ export default function PersonDetail() {
       )}
 
       {/* Modal */}
-      <dialog ref={modalRef} className="modal">
+      <dialog ref={modalRef} className="modal" onCancel={(e) => { e.preventDefault(); guard.request(form); }}>
         <div className="modal-box max-w-lg p-0 overflow-hidden bg-white shadow-2xl">
           <div className="px-6 py-5 flex items-center gap-3" style={{ background: 'linear-gradient(135deg,#431407 0%,#c2410c 100%)' }}>
             <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
@@ -761,11 +779,13 @@ export default function PersonDetail() {
           </div>
 
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
-            <button className="px-5 py-2 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors" onClick={() => modalRef.current?.close()}>ยกเลิก</button>
-            <button className="px-6 py-2 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg active:scale-95 transition-all" style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }} onClick={handleSave}>บันทึก</button>
+            {guard.asking ? <DiscardBar guard={guard} /> : (<>
+              <button className="px-5 py-2 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors" onClick={() => guard.request(form)}>ยกเลิก</button>
+              <button className="px-6 py-2 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg active:scale-95 transition-all" style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }} onClick={handleSave}>บันทึก</button>
+            </>)}
           </div>
         </div>
-        <form method="dialog" className="modal-backdrop"><button>close</button></form>
+        <form method="dialog" className="modal-backdrop"><button type="button" onClick={() => guard.request(form)}>close</button></form>
       </dialog>
     </div>
   );
@@ -809,6 +829,9 @@ const Sel = ({ label, value = '', onChange, options }) => (
 const Sel12 = (p) => <div className="col-span-2"><Sel {...p} /></div>;
 const SelData12 = (p) => <div className="col-span-2"><Sel {...p} /></div>;
 
+// ปุ่มเล็กสีส้มอ่อน (เพิ่ม / เปลี่ยนรูป) — เดิมเป็นกรอบส้มเข้มแข็งๆ ของ DaisyUI
+const SMALL_BTN = 'inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-orange-700 bg-orange-50 border border-orange-200 hover:bg-orange-100 active:scale-95 transition-all';
+
 const DelBtn = ({ onClick }) => (
   <button className="btn btn-ghost btn-xs text-red-400 hover:bg-red-50" title="ลบ" onClick={onClick}><Trash2 size={13} /></button>
 );
@@ -843,7 +866,7 @@ function InfoCard({ title, items }) {
         {items.map(([label, value]) => (
           <div key={label} className="mb-3">
             <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-0.5">{label}</p>
-            <p className="text-sm text-orange-950 font-medium">{value || <span className="text-gray-200">—</span>}</p>
+            <p className="text-sm text-orange-950 font-medium">{value || <span className="text-gray-400">—</span>}</p>
           </div>
         ))}
       </div>
@@ -859,7 +882,7 @@ function SubSection({ title, icon, onAdd, children }) {
           <span className="text-orange-500">{icon}</span>{title}
         </div>
         {onAdd && (
-          <button className="btn btn-outline btn-primary btn-xs gap-1" onClick={onAdd}>
+          <button className={SMALL_BTN} onClick={onAdd}>
             <Plus size={13} /> เพิ่ม
           </button>
         )}

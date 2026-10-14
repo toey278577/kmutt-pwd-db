@@ -28,7 +28,7 @@ const DateRange = ({ start, end }) => (
     <span className="bg-orange-50 text-orange-600 text-xs font-bold px-2 py-0.5 rounded-lg border border-orange-100">
       {fmtDate(start) || '—'}
     </span>
-    <span className="text-gray-300 text-xs">→</span>
+    <span className="text-gray-400 text-xs">→</span>
     <span className="bg-gray-50 text-gray-400 text-xs font-medium px-2 py-0.5 rounded-lg border border-gray-100">
       {fmtDate(end) || '—'}
     </span>
@@ -51,7 +51,7 @@ function PersonCell({ id, name, i, navigate }) {
 function EmptyRow({ cols, text }) {
   return (
     <tr>
-      <td colSpan={cols} className="text-center py-16 text-gray-300">
+      <td colSpan={cols} className="text-center py-16 text-gray-400">
         <div className="flex flex-col items-center gap-3">
           <div className="w-16 h-16 rounded-3xl bg-orange-50 flex items-center justify-center">
             <GraduationCap size={28} className="text-orange-200" />
@@ -65,11 +65,11 @@ function EmptyRow({ cols, text }) {
 
 // คะแนนก่อน → หลังอบรม (ถ้าบันทึกไว้ในแท็บประเมินทักษะ)
 function ScoreCell({ pre, post }) {
-  if (pre == null && post == null) return <span className="text-gray-300">—</span>;
+  if (pre == null && post == null) return <span className="text-gray-400">—</span>;
   const up = pre != null && post != null ? post - pre : null;
   return (
     <span className="whitespace-nowrap text-sm text-gray-700">
-      {pre ?? '—'} <span className="text-gray-300">→</span> <span className="font-bold">{post ?? '—'}</span>
+      {pre ?? '—'} <span className="text-gray-400">→</span> <span className="font-bold">{post ?? '—'}</span>
       {up != null && up !== 0 && (
         <span className={`ml-1.5 text-xs font-bold ${up > 0 ? 'text-emerald-600' : 'text-red-500'}`}>{up > 0 ? `+${up}` : up}</span>
       )}
@@ -129,7 +129,7 @@ export default function TrainingList() {
         </div>
         <div>
           <h1 className="text-xl font-black page-title leading-tight">การอบรม & ฝึกงาน</h1>
-          <p className="text-gray-400 text-sm mt-0.5">
+          <p className="text-gray-500 text-sm mt-0.5">
             ผู้เข้าอบรมตามรุ่น <span className="text-orange-600 font-bold">{enrolls.length}</span> คน
             · ประวัติอบรมรายคน <span className="text-orange-600 font-bold">{rows.length}</span> รายการ
           </p>
@@ -202,7 +202,7 @@ export default function TrainingList() {
                       <td className="px-4 py-3.5">
                         {tp
                           ? <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${tp.bg}`}>{tp.label}</span>
-                          : <span className="text-gray-300">—</span>}
+                          : <span className="text-gray-400">—</span>}
                       </td>
                       <td className="px-4 py-3.5"><DateRange start={t.startDate} end={t.endDate} /></td>
                       <td className="px-4 py-3.5 text-gray-400 text-xs max-w-[140px] truncate">{t.skillsGained || '—'}</td>

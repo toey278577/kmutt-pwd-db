@@ -71,7 +71,7 @@ export default function AuditLog() {
         </div>
         <div>
           <h1 className="text-xl font-black page-title leading-tight">ประวัติการใช้งาน</h1>
-          <p className="text-gray-400 text-sm mt-0.5">
+          <p className="text-gray-500 text-sm mt-0.5">
             ใครเพิ่ม แก้ไข ลบข้อมูลอะไร เมื่อไหร่ — ทั้งหมด <span className="text-orange-600 font-bold">{data.total.toLocaleString()}</span> รายการ
           </p>
         </div>

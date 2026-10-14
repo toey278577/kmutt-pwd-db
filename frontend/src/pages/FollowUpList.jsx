@@ -60,7 +60,7 @@ export default function FollowUpList() {
         </div>
         <div>
           <h1 className="text-xl font-black page-title leading-tight">ติดตามผล</h1>
-          <p className="text-gray-400 text-sm mt-0.5">
+          <p className="text-gray-500 text-sm mt-0.5">
             <span className="text-orange-600 font-bold">{rows.length}</span> รายการในระบบ
           </p>
         </div>
@@ -83,7 +83,7 @@ export default function FollowUpList() {
             <tbody>
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="text-center py-16 text-gray-300">
+                  <td colSpan={8} className="text-center py-16 text-gray-400">
                     <div className="flex flex-col items-center gap-3">
                       <div className="w-16 h-16 rounded-3xl bg-orange-50 flex items-center justify-center">
                         <Target size={28} className="text-orange-200" />
@@ -121,7 +121,7 @@ export default function FollowUpList() {
                     <td className="px-4 py-3.5">
                       {f.skillMatch === 'MATCH' && <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">ตรงสาย</span>}
                       {f.skillMatch === 'NOT_MATCH' && <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-600 border border-red-200">ไม่ตรง</span>}
-                      {!f.skillMatch && <span className="text-gray-300">—</span>}
+                      {!f.skillMatch && <span className="text-gray-400">—</span>}
                     </td>
                     <td className="px-4 py-3.5 text-gray-500 text-sm">{f.satisfaction || '—'}</td>
                     <td className="px-4 py-3.5 text-gray-400 text-xs max-w-[140px] truncate">{f.issues || '—'}</td>

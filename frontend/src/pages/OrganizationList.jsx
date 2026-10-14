@@ -4,6 +4,8 @@ import { getOrganizations, createOrganization, updateOrganization, deleteOrganiz
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import LoadError from '../components/LoadError';
+import { useDiscardGuard } from '../utils/useDiscardGuard';
+import DiscardBar from '../components/DiscardBar';
 import { orgInitials } from '../utils/name';
 
 const emptyForm = { orgName: '', businessType: '', address: '', contactName: '', phone: '', email: '', note: '' };
@@ -20,6 +22,7 @@ export default function OrganizationList() {
   const { canEdit } = useAuth();
   const toast = useToast();
   const modalRef = useRef(null);
+  const guard = useDiscardGuard(() => modalRef.current?.close());
   const [orgs, setOrgs] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
@@ -31,8 +34,10 @@ export default function OrganizationList() {
 
   const openModal = (org = null) => {
     // เอาเฉพาะช่องในฟอร์ม (ไม่ส่ง id / จำนวนคนที่เชื่อม กลับไปตอนบันทึก)
-    if (org) { setForm(Object.fromEntries(Object.keys(emptyForm).map((k) => [k, org[k] ?? '']))); setEditId(org.id); }
-    else { setForm(emptyForm); setEditId(null); }
+    const initial = org ? Object.fromEntries(Object.keys(emptyForm).map((k) => [k, org[k] ?? ''])) : emptyForm;
+    setForm(initial);
+    setEditId(org?.id ?? null);
+    guard.arm(initial);
     modalRef.current?.showModal();
   };
 
@@ -66,21 +71,21 @@ export default function OrganizationList() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
             <Building2 size={22} className="text-orange-600" />
           </div>
           <div>
             <h1 className="text-xl font-black page-title leading-tight">สถานประกอบการ</h1>
-            <p className="text-gray-400 text-sm mt-0.5">
+            <p className="text-gray-500 text-sm mt-0.5">
               <span className="text-orange-600 font-bold">{orgs.length}</span> แห่งในระบบ
             </p>
           </div>
         </div>
         {canEdit && (
           <button
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm flex-shrink-0"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm flex-shrink-0"
             onClick={() => openModal()}>
             <Plus size={16} /> เพิ่มองค์กร
           </button>
@@ -101,7 +106,7 @@ export default function OrganizationList() {
             <tbody>
               {orgs.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="text-center py-16 text-gray-300">
+                  <td colSpan={6} className="text-center py-16 text-gray-400">
                     <div className="flex flex-col items-center gap-3">
                       <div className="w-16 h-16 rounded-3xl bg-orange-50 flex items-center justify-center">
                         <Building2 size={28} className="text-orange-200" />
@@ -113,14 +118,14 @@ export default function OrganizationList() {
               )}
               {orgs.map((o, i) => (
                 <tr key={o.id} className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors">
-                  <td className="px-4 py-3.5 text-gray-300 text-xs font-mono">{i + 1}</td>
+                  <td className="px-4 py-3.5 text-gray-400 text-xs font-mono">{i + 1}</td>
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-3">
                       <div className={`w-9 h-9 rounded-2xl bg-gradient-to-br ${AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]} text-white text-xs font-black flex items-center justify-center flex-shrink-0 shadow-sm`}>
                         {orgInitials(o.orgName)}
                       </div>
                       <div>
-                        <p className="font-bold text-gray-800 text-sm leading-none">{o.orgName}</p>
+                        <p className="font-bold text-gray-800 text-sm leading-none whitespace-nowrap">{o.orgName}</p>
                         {o.address && <p className="text-gray-400 text-xs mt-0.5 truncate max-w-[160px]">{o.address}</p>}
                         {o._count?.persons > 0 && <p className="text-orange-500 text-xs mt-0.5 font-semibold">เชื่อมกับคนพิการ {o._count.persons} คน</p>}
                       </div>
@@ -129,7 +134,7 @@ export default function OrganizationList() {
                   <td className="px-4 py-3.5">
                     {o.businessType
                       ? <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-orange-50 text-orange-600 border border-orange-100">{o.businessType}</span>
-                      : <span className="text-gray-300">—</span>}
+                      : <span className="text-gray-400">—</span>}
                   </td>
                   <td className="px-4 py-3.5 text-gray-600 text-sm">{o.contactName || '—'}</td>
                   <td className="px-4 py-3.5">
@@ -156,7 +161,7 @@ export default function OrganizationList() {
       </div>
 
       {/* Modal */}
-      <dialog ref={modalRef} className="modal">
+      <dialog ref={modalRef} className="modal" onCancel={(e) => { e.preventDefault(); guard.request(form); }}>
         <div className="modal-box max-w-md p-0 overflow-hidden bg-white shadow-2xl rounded-3xl">
           <div className="relative px-6 py-5 flex items-center gap-4 overflow-hidden"
             style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
@@ -195,14 +200,16 @@ export default function OrganizationList() {
             </div>
           </div>
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
-            <button className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-all"
-              onClick={() => modalRef.current?.close()}>ยกเลิก</button>
-            <button className="px-6 py-2.5 rounded-2xl text-sm font-bold text-white active:scale-95 transition-all"
-              style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', boxShadow: '0 4px 15px rgba(234,88,12,0.3)' }}
-              onClick={handleSave}>บันทึก</button>
+            {guard.asking ? <DiscardBar guard={guard} /> : (<>
+              <button className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-all"
+                onClick={() => guard.request(form)}>ยกเลิก</button>
+              <button className="px-6 py-2.5 rounded-2xl text-sm font-bold text-white active:scale-95 transition-all"
+                style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', boxShadow: '0 4px 15px rgba(234,88,12,0.3)' }}
+                onClick={handleSave}>บันทึก</button>
+            </>)}
           </div>
         </div>
-        <form method="dialog" className="modal-backdrop"><button>close</button></form>
+        <form method="dialog" className="modal-backdrop"><button type="button" onClick={() => guard.request(form)}>close</button></form>
       </dialog>
     </div>
   );

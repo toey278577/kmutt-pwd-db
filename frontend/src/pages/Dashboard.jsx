@@ -213,7 +213,7 @@ function EmptyDashboard({ onAdd, onBatch }) {
               <div className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
                 <Icon size={15} className="text-orange-500" />
               </div>
-              <span className="text-xs font-black text-gray-300">ขั้นที่ {i + 1}</span>
+              <span className="text-xs font-black text-gray-400">ขั้นที่ {i + 1}</span>
             </div>
             <p className="font-bold text-gray-700 text-sm mb-0.5">{title}</p>
             <p className="text-gray-400 text-xs leading-relaxed">{desc}</p>
@@ -250,8 +250,8 @@ function BarList({ data }) {
       {data.map((d) => (
         <div key={d.name}>
           <div className="flex items-baseline justify-between gap-2.5 mb-1.5">
-            <span className={`text-xs font-medium truncate ${d.value ? 'text-gray-600' : 'text-gray-300'}`} title={d.name}>{d.name}</span>
-            <span className={`text-xs font-bold tabular-nums flex-shrink-0 ${d.value ? 'text-gray-800' : 'text-gray-300'}`}>{d.value}</span>
+            <span className={`text-xs font-medium truncate ${d.value ? 'text-gray-600' : 'text-gray-400'}`} title={d.name}>{d.name}</span>
+            <span className={`text-xs font-bold tabular-nums flex-shrink-0 ${d.value ? 'text-gray-800' : 'text-gray-400'}`}>{d.value}</span>
           </div>
           <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--viz-track)' }}>
             <div className="h-full rounded-full transition-all duration-500"
@@ -271,7 +271,7 @@ function ColumnChart({ data }) {
       <div className="flex items-end gap-2.5" style={{ height: 128 }}>
         {data.map((d) => (
           <div key={d.name} className="flex-1 flex flex-col items-center justify-end h-full">
-            <span className={`text-xs font-extrabold mb-1.5 tabular-nums ${d.value ? 'text-gray-800' : 'text-gray-300'}`}>{d.value}</span>
+            <span className={`text-xs font-extrabold mb-1.5 tabular-nums ${d.value ? 'text-gray-800' : 'text-gray-400'}`}>{d.value}</span>
             <div className="w-full rounded-t-md transition-all duration-500" style={{
               maxWidth: 44,
               height: d.value ? `${Math.max((d.value / max) * 100, 4)}%` : 3,
@@ -282,7 +282,7 @@ function ColumnChart({ data }) {
       </div>
       <div className="flex gap-2.5 mt-2">
         {data.map((d) => (
-          <span key={d.name} className={`flex-1 text-center text-[11px] font-medium leading-tight ${d.value ? 'text-gray-400' : 'text-gray-300'}`}>{d.name}</span>
+          <span key={d.name} className={`flex-1 text-center text-[11px] font-medium leading-tight ${d.value ? 'text-gray-600' : 'text-gray-400'}`}>{d.name}</span>
         ))}
       </div>
     </div>
@@ -323,7 +323,7 @@ function EmptyChart() {
       <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center">
         <TrendingUp size={18} className="text-orange-200" />
       </div>
-      <p className="text-gray-300 text-xs">ยังไม่มีข้อมูล</p>
+      <p className="text-gray-400 text-xs">ยังไม่มีข้อมูล</p>
     </div>
   );
 }

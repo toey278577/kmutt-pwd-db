@@ -211,17 +211,17 @@ export default function ReportPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-5 flex items-center justify-between gap-4 no-print">
-        <div className="flex items-center gap-3">
+      <div className="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 no-print">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
             <Printer size={22} className="text-orange-600" />
           </div>
           <div>
             <h1 className="text-xl font-black page-title leading-tight">ออกรายงาน / Report</h1>
-            <p className="text-gray-400 text-sm mt-0.5">กด "พิมพ์ / บันทึก PDF" → เปลี่ยน Destination เป็น "Save as PDF" → Save</p>
+            <p className="text-gray-500 text-sm mt-0.5">กด "พิมพ์ / บันทึก PDF" → เปลี่ยน Destination เป็น "Save as PDF" → Save</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto [&>button]:flex-1 sm:[&>button]:flex-none [&>button]:justify-center">
           {(activeType === 'list' || activeType === 'behavior' || activeType === 'course_eval') && (
             <button
               onClick={handleExportExcel}
@@ -526,7 +526,7 @@ export default function ReportPage() {
                           ? <img src={p.photos[0].filePath} alt={p.fullName}
                               className="w-10 h-12 object-cover rounded mx-auto"
                               style={{ printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' }} />
-                          : <div className="w-10 h-12 bg-gray-100 border border-gray-200 rounded mx-auto flex items-center justify-center text-gray-300 text-[8px]">ไม่มีรูป</div>
+                          : <div className="w-10 h-12 bg-gray-100 border border-gray-200 rounded mx-auto flex items-center justify-center text-gray-400 text-[8px]">ไม่มีรูป</div>
                         }
                       </td>
                       <td className="border border-gray-300 px-2 py-1 align-middle font-medium">{p.fullName}</td>
@@ -590,7 +590,7 @@ export default function ReportPage() {
                         <td className="border border-gray-300 px-1 py-1 text-center align-middle">
                           {p.photos?.[0]?.filePath
                             ? <img src={p.photos[0].filePath} alt={p.fullName} className="w-10 h-12 object-cover rounded mx-auto" />
-                            : <div className="w-10 h-12 bg-gray-100 border border-gray-200 rounded mx-auto flex items-center justify-center text-gray-300 text-[9px]">ไม่มีรูป</div>
+                            : <div className="w-10 h-12 bg-gray-100 border border-gray-200 rounded mx-auto flex items-center justify-center text-gray-400 text-[9px]">ไม่มีรูป</div>
                           }
                         </td>
                         <td className="border border-gray-300 px-2 py-2 align-middle">{p.fullName}</td>

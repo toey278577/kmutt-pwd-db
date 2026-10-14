@@ -168,6 +168,8 @@ ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /a
 - error จาก Prisma ถูกแปลงเป็นข้อความไทยกลางที่ `index.js` (ของจริงอยู่ใน log `[DB ERROR]`)
 - route รายการย่อยของคน (`/persons/:id/<sub>/:subId`) ต้องเช็คเจ้าของด้วย `ensureOwned` + รับช่องด้วย `pick` (`utils/owned.js`) — อย่า spread `req.body` เข้า DB
 - หน้าเว็บ: ชื่อ/คำนำหน้า/ตัวย่อ → `utils/name.js` · ช่องวันที่ พ.ศ. → `utils/useThaiDate.js` (ตรวจวันจริง/ปี ค.ศ.) · รูป → `utils/resizeImage.js` ย่อก่อนส่ง · โหลดพัง → `components/LoadError.jsx`
+- ฟอร์มใหม่ทุกอัน: ใส่ตัวถามก่อนปิดเมื่อยังไม่บันทึก `utils/useDiscardGuard.js` + `components/DiscardBar.jsx` (arm ตอนเปิด, request ตอนปิด/Esc/คลิกนอกฟอร์ม)
+- สีเทา `gray-400/500` ถูกปรับเข้มขึ้นใน `@theme` ของ `index.css` (ให้ตัวหนังสืออ่านง่าย ≥4.5:1) — **ห้ามปรับ `gray-300`** เพราะใช้เป็นเส้นขอบ 71 จุด · ตัวหนังสือห้ามใช้ gray-200/300
 - ทดสอบหน้าเว็บจริง: backend :5000 + vite :5173 + Chrome `--headless=new --remote-debugging-port` แล้วสั่งผ่าน CDP (ใส่ token ใน sessionStorage แทนการล็อกอิน)
 
 ---

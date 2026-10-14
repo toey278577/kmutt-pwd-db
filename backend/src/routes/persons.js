@@ -82,11 +82,17 @@ router.get('/', async (req, res) => {
   try {
     const { search, province, gender, withPhotos, batchId } = req.query;
     const where = {};
-    if (search) {
+    const q = String(search || '').trim();
+    if (q) {
+      // ค้นได้ทั้งชื่อ ชื่อเล่น เลขบัตร และเบอร์โทร — พิมพ์เบอร์แบบมีขีด/เว้นวรรค (081-234-5678) ก็เจอ
+      const digits = q.replace(/[\s-]/g, '');
       where.OR = [
-        { fullName: { contains: search, mode: 'insensitive' } },
-        { thaiId: { contains: search } },
+        { fullName: { contains: q, mode: 'insensitive' } },
+        { nickname: { contains: q, mode: 'insensitive' } },
       ];
+      if (/^\d+$/.test(digits)) {
+        where.OR.push({ thaiId: { contains: digits } }, { phone: { contains: digits } }, { mobile: { contains: digits } });
+      }
     }
     if (province) where.province = province;
     if (gender) where.gender = gender;
@@ -97,6 +103,8 @@ router.get('/', async (req, res) => {
       birthDate: true, phone: true, mobile: true, province: true,
       educationLevel: true, lifeStatus: true, createdAt: true, batchId: true,
       disabilityInfos: { select: { id: true, disabilityType: { select: { typeName: true } } } },
+      // ผลติดตามล่าสุด (วันที่ล่าสุด ถ้าวันเดียวกันเอาที่บันทึกทีหลัง — แบบเดียวกับ Dashboard) ใช้โชว์คอลัมน์ "งานล่าสุด"
+      followUps: { select: { employmentStatus: true, followUpDate: true }, orderBy: [{ followUpDate: 'desc' }, { id: 'desc' }], take: 1 },
     };
     if (withPhotos === 'true') {
       select.photos = { select: { filePath: true }, take: 1 };

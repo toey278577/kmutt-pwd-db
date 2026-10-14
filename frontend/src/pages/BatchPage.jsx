@@ -6,6 +6,8 @@ import { useToast } from '../context/ToastContext';
 import { useThaiDate } from '../utils/useThaiDate';
 import { endBeforeStart } from '../utils/thaiDate';
 import LoadError from '../components/LoadError';
+import { useDiscardGuard } from '../utils/useDiscardGuard';
+import DiscardBar from '../components/DiscardBar';
 
 const STATUS_LABEL = { ACTIVE: 'กำลังดำเนินการ', COMPLETED: 'เสร็จสิ้น' };
 const STATUS_STYLE = {
@@ -34,6 +36,7 @@ export default function BatchPage() {
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const guard = useDiscardGuard(() => setShowModal(false));
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -52,20 +55,23 @@ export default function BatchPage() {
 
   const openNew = () => {
     setForm(emptyForm);
+    guard.arm(emptyForm);
     setEditId(null);
     setErrors({});
     setShowModal(true);
   };
 
   const openEdit = (b) => {
-    setForm({
+    const initial = {
       batchNumber: b.batchNumber,
       year: b.year,
       courseName: b.courseName,
       startDate: b.startDate ? b.startDate.slice(0, 10) : '',
       endDate: b.endDate ? b.endDate.slice(0, 10) : '',
       status: b.status,
-    });
+    };
+    setForm(initial);
+    guard.arm(initial);
     setEditId(b.id);
     setErrors({});
     setShowModal(true);
@@ -155,19 +161,19 @@ export default function BatchPage() {
     <div className="space-y-5">
 
       {/* Header */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
             <Layers size={22} className="text-orange-600" />
           </div>
           <div>
             <h1 className="text-xl font-black page-title leading-tight">จัดการรุ่นการฝึกอบรม</h1>
-            <p className="text-gray-400 text-sm mt-0.5">รุ่นการฝึกอบรม-ฝึกงานคนพิการ</p>
+            <p className="text-gray-500 text-sm mt-0.5">รุ่นการฝึกอบรม-ฝึกงานคนพิการ</p>
           </div>
         </div>
         {canEdit && (
           <button onClick={openNew}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm flex-shrink-0">
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all shadow-sm flex-shrink-0">
             <Plus size={16} /> เพิ่มรุ่น
           </button>
         )}
@@ -305,7 +311,7 @@ export default function BatchPage() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="font-bold text-gray-800">{editId ? 'แก้ไขรุ่น' : 'เพิ่มรุ่นใหม่'}</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+              <button onClick={() => guard.request(form)} className="text-gray-400 hover:text-gray-600 transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -349,15 +355,17 @@ export default function BatchPage() {
             </div>
 
             <div className="px-6 pb-5 flex gap-2 justify-end">
-              <button onClick={() => setShowModal(false)}
-                className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-100 transition-colors">
-                ยกเลิก
-              </button>
-              <button onClick={handleSave} disabled={saving}
-                className="px-5 py-2 rounded-xl text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-60"
-                style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
-                {saving ? 'กำลังบันทึก...' : 'บันทึก'}
-              </button>
+              {guard.asking ? <DiscardBar guard={guard} /> : (<>
+                <button onClick={() => guard.request(form)}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-100 transition-colors">
+                  ยกเลิก
+                </button>
+                <button onClick={handleSave} disabled={saving}
+                  className="px-5 py-2 rounded-xl text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-60"
+                  style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
+                  {saving ? 'กำลังบันทึก...' : 'บันทึก'}
+                </button>
+              </>)}
             </div>
           </div>
         </div>

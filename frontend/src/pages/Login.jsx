@@ -198,7 +198,7 @@ export default function Login() {
                       onChange={e => setForm({ ...form, email: e.target.value })}
                       required
                       autoComplete="email"
-                      className="w-full rounded-2xl border border-gray-200 pl-11 pr-4 py-3.5 text-sm text-gray-800 placeholder:text-gray-300 bg-gray-50/80 hover:bg-white focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-400/20 focus:border-orange-400 focus:shadow-[0_6px_22px_-8px_rgba(234,88,12,0.5)] transition-all"
+                      className="w-full rounded-2xl border border-gray-200 pl-11 pr-4 py-3.5 text-sm text-gray-800 placeholder:text-gray-400 bg-gray-50/80 hover:bg-white focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-400/20 focus:border-orange-400 focus:shadow-[0_6px_22px_-8px_rgba(234,88,12,0.5)] transition-all"
                     />
                   </div>
                 </div>
@@ -215,10 +215,10 @@ export default function Login() {
                       onChange={e => setForm({ ...form, password: e.target.value })}
                       required
                       autoComplete="current-password"
-                      className="w-full rounded-2xl border border-gray-200 pl-11 pr-11 py-3.5 text-sm text-gray-800 placeholder:text-gray-300 bg-gray-50/80 hover:bg-white focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-400/20 focus:border-orange-400 focus:shadow-[0_6px_22px_-8px_rgba(234,88,12,0.5)] transition-all"
+                      className="w-full rounded-2xl border border-gray-200 pl-11 pr-11 py-3.5 text-sm text-gray-800 placeholder:text-gray-400 bg-gray-50/80 hover:bg-white focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-400/20 focus:border-orange-400 focus:shadow-[0_6px_22px_-8px_rgba(234,88,12,0.5)] transition-all"
                     />
                     <button type="button" onClick={() => setShowPw(!showPw)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-orange-500 transition-colors z-10">
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500 transition-colors z-10">
                       {showPw ? <EyeOff size={17} /> : <Eye size={17} />}
                     </button>
                   </div>
@@ -262,7 +262,7 @@ export default function Login() {
           )}
 
           {/* Mobile credit + เวอร์ชัน */}
-          <p className="lg:hidden text-center text-xs text-gray-300 mt-2">
+          <p className="lg:hidden text-center text-xs text-gray-400 mt-2">
             Developed by Suthat Srisawat · 2026
           </p>
           <p className="lg:hidden text-center text-[11px] text-gray-400 font-bold tracking-wider mt-1">

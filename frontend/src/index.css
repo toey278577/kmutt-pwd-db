@@ -16,6 +16,14 @@
 
 * { font-family: 'Sarabun', sans-serif; }
 
+/* ตัวหนังสือรอง — เดิม gray-400 จางเกิน (2.5:1 บนการ์ด) คนสายตาไม่ดี/จอมือถือกลางแดดอ่านแทบไม่เห็น
+ * ปรับให้ผ่านเกณฑ์อ่านง่าย WCAG 4.5:1 และเลื่อน gray-500 เข้มตามลงไปนิด ให้ยังแยกระดับกันได้
+ * (ทำที่ตัวสีได้เพราะ gray-400/500 ใช้กับตัวหนังสือ/ไอคอนเท่านั้น — gray-300 ใช้เป็นเส้นขอบ 71 จุด ห้ามแตะ) */
+@theme {
+  --color-gray-400: #6b7280;
+  --color-gray-500: #5b6270;
+}
+
 @keyframes bounce-in {
   0% { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.9); }
   60% { transform: translateX(-50%) translateY(4px) scale(1.02); }
@@ -133,6 +141,8 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #4a4a50; }
   html.dark main .text-gray-300          { color: #7f8088 !important; }
   html.dark main .text-amber-700         { color: #fbbf24 !important; }
   html.dark main .text-orange-800        { color: #fb923c !important; }
+  /* ปุ่มส้มอ่อน (เพิ่ม / เปลี่ยนรูป / กลับไปแก้ต่อ) — พื้นกลายเป็นเทาเข้ม ตัวหนังสือส้มเข้มจะจม */
+  html.dark main [class*="bg-orange-50"].text-orange-700 { color: #fdba74 !important; }
   html.dark main .divide-gray-50,
   html.dark main .divide-y               { border-color: #34343b !important; }
 
@@ -142,7 +152,9 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #4a4a50; }
     border-color: #34343b !important;
     color: #f5f5f4 !important;
   }
-  html.dark main input::placeholder      { color: #4a4a50 !important; }
+  /* เดิม #4a4a50 (1.9:1) มืดจนไม่เห็นว่าช่องให้กรอกอะไร */
+  html.dark main input::placeholder,
+  html.dark main textarea::placeholder   { color: #75767e !important; }
   html.dark main select                  { background-color: #1e1e22 !important; border-color: #34343b !important; color: #f5f5f4 !important; }
   html.dark main textarea                { background-color: #1e1e22 !important; border-color: #34343b !important; color: #f5f5f4 !important; }
 

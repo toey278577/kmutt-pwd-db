@@ -10,7 +10,7 @@ const ROUND_STATE = {
   done:    { cls: 'bg-emerald-100 text-emerald-700 border-emerald-200', title: 'ติดตามแล้ว' },
   missed:  { cls: 'bg-gray-100 text-gray-400 border-gray-200 line-through', title: 'ขาด (เลยช่วงไปแล้ว)' },
   current: { cls: 'bg-orange-50 text-orange-600 border-orange-300 ring-1 ring-orange-200', title: 'รอบนี้' },
-  future:  { cls: 'bg-white text-gray-300 border-gray-100', title: 'ยังไม่ถึง' },
+  future:  { cls: 'bg-white text-gray-400 border-gray-100', title: 'ยังไม่ถึง' },
 };
 
 const fmtDate = (iso) => {
@@ -111,7 +111,7 @@ export default function FollowUpDue({ data, limit, onViewAll }) {
                     <Phone size={12} /> {it.phone}
                   </a>
                 ) : (
-                  <span className="text-xs text-gray-300 whitespace-nowrap">ไม่มีเบอร์</span>
+                  <span className="text-xs text-gray-400 whitespace-nowrap">ไม่มีเบอร์</span>
                 )}
               </div>
             </div>

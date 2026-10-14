@@ -48,7 +48,7 @@ function ToastCard({ t, onClose }) {
         {t.message && <p className="text-sm text-gray-500 leading-snug mt-0.5 break-words">{t.message}</p>}
       </div>
       {/* ปิด */}
-      <button onClick={onClose} className="text-gray-300 hover:text-gray-500 transition-colors flex-shrink-0 mt-0.5">
+      <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 mt-0.5">
         <X size={16} />
       </button>
     </div>
