@@ -201,6 +201,32 @@ router.post('/import', async (req, res) => {
       });
     }
 
+    // รุ่น / หลักสูตร / ประเภทความพิการ ต้องมีอยู่จริงในระบบ — ไม่ตรงแถวเดียวก็ไม่นำเข้าทั้งไฟล์ (กฎเดียวกับจังหวัด)
+    // หน้าเว็บจับคู่ชื่อเป็นเลข id มาให้แล้ว ตรงนี้ตรวจซ้ำกันไฟล์ที่ข้ามการตรวจของหน้าเว็บมา
+    const [allBatches, allTypes] = await Promise.all([
+      prisma.trainingBatch.findMany({ select: { id: true, courses: { select: { id: true } } } }),
+      prisma.disabilityType.findMany({ select: { id: true } }),
+    ]);
+    const courseOf = new Map(allBatches.map((b) => [b.id, new Set(b.courses.map((c) => c.id))]));
+    const typeIds = new Set(allTypes.map((t) => t.id));
+    const badRefs = [];
+    rows.forEach((r, i) => {
+      const bad = (field, value) => badRefs.push({ row: r.__row || (i + 1), fullName: String(r.fullName || '').trim(), field, value: String(value) });
+      const bId = r.batchId ? parseInt(r.batchId) : null;
+      const cId = r.courseId ? parseInt(r.courseId) : null;
+      if (bId && !courseOf.has(bId)) bad('รุ่น', r.batchId);
+      if (cId && (!bId || !courseOf.get(bId)?.has(cId))) bad('หลักสูตร', r.courseId);
+      for (const t of Array.isArray(r.disabilityTypeIds) ? r.disabilityTypeIds : []) {
+        if (!typeIds.has(parseInt(t))) bad('ประเภทความพิการ', t);
+      }
+    });
+    if (badRefs.length > 0) {
+      return res.status(400).json({
+        error: `มี ${badRefs.length} จุดที่ รุ่น/หลักสูตร/ประเภทความพิการ ไม่ตรงกับในระบบ — ยังไม่ได้นำเข้าข้อมูลใดๆ`,
+        badRefs,
+      });
+    }
+
     let created = 0;
     const errors = [];
     for (let i = 0; i < rows.length; i++) {
@@ -242,6 +268,12 @@ router.post('/import', async (req, res) => {
             landmark: txt(r.landmark, 255),
             educationLevel: txt(r.educationLevel, 100),
             batchId: r.batchId ? parseInt(r.batchId) : null,
+            courseId: r.courseId ? parseInt(r.courseId) : null,
+            // ประเภทความพิการจากคอลัมน์ใหม่ — สร้างพร้อมคนในคำสั่งเดียว (คนเข้า = ความพิการเข้าด้วย ไม่ค้างครึ่งๆ)
+            disabilityInfos: {
+              create: [...new Set((Array.isArray(r.disabilityTypeIds) ? r.disabilityTypeIds : []).map((t) => parseInt(t)))]
+                .map((disabilityTypeId) => ({ disabilityTypeId })),
+            },
           },
         });
         created++;

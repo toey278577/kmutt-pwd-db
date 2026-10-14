@@ -3,7 +3,7 @@
 // ทำให้ระบบนับเป็นคนละค่า (เช่น "ปริญญาตรี" ขึ้นซ้ำ 2 แถวในกราฟ Dashboard)
 
 // zero-width space/joiner, word joiner, BOM, soft hyphen — มองไม่เห็นแต่ทำให้ข้อความไม่เท่ากัน
-const INVISIBLE = /[​-‍⁠﻿­]/g;
+const INVISIBLE = /[\u200B-\u200D\u2060\uFEFF\u00AD]/g;
 
 function cleanText(v) {
   if (v == null) return '';

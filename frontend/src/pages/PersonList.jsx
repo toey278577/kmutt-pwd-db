@@ -9,6 +9,7 @@ import { THAI_PROVINCES, checkProvince } from '../utils/province';
 import { PREFIXES, splitPrefix, nameInitials } from '../utils/name';
 import { resizeImage } from '../utils/resizeImage';
 import { useThaiDate } from '../utils/useThaiDate';
+import { matchBatch, matchCourse, matchDisabilities } from '../utils/importCheck';
 
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
 const GENDER_BADGE = { MALE: 'bg-sky-100 text-sky-600 border-sky-200', FEMALE: 'bg-pink-100 text-pink-500 border-pink-200', OTHER: 'bg-gray-100 text-gray-500 border-gray-200' };
@@ -281,13 +282,8 @@ export default function PersonList() {
     ].filter(Boolean);
     return parts.length ? parts.join(' ') : '—';
   };
-  const resolveBatch = (numRaw, yearRaw) => {
-    if (!numRaw) return '';
-    const num = parseInt(String(numRaw).replace(/\D/g, ''));
-    const yr = yearRaw ? parseInt(String(yearRaw).replace(/\D/g, '')) : null;
-    const found = batches.find(b => b.batchNumber === num && (yr ? b.year === yr : true));
-    return found ? String(found.id) : '';
-  };
+  // ชื่อประเภทความพิการแบบสั้นไว้โชว์ในตารางตัวอย่าง ("ความพิการทางการมองเห็น" → "การมองเห็น")
+  const shortDis = (n) => n.replace(/^ความพิการทาง/, '');
 
   const downloadTemplate = () => {
     const headers = [
@@ -295,14 +291,14 @@ export default function PersonList() {
       'เบอร์โทร', 'โทรศัพท์บ้าน', 'อีเมล',
       'เลขที่', 'หมู่ที่', 'อาคาร/หมู่บ้าน', 'ชั้นที่', 'ซอย', 'ถนน',
       'แขวง/ตำบล', 'เขต/อำเภอ', 'จังหวัด', 'รหัสไปรษณีย์', 'สถานที่ใกล้เคียง',
-      'ระดับการศึกษา', 'รุ่นที่', 'ปี',
+      'ระดับการศึกษา', 'รุ่นที่', 'ปี', 'หลักสูตร', 'ประเภทความพิการ',
     ];
     const example = [
       'นาย สมชาย ใจดี', 'ชาย', '1234567890123', 'ชาย', '15/05/2540',
       '0812345678', '021234567', 'somchai@email.com',
       '99/1', '5', 'หมู่บ้านสุขใจ', '2', 'ซอยประชาอุทิศ 10', 'ถนนประชาอุทิศ',
       'บางมด', 'ทุ่งครุ', 'กรุงเทพมหานคร', '10140', 'ใกล้ มจธ.',
-      'ปริญญาตรี', '13', '2569',
+      'ปริญญาตรี', '13', '2569', '', 'ความพิการทางการมองเห็น',
     ];
     const ws = XLSX.utils.aoa_to_sheet([headers, example]);
     ws['!cols'] = headers.map(() => ({ wch: 18 }));
@@ -312,8 +308,16 @@ export default function PersonList() {
     const wsProv = XLSX.utils.aoa_to_sheet([['จังหวัด (ใช้ชื่อตามนี้เท่านั้น)'], ...THAI_PROVINCES.map(p => [p])]);
     wsProv['!cols'] = [{ wch: 30 }];
     XLSX.utils.book_append_sheet(wb, wsProv, 'รายชื่อจังหวัด');
+    // รุ่น + หลักสูตรที่มีในระบบตอนนี้ — "รุ่นที่/ปี/หลักสูตร" ต้องตรงกับชีตนี้ ไม่งั้นนำเข้าไม่ได้
+    const batchRows = batches.flatMap((b) => (b.courses?.length ? b.courses.map((c) => [b.batchNumber, b.year, c.name]) : [[b.batchNumber, b.year, '(ยังไม่มีหลักสูตร — เว้นว่าง)']]));
+    const wsBatch = XLSX.utils.aoa_to_sheet([['รุ่นที่', 'ปี', 'หลักสูตร (ใช้ชื่อตามนี้เท่านั้น)'], ...batchRows]);
+    wsBatch['!cols'] = [{ wch: 10 }, { wch: 10 }, { wch: 40 }];
+    XLSX.utils.book_append_sheet(wb, wsBatch, 'รุ่นและหลักสูตร');
+    const wsDis = XLSX.utils.aoa_to_sheet([['ประเภทความพิการ (ใส่หลายประเภทคั่นด้วย , ได้)'], ...disabilityTypes.map((t) => [t.typeName])]);
+    wsDis['!cols'] = [{ wch: 45 }];
+    XLSX.utils.book_append_sheet(wb, wsDis, 'ประเภทความพิการ');
     // ใส่เลขเวอร์ชันในชื่อไฟล์ กันสับสนกับเทมเพลตเก่าที่ค้างอยู่ในเครื่อง
-    XLSX.writeFile(wb, 'เทมเพลตนำเข้าคนพิการ-v2-มีที่อยู่.xlsx');
+    XLSX.writeFile(wb, 'เทมเพลตนำเข้าคนพิการ-v3.xlsx');
   };
 
   const handleImportFile = (e) => {
@@ -352,7 +356,13 @@ export default function PersonList() {
           postalCode: String(row['รหัสไปรษณีย์'] || '').replace(/\D/g, '').trim(),
           landmark: String(row['สถานที่ใกล้เคียง'] || '').trim(),
           educationLevel: String(row['ระดับการศึกษา'] || row['วุฒิการศึกษา'] || '').trim(),
-          batchId: resolveBatch(row['รุ่นที่'], row['ปี']),
+          ...(() => {
+            // รุ่น / หลักสูตร / ประเภทความพิการ — ไม่ตรงกับในระบบ = บล็อกไม่ให้นำเข้า (เหมือนจังหวัด)
+            const b = matchBatch(row['รุ่นที่'] ?? row['รุ่น'], row['ปี'], batches);
+            const c = matchCourse(row['หลักสูตร'], b);
+            const d = matchDisabilities(row['ประเภทความพิการ'] ?? row['ความพิการ'], disabilityTypes);
+            return { batchId: b.batchId, courseId: c.courseId, disabilityTypeIds: d.ids, __batch: b, __course: c, __dis: d };
+          })(),
         })).filter(r => r.fullName);
         if (mapped.length === 0) return toast.error('ไม่พบข้อมูล', 'ไฟล์ไม่มีแถวที่มีชื่อ-นามสกุล หรือหัวคอลัมน์ไม่ตรงเทมเพลต');
         setImportRows(mapped);
@@ -365,12 +375,21 @@ export default function PersonList() {
   };
 
   // สรุปผลตรวจจังหวัดของไฟล์ที่เลือกไว้ ใช้ทั้งตอนโชว์และตอนกันไม่ให้กดนำเข้า
-  const provBad = importRows.filter(r => r.__prov?.status === 'bad');
   const provFixed = importRows.filter(r => r.__prov?.status === 'fixed');
   const provEmpty = importRows.filter(r => r.__prov?.status === 'empty');
+  const disFixed = importRows.filter(r => r.__dis?.status === 'fixed');
+  const disEmpty = importRows.filter(r => r.__dis?.status === 'empty');
+  const batchEmpty = importRows.filter(r => r.__batch?.status === 'empty');
+  // ทุกช่องที่ไม่ตรงกับในระบบ — มีแม้แต่จุดเดียวก็กดนำเข้าไม่ได้
+  const CHECKS = [['จังหวัด', '__prov', 'สะกดไม่ตรงกับชื่อจังหวัด — ดูชีต "รายชื่อจังหวัด"'], ['รุ่น', '__batch'], ['หลักสูตร', '__course'], ['ประเภทความพิการ', '__dis']];
+  const importIssues = importRows.flatMap(r => CHECKS
+    .filter(([, k]) => r[k]?.status === 'bad')
+    .map(([label, k, fallback]) => ({ row: r.__row, fullName: r.fullName, label, typed: r[k].typed, reason: r[k].reason || fallback })));
+  const badRowCount = new Set(importIssues.map(i => i.row)).size;
+  const isBadRow = (r) => CHECKS.some(([, k]) => r[k]?.status === 'bad');
 
   const handleImport = async () => {
-    if (importRows.length === 0 || provBad.length > 0) return;
+    if (importRows.length === 0 || importIssues.length > 0) return;
     setImporting(true);
     try {
       const res = await importPersons(importRows);
@@ -386,9 +405,13 @@ export default function PersonList() {
       }
     } catch (err) {
       const bad = err.response?.data?.badProvinces;
+      const refs = err.response?.data?.badRefs;
       if (bad?.length) {
         toast.error('จังหวัดไม่ถูกต้อง — ยังไม่ได้นำเข้าข้อมูลใดๆ',
           bad.slice(0, 3).map(b => `แถว ${b.row}: "${b.province}"`).join(' • ') + (bad.length > 3 ? ' …' : ''));
+      } else if (refs?.length) {
+        toast.error('ข้อมูลไม่ตรงกับในระบบ — ยังไม่ได้นำเข้าข้อมูลใดๆ',
+          refs.slice(0, 3).map(b => `แถว ${b.row}: ${b.field}`).join(' • ') + (refs.length > 3 ? ' …' : '') + ' — ลองเปิดหน้านี้ใหม่แล้วเลือกไฟล์อีกครั้ง');
       } else {
         toast.error('นำเข้าไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด');
       }
@@ -866,8 +889,9 @@ export default function PersonList() {
                 <div className="w-7 h-7 rounded-full bg-orange-500 text-white text-sm font-bold flex items-center justify-center flex-shrink-0">1</div>
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-gray-700">ดาวน์โหลดเทมเพลต แล้วกรอกข้อมูล</p>
-                  <p className="text-xs text-gray-500 mt-0.5">คอลัมน์: ชื่อ-นามสกุล*, ชื่อเล่น, เลขบัตรประชาชน, เพศ, วันเกิด (วว/ดด/ปปปป พ.ศ.), เบอร์โทร, โทรศัพท์บ้าน, อีเมล, ที่อยู่ (เลขที่, หมู่ที่, อาคาร/หมู่บ้าน, ชั้นที่, ซอย, ถนน, แขวง/ตำบล, เขต/อำเภอ, จังหวัด, รหัสไปรษณีย์, สถานที่ใกล้เคียง), ระดับการศึกษา, รุ่นที่, ปี</p>
-                  <p className="text-xs text-red-500 mt-1 font-semibold">ช่อง &quot;จังหวัด&quot; ต้องสะกดให้ตรงกับชื่อจริง — ดูรายชื่อได้ในชีต &quot;รายชื่อจังหวัด&quot; ของเทมเพลต ถ้าไม่ตรงจะนำเข้าไม่ได้</p>
+                  <p className="text-xs text-gray-500 mt-0.5">คอลัมน์: ชื่อ-นามสกุล*, ชื่อเล่น, เลขบัตรประชาชน, เพศ, วันเกิด (วว/ดด/ปปปป พ.ศ.), เบอร์โทร, โทรศัพท์บ้าน, อีเมล, ที่อยู่ (เลขที่, หมู่ที่, อาคาร/หมู่บ้าน, ชั้นที่, ซอย, ถนน, แขวง/ตำบล, เขต/อำเภอ, จังหวัด, รหัสไปรษณีย์, สถานที่ใกล้เคียง), ระดับการศึกษา, รุ่นที่, ปี, หลักสูตร, ประเภทความพิการ</p>
+                  <p className="text-xs text-red-500 mt-1 font-semibold">ช่อง &quot;จังหวัด&quot; &quot;รุ่นที่/ปี&quot; &quot;หลักสูตร&quot; &quot;ประเภทความพิการ&quot; ต้องตรงกับในระบบ — ดูรายชื่อได้ในชีตของเทมเพลต ถ้ามีแถวไหนไม่ตรงจะนำเข้าไม่ได้ทั้งไฟล์</p>
+                  <p className="text-xs text-gray-400 mt-0.5">สร้างรุ่นและหลักสูตรที่หน้า &quot;จัดการรุ่น&quot; ให้ครบก่อน แล้วค่อยดาวน์โหลดเทมเพลต (ชีต &quot;รุ่นและหลักสูตร&quot; จะมีรายการล่าสุด)</p>
                   <button onClick={downloadTemplate}
                     className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-orange-600 bg-white border border-orange-200 hover:bg-orange-50">
                     <Download size={13} /> ดาวน์โหลดเทมเพลต
@@ -888,42 +912,59 @@ export default function PersonList() {
                 </div>
               </div>
 
-              {/* ผลตรวจจังหวัด — ถ้ามีแถวที่ผิด จะกดนำเข้าไม่ได้จนกว่าจะแก้ไฟล์ */}
-              {provBad.length > 0 && (
+              {/* ผลตรวจ จังหวัด/รุ่น/หลักสูตร/ประเภทความพิการ — ไม่ตรงจุดเดียวก็กดนำเข้าไม่ได้จนกว่าจะแก้ไฟล์ */}
+              {importIssues.length > 0 && (
                 <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200">
                   <p className="text-sm font-bold text-red-700 flex items-center gap-1.5">
-                    <X size={15} /> นำเข้าไม่ได้ — มี {provBad.length} แถวที่กรอกจังหวัดไม่ถูกต้อง
+                    <X size={15} /> นำเข้าไม่ได้ — มี {badRowCount} แถวที่ข้อมูลไม่ตรงกับในระบบ
                   </p>
                   <p className="text-xs text-red-500 mt-1 mb-2">
-                    แก้ชื่อจังหวัดในไฟล์ Excel ให้ตรงกับชื่อจริง (เช่น &quot;กรุงเทพมหานคร&quot; &quot;อุทัยธานี&quot;) แล้วเลือกไฟล์ใหม่อีกครั้ง
+                    แก้ในไฟล์ Excel ตามที่บอกด้านล่าง (หรือสร้างรุ่น/หลักสูตรที่หน้า &quot;จัดการรุ่น&quot; ให้ครบ) แล้วเลือกไฟล์ใหม่อีกครั้ง — ยังไม่มีข้อมูลไหนถูกนำเข้า
                   </p>
-                  <div className="bg-white rounded-lg border border-red-100 overflow-auto" style={{ maxHeight: '120px' }}>
+                  <div className="bg-white rounded-lg border border-red-100 overflow-auto" style={{ maxHeight: '160px' }}>
                     <table className="w-full text-xs">
                       <tbody>
-                        {provBad.slice(0, 20).map((r, i) => (
-                          <tr key={i} className="border-b border-red-50 last:border-0">
-                            <td className="px-2 py-1.5 text-gray-400 whitespace-nowrap">แถว {r.__row}</td>
-                            <td className="px-2 py-1.5 text-gray-600 truncate max-w-[180px]">{r.fullName}</td>
-                            <td className="px-2 py-1.5 text-red-600 font-semibold">&quot;{r.__prov.typed}&quot;</td>
+                        {importIssues.slice(0, 30).map((it, i) => (
+                          <tr key={i} className="border-b border-red-50 last:border-0 align-top">
+                            <td className="px-2 py-1.5 text-gray-400 whitespace-nowrap">แถว {it.row}</td>
+                            <td className="px-2 py-1.5 text-gray-600 truncate max-w-[140px]">{it.fullName}</td>
+                            <td className="px-2 py-1.5 text-gray-500 whitespace-nowrap">{it.label}</td>
+                            <td className="px-2 py-1.5 text-red-600 font-semibold whitespace-nowrap">&quot;{it.typed}&quot;</td>
+                            <td className="px-2 py-1.5 text-red-500">{it.reason}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
-                  {provBad.length > 20 && <p className="text-xs text-red-400 mt-1">แสดง 20 แถวแรก จากทั้งหมด {provBad.length} แถว</p>}
+                  {importIssues.length > 30 && <p className="text-xs text-red-400 mt-1">แสดง 30 จุดแรก จากทั้งหมด {importIssues.length} จุด</p>}
                 </div>
               )}
 
-              {importRows.length > 0 && provBad.length === 0 && (provFixed.length > 0 || provEmpty.length > 0) && (
+              {importRows.length > 0 && importIssues.length === 0 && (provFixed.length > 0 || provEmpty.length > 0 || disFixed.length > 0 || disEmpty.length > 0 || batchEmpty.length > 0) && (
                 <div className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-1">
                   {provFixed.length > 0 && (
                     <p className="text-xs text-amber-700">
                       <b>แก้ชื่อจังหวัดให้อัตโนมัติ {provFixed.length} แถว</b> — เช่น แถว {provFixed[0].__row}: &quot;{provFixed[0].__prov.typed}&quot; → &quot;{provFixed[0].province}&quot;
                     </p>
                   )}
+                  {disFixed.length > 0 && (
+                    <p className="text-xs text-amber-700">
+                      <b>จับคู่ประเภทความพิการให้อัตโนมัติ {disFixed.length} แถว</b> — เช่น แถว {disFixed[0].__row}: &quot;{disFixed[0].__dis.typed}&quot; → &quot;{disFixed[0].__dis.names.join(', ')}&quot;
+                    </p>
+                  )}
                   {provEmpty.length > 0 && (
                     <p className="text-xs text-amber-700">
                       <b>ไม่ได้กรอกจังหวัด {provEmpty.length} แถว</b> — นำเข้าได้ แต่จะไปอยู่กลุ่ม &quot;ไม่ระบุ&quot; ในกราฟภูมิภาค
+                    </p>
+                  )}
+                  {batchEmpty.length > 0 && (
+                    <p className="text-xs text-amber-700">
+                      <b>ไม่ได้ใส่รุ่น {batchEmpty.length} แถว</b> — นำเข้าได้ แต่จะไม่อยู่ในรุ่นไหน และไม่มีแจ้งเตือนติดตามผล
+                    </p>
+                  )}
+                  {disEmpty.length > 0 && (
+                    <p className="text-xs text-amber-700">
+                      <b>ไม่ได้ใส่ประเภทความพิการ {disEmpty.length} แถว</b> — นำเข้าได้ แต่ต้องมาใส่ทีหลังทีละคน
                     </p>
                   )}
                 </div>
@@ -934,30 +975,40 @@ export default function PersonList() {
                 <div className="mt-2">
                   <p className="text-sm font-bold text-gray-700 mb-2">ตัวอย่างข้อมูล ({importRows.length} รายการ)</p>
                   <div className="border border-gray-200 rounded-xl overflow-auto" style={{ maxHeight: '260px' }}>
-                    <table className="w-full text-xs">
+                    <table className="w-full text-xs" style={{ minWidth: "1080px" }}>
                       <thead className="bg-gray-50 sticky top-0">
-                        <tr className="text-gray-500">
+                        <tr className="text-gray-500 whitespace-nowrap">
                           <th className="px-2 py-2 text-left">#</th>
                           <th className="px-2 py-2 text-left">ชื่อ-นามสกุล</th>
+                          <th className="px-2 py-2 text-left">รุ่น</th>
+                          <th className="px-2 py-2 text-left">หลักสูตร</th>
+                          <th className="px-2 py-2 text-left">ประเภทความพิการ</th>
                           <th className="px-2 py-2 text-left">ชื่อเล่น</th>
                           <th className="px-2 py-2 text-left">เลขบัตร</th>
                           <th className="px-2 py-2 text-center">เพศ</th>
                           <th className="px-2 py-2 text-left">วันเกิด</th>
                           <th className="px-2 py-2 text-left">ที่อยู่</th>
-                          <th className="px-2 py-2 text-left">รุ่น</th>
                         </tr>
                       </thead>
                       <tbody>
                         {importRows.slice(0, 50).map((r, i) => (
-                          <tr key={i} className={`border-t border-gray-100 ${r.__prov?.status === 'bad' ? 'bg-red-50' : ''}`}>
+                          <tr key={i} className={`border-t border-gray-100 ${isBadRow(r) ? 'bg-red-50' : ''}`}>
                             <td className="px-2 py-1.5 text-gray-400">{i + 1}</td>
-                            <td className="px-2 py-1.5 text-gray-700">{r.fullName}</td>
+                            <td className="px-2 py-1.5 text-gray-700 whitespace-nowrap">{r.fullName}</td>
+                            <td className={`px-2 py-1.5 whitespace-nowrap ${r.__batch?.status === 'bad' ? 'text-red-600 font-semibold' : 'text-gray-500'}`}>
+                              {r.__batch?.status === 'ok' ? `${r.__batch.batch.batchNumber}/${r.__batch.batch.year}` : (r.__batch?.typed || '—')}
+                            </td>
+                            <td className={`px-2 py-1.5 max-w-[140px] truncate ${r.__course?.status === 'bad' ? 'text-red-600 font-semibold' : 'text-gray-500'}`} title={r.__course?.name || r.__course?.typed}>
+                              {r.__course?.name || r.__course?.typed || '—'}
+                            </td>
+                            <td className={`px-2 py-1.5 max-w-[180px] truncate ${r.__dis?.status === 'bad' ? 'text-red-600 font-semibold' : 'text-gray-500'}`} title={r.__dis?.names?.join(', ') || r.__dis?.typed}>
+                              {r.__dis?.names?.length ? r.__dis.names.map(shortDis).join(', ') : (r.__dis?.typed || '—')}
+                            </td>
                             <td className="px-2 py-1.5 text-gray-500">{r.nickname}</td>
                             <td className="px-2 py-1.5 text-gray-500 font-mono">{r.thaiId}</td>
                             <td className="px-2 py-1.5 text-center text-gray-500">{r.gender === 'FEMALE' ? 'หญิง' : r.gender === 'OTHER' ? 'อื่นๆ' : 'ชาย'}</td>
                             <td className={`px-2 py-1.5 ${r.birthDate ? 'text-gray-500' : 'text-red-400'}`}>{showBirth(r.birthDate)}</td>
                             <td className={`px-2 py-1.5 max-w-[220px] truncate ${r.__prov?.status === 'bad' ? 'text-red-600 font-semibold' : 'text-gray-500'}`} title={showAddress(r)}>{showAddress(r)}</td>
-                            <td className="px-2 py-1.5 text-gray-500">{r.batchId ? (batches.find(b => String(b.id) === r.batchId)?.batchNumber ?? '—') : '—'}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -971,10 +1022,10 @@ export default function PersonList() {
             <div className="px-6 py-4 border-t border-gray-100 flex gap-2 justify-end flex-shrink-0">
               <button onClick={() => setImportModal(false)}
                 className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-100">ยกเลิก</button>
-              <button onClick={handleImport} disabled={importRows.length === 0 || importing || provBad.length > 0}
-                className={`px-5 py-2 rounded-xl text-sm font-bold transition-all disabled:cursor-not-allowed ${provBad.length > 0 ? 'bg-gray-200 text-gray-500' : 'text-white bg-green-600 hover:bg-green-700 active:scale-95 disabled:opacity-50'}`}>
+              <button onClick={handleImport} disabled={importRows.length === 0 || importing || importIssues.length > 0}
+                className={`px-5 py-2 rounded-xl text-sm font-bold transition-all disabled:cursor-not-allowed ${importIssues.length > 0 ? 'bg-gray-200 text-gray-500' : 'text-white bg-green-600 hover:bg-green-700 active:scale-95 disabled:opacity-50'}`}>
                 {importing ? 'กำลังนำเข้า...'
-                  : provBad.length > 0 ? `แก้จังหวัดในไฟล์ก่อน (${provBad.length} แถว)`
+                  : importIssues.length > 0 ? `แก้ไฟล์ก่อน (${badRowCount} แถว)`
                   : `นำเข้า ${importRows.length} รายการ`}
               </button>
             </div>

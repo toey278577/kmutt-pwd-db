@@ -114,7 +114,7 @@ BatchStatus: ACTIVE|COMPLETED      UserRole: ADMIN|STAFF|VIEWER
 POST   /api/auth/login · GET /api/auth/me
 
 GET/POST       /api/persons              ← รายชื่อ (filter/แบ่งหน้า) / เพิ่ม
-POST           /api/persons/import       ← นำเข้า Excel (เทมเพลต v2 22 คอลัมน์)
+POST           /api/persons/import       ← นำเข้า Excel (เทมเพลต v3 24 คอลัมน์ — รุ่น/หลักสูตร/ความพิการ/จังหวัด ไม่ตรง = ไม่นำเข้าทั้งไฟล์)
 GET/PUT/DELETE /api/persons/:id
 GET            /api/persons/disability-types
 
