@@ -30,7 +30,7 @@ const TABLE = {
   personPhoto: 'person_photos', disabilityInfo: 'disability_infos',
   trainingRecord: 'training_records', workExperience: 'work_experiences',
   skill: 'skills', followUp: 'follow_ups', personOrganization: 'person_organizations',
-  personAssessment: 'person_assessments',
+  personAssessment: 'person_assessments', auditLog: 'audit_logs',
 };
 const ORDER = Object.keys(TABLE);
 

@@ -18,6 +18,7 @@ const UserManagement   = lazy(() => import('./pages/UserManagement'));
 const Help             = lazy(() => import('./pages/Help'));
 const ReportPage       = lazy(() => import('./pages/ReportPage'));
 const BatchPage        = lazy(() => import('./pages/BatchPage'));
+const AuditLog         = lazy(() => import('./pages/AuditLog'));
 
 function PageLoader() {
   return (
@@ -59,6 +60,11 @@ function AppRoutes() {
                 <Route path="/users"        element={
                   <ProtectedRoute adminOnly>
                     <UserManagement />
+                  </ProtectedRoute>
+                } />
+                <Route path="/audit"        element={
+                  <ProtectedRoute adminOnly>
+                    <AuditLog />
                   </ProtectedRoute>
                 } />
               </Routes>

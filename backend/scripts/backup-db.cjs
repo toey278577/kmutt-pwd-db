@@ -24,6 +24,7 @@ const MODELS = [
   'disabilityType', 'organization', 'user', 'trainingBatch', 'course',
   'person', 'personPhoto', 'disabilityInfo', 'trainingRecord',
   'workExperience', 'skill', 'followUp', 'personOrganization', 'personAssessment',
+  'auditLog',
 ];
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });

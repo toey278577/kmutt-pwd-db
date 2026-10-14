@@ -60,6 +60,7 @@ export const deleteUser = (id) => api.delete(`/users/${id}`);
 // ระบบ (เฉพาะผู้ดูแลระบบ)
 export const getSystemStats = () => api.get('/system/stats');
 export const resetSystem = (data) => api.post('/system/reset', data);
+export const getAuditLogs = (params) => api.get('/audit-logs', { params });
 
 // persons list: cache 20 วิ (key แยกตาม params), invalidate เมื่อ mutate
 export const getPersons = (params) => {

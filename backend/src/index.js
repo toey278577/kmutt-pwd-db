@@ -7,6 +7,7 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const { authenticate } = require('./middleware/auth');
+const { auditMiddleware } = require('./middleware/audit');
 const prisma = require('./prismaClient');
 const authRouter = require('./routes/auth');
 const personsRouter = require('./routes/persons');
@@ -23,6 +24,7 @@ const aggregateRouter = require('./routes/aggregate');
 const batchesRouter = require('./routes/batches');
 const assessmentsRouter = require('./routes/assessments');
 const systemRouter = require('./routes/system');
+const auditRouter = require('./routes/audit');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -79,6 +81,9 @@ app.use('/api/uploads', express.static(path.join(__dirname, '..', 'uploads'), {
   dotfiles: 'deny',
 }));
 
+// บันทึกว่าใครเพิ่ม/แก้/ลบอะไร (เขียน log ตอน response ส่งเสร็จ จึงรู้ผู้ใช้จาก authenticate ของแต่ละ route)
+app.use('/api', auditMiddleware);
+
 app.use('/api/auth', authRouter);
 
 app.use('/api/persons', authenticate, personsRouter);
@@ -93,6 +98,7 @@ app.use('/api/organizations', authenticate, organizationsRouter);
 app.use('/api/dashboard', authenticate, dashboardRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/system', systemRouter);
+app.use('/api/audit-logs', auditRouter);
 app.use('/api/batches', authenticate, batchesRouter);
 app.use('/api/persons', authenticate, assessmentsRouter);
 

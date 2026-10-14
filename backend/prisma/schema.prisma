@@ -317,3 +317,23 @@ model User {
 
   @@map("users")
 }
+
+// บันทึกว่าใครทำอะไรในระบบ (เพิ่ม/แก้/ลบ/ล็อกอิน) — ไม่ผูก FK กับ user/person
+// เพราะต้องเก็บประวัติไว้แม้ผู้ใช้หรือคนพิการคนนั้นจะถูกลบไปแล้ว
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  userName  String   @map("user_name") @db.VarChar(255)
+  action    String   @db.VarChar(20)
+  entity    String   @db.VarChar(50)
+  entityId  Int?     @map("entity_id")
+  personId  Int?     @map("person_id")
+  label     String?  @db.VarChar(255)
+  ip        String?  @db.VarChar(64)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([userId])
+  @@index([personId])
+  @@map("audit_logs")
+}
