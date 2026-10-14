@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient');
 const { canonicalProvince } = require('../utils/province');
+const { cleanText } = require('../utils/text');
 
 const toDate = (val) => (val && String(val).trim() !== '') ? new Date(val) : null;
 const toEnum = (val) => (val && String(val).trim() !== '') ? val : null;
@@ -142,7 +143,7 @@ router.post('/', async (req, res) => {
       province: province || null,
       nationality: nationality || null,
       religion: religion || null,
-      educationLevel: educationLevel || null,
+      educationLevel: cleanText(educationLevel) || null,
       birthDate: toDate(birthDate),
       maritalStatus: toMarital(maritalStatus),
       gender, lifeStatus,
@@ -203,9 +204,9 @@ router.post('/import', async (req, res) => {
       if (thaiId && thaiId.length !== 13) { errors.push({ row: rowNo, error: 'เลขบัตรไม่ครบ 13 หลัก' }); continue; }
       const gender = ['MALE', 'FEMALE', 'OTHER'].includes(r.gender) ? r.gender : 'MALE';
       try {
-        // ตัดความยาวตาม VarChar ใน schema กันแถวเดียวพังทั้งไฟล์
+        // ตัดความยาวตาม VarChar ใน schema กันแถวเดียวพังทั้งไฟล์ + ล้างตัวล่องหนที่ติดมาจาก Excel
         const txt = (v, max) => {
-          const s = v == null ? '' : String(v).trim();
+          const s = cleanText(v);
           return s ? s.slice(0, max) : null;
         };
         await prisma.person.create({
@@ -258,7 +259,8 @@ router.put('/:id', async (req, res) => {
       phone, mobile: mobile || null, email, landmark: landmark || null,
       houseNo: houseNo || null, moo: moo || null, building: building || null, floor: floor || null,
       soi: soi || null, road: road || null, subDistrict: subDistrict || null, district: district || null,
-      province, postalCode: postalCode || null, address, nationality, religion, educationLevel,
+      province, postalCode: postalCode || null, address, nationality, religion,
+      educationLevel: educationLevel === undefined ? undefined : cleanText(educationLevel) || null,
       birthDate: toDate(birthDate), maritalStatus: toMarital(maritalStatus), gender, lifeStatus,
       batchId: batchId ? parseInt(batchId) : null,
     };

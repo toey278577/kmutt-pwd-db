@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient');
 const { REGION_ORDER, getRegion } = require('../utils/province');
+const { cleanText, groupKey } = require('../utils/text');
 
 const AGE_ORDER = ['ต่ำกว่า 15 ปี', '15-25 ปี', '26-35 ปี', '36-45 ปี', '46 ปีขึ้นไป'];
 const AGE_ALWAYS = ['15-25 ปี', '26-35 ปี', '36-45 ปี', '46 ปีขึ้นไป'];
@@ -43,15 +44,18 @@ router.get('/stats', async (req, res) => {
       ]);
     const typeMap = Object.fromEntries(disabilityTypes.map((t) => [t.id, t.typeName]));
 
-    // วุฒิการศึกษา
-    const eduCount = {};
+    // วุฒิการศึกษา — จัดกลุ่มด้วย groupKey ข้อความที่หน้าตาเหมือนกันแต่มีตัวล่องหน/ช่องว่างต่างกัน จะรวมเป็นแถวเดียว
+    // ชื่อที่โชว์ใช้แบบที่เจอบ่อยสุดในกลุ่มนั้น
+    const eduGroups = {};
     for (const p of allPersons) {
-      const key = p.educationLevel?.trim() || 'ไม่ระบุ';
-      eduCount[key] = (eduCount[key] || 0) + 1;
+      const name = cleanText(p.educationLevel) || 'ไม่ระบุ';
+      const g = (eduGroups[groupKey(name)] ||= { value: 0, names: {} });
+      g.value++;
+      g.names[name] = (g.names[name] || 0) + 1;
     }
-    const byEducation = Object.entries(eduCount)
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, value]) => ({ name, value }));
+    const byEducation = Object.values(eduGroups)
+      .map((g) => ({ name: Object.entries(g.names).sort((a, b) => b[1] - a[1])[0][0], value: g.value }))
+      .sort((a, b) => b.value - a.value);
 
     // ช่วงอายุ
     const ageCount = {};
