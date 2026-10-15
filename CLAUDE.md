@@ -39,7 +39,7 @@ web app สำหรับจัดการข้อมูลคนพิกา
 │       ├── App.jsx          ← router (lazy load ทุกหน้า)
 │       ├── api/index.js     ← axios client + cache เล็กๆ (utils/apiCache)
 │       ├── context/         ← AuthContext, ThemeContext (dark mode), ToastContext
-│       ├── components/      ← Layout (sidebar), ErrorBoundary, DangerZone (ปุ่มรีเซ็ตระบบ)
+│       ├── components/      ← Layout (sidebar), ErrorBoundary, DangerZone (ปุ่มรีเซ็ตระบบ), MobileCard (การ์ดแทนตารางบนมือถือ)
 │       └── pages/           ← ดูตารางหน้าเว็บด้านล่าง
 │
 ├── tests/                   ← ชุดทดสอบ (npm test): run.cjs ตัวรัน · lib.cjs ตัวช่วย · fixtures/seed.cjs ข้อมูลตั้งต้น
@@ -117,12 +117,13 @@ BatchStatus: ACTIVE|COMPLETED      UserRole: ADMIN|STAFF|VIEWER
 ```
 POST   /api/auth/login · GET /api/auth/me
 
-GET/POST       /api/persons              ← รายชื่อ (filter/แบ่งหน้า) / เพิ่ม
+GET/POST       /api/persons              ← รายชื่อ / เพิ่ม · ?search= (ชื่อ ชื่อเล่น เลขบัตร เบอร์) &batchId= &gender= &province=
+                                            &disabilityTypeId= &employment=EMPLOYED|UNEMPLOYED|STUDYING|NONE (ผลติดตามล่าสุด) · ส่ง followUps ล่าสุด 1 รายการมาด้วย
 POST           /api/persons/import       ← นำเข้า Excel (เทมเพลต v3 24 คอลัมน์ — รุ่น/หลักสูตร/ความพิการ/จังหวัด ไม่ตรง = ไม่นำเข้าทั้งไฟล์)
 GET/PUT/DELETE /api/persons/:id
 GET            /api/persons/disability-types
 
-/api/persons/:id/{disability|training|workexp|followup|skills|personorg|photos|assessments}[/:subId]
+/api/persons/:id/{disability|training|workexp|followup|skills|personorg|photos|assessments}[/:subId]   ← รายการย่อย แก้ (PUT) ได้ทุกอย่างยกเว้นรูป/ผลประเมิน
 GET            /api/persons/batch/:batchId/assessments
 
 /api/organizations[/:id]  ·  /api/batches[/:id]  ·  /api/batches/:id/courses[/:courseId]
@@ -172,6 +173,8 @@ ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /a
 - error จาก Prisma ถูกแปลงเป็นข้อความไทยกลางที่ `index.js` (ของจริงอยู่ใน log `[DB ERROR]`)
 - route รายการย่อยของคน (`/persons/:id/<sub>/:subId`) ต้องเช็คเจ้าของด้วย `ensureOwned` + รับช่องด้วย `pick` (`utils/owned.js`) — อย่า spread `req.body` เข้า DB
 - หน้าเว็บ: ชื่อ/คำนำหน้า/ตัวย่อ → `utils/name.js` · ช่องวันที่ พ.ศ. → `utils/useThaiDate.js` (ตรวจวันจริง/ปี ค.ศ.) · รูป → `utils/resizeImage.js` ย่อก่อนส่ง · โหลดพัง → `components/LoadError.jsx`
+- ตารางใหม่ทุกอัน: จอคอมเป็นตาราง มือถือใช้ `components/MobileCard.jsx` (`hidden md:block` / `md:hidden`) · ชื่อ/สีประวัติการใช้งาน → `utils/auditLabels.js`
+- หน้ารายละเอียด: แท็บ "ประวัติการแก้ไข" (ท้ายสุด) เห็นเฉพาะ ADMIN — ใช้ `/api/audit-logs?personId=` ซึ่งเปิดให้แอดมินเท่านั้น
 - ฟอร์มใหม่ทุกอัน: ใส่ตัวถามก่อนปิดเมื่อยังไม่บันทึก `utils/useDiscardGuard.js` + `components/DiscardBar.jsx` (arm ตอนเปิด, request ตอนปิด/Esc/คลิกนอกฟอร์ม)
 - สีเทา `gray-400/500` ถูกปรับเข้มขึ้นใน `@theme` ของ `index.css` (ให้ตัวหนังสืออ่านง่าย ≥4.5:1) — **ห้ามปรับ `gray-300`** เพราะใช้เป็นเส้นขอบ 71 จุด · ตัวหนังสือห้ามใช้ gray-200/300
 - **ชุดทดสอบใช้ฐาน `kmutt_pwd_db_test` ของมันเอง** ล้างใหม่ทุกครั้งที่รัน (พี่เต้ยอนุญาตแล้ว เฉพาะ *_test) + เปิดหลังบ้าน :5055 / หน้าเว็บ :5180 / Chrome :9341 เองแล้วปิดให้
@@ -183,7 +186,5 @@ ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /a
 
 ## สิ่งที่อาจทำต่อ
 
-- ค้นหาขั้นสูง (กรองหลายเงื่อนไขพร้อมกัน)
-- Export Excel
-- แท็บ "ประวัติการแก้ไข" ในหน้ารายละเอียดคนพิการ (API รองรับ `?personId=` แล้ว)
 - เพิ่ม/แก้ประเภทความพิการผ่าน UI
+- แจ้งเตือนรอบติดตามผลทาง Telegram ทุกเช้าวันจันทร์ (มีระบบส่ง Telegram ใน healthcheck แล้ว) — พี่เต้ยบอกพักไว้ก่อน (15 ต.ค. 69)

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Plus, Pencil, Trash2, GraduationCap, Briefcase, Star, Target, ChevronDown, Building2, Accessibility, Camera, ClipboardList, TrendingUp, Save } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, GraduationCap, Briefcase, Star, Target, ChevronDown, Building2, Accessibility, Camera, ClipboardList, TrendingUp, Save, History } from 'lucide-react';
 import {
   getPerson, getTraining, createTraining, updateTraining, deleteTraining,
   getWorkExp, createWorkExp, updateWorkExp, deleteWorkExp,
@@ -11,6 +11,7 @@ import {
   getDisabilityTypes, createDisabilityInfo, updateDisabilityInfo, deleteDisabilityInfo,
   getPersonPhotos, uploadPersonPhoto, deletePersonPhoto,
   getAssessments, saveAssessment, deleteAssessment, getBatches,
+  getAuditLogs,
 } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -21,6 +22,7 @@ import DiscardBar from '../components/DiscardBar';
 import MobileCard, { MobileEditBtn, MobileDelBtn } from '../components/MobileCard';
 import { nameInitials } from '../utils/name';
 import { useThaiDate } from '../utils/useThaiDate';
+import { auditAction, AUDIT_ENTITIES, fmtAuditTime } from '../utils/auditLabels';
 import { endBeforeStart } from '../utils/thaiDate';
 
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
@@ -38,6 +40,9 @@ const WORK_MODE_LABELS = { INTERNSHIP: 'ฝึกงาน', EMPLOYMENT: 'จ้
 const EMP_CHIP = { EMPLOYED: 'bg-emerald-100 text-emerald-700 border-emerald-200', UNEMPLOYED: 'bg-gray-100 text-gray-600 border-gray-200', STUDYING: 'bg-sky-100 text-sky-700 border-sky-200' };
 
 const tabs = ['ข้อมูลพื้นฐาน', 'การอบรม', 'ประสบการณ์งาน', 'ทักษะ', 'ติดตามผล', 'สถานประกอบการ', 'ประเมินทักษะ'];
+// แท็บที่ 8 เฉพาะผู้ดูแลระบบ — ใช้ข้อมูลประวัติการใช้งาน (มีชื่อผู้ใช้/IP) ซึ่งเปิดให้แอดมินเท่านั้น
+const HISTORY_TAB = tabs.length;
+const HISTORY_PAGE = 50;
 
 function calcAge(birthDate) {
   if (!birthDate) return null;
@@ -74,7 +79,17 @@ export default function PersonDetail() {
   // ย้อนกลับไปหน้าที่มา (รายชื่อหน้าเดิม / ติดตามผล / ฯลฯ)
   // ถ้าเปิดลิงก์นี้ตรงๆ ไม่มีประวัติให้ย้อน ค่อยไปหน้ารายชื่อ
   const goBack = () => (location.key !== 'default' ? navigate(-1) : navigate('/persons'));
-  const { canEdit } = useAuth();
+  const { canEdit, isAdmin } = useAuth();
+  const shownTabs = isAdmin ? [...tabs, 'ประวัติการแก้ไข'] : tabs;
+  // ประวัติการแก้ไขของคนนี้ — โหลดตอนเปิดแท็บทุกครั้ง (ได้ของล่าสุดเสมอ)
+  const [history, setHistory] = useState({ items: [], total: 0, loaded: false, error: '' });
+  const loadHistory = (more = false) => {
+    if (!more) setHistory({ items: [], total: 0, loaded: false, error: '' });
+    const page = more ? Math.floor(history.items.length / HISTORY_PAGE) + 1 : 1;
+    getAuditLogs({ personId: id, pageSize: HISTORY_PAGE, page })
+      .then((r) => setHistory((h) => ({ items: more ? [...h.items, ...r.data.items] : r.data.items, total: r.data.total, loaded: true, error: '' })))
+      .catch((e) => setHistory((h) => ({ ...h, loaded: true, error: e.response?.data?.error || 'โหลดประวัติไม่สำเร็จ' })));
+  };
   const toast = useToast();
   const modalRef = useRef(null);
   const guard = useDiscardGuard(() => modalRef.current?.close());
@@ -318,10 +333,10 @@ export default function PersonDetail() {
       {/* Tabs */}
       {/* มือถือ: แท็บเรียงแถวเดียว ปัดซ้าย-ขวาได้ (เดิมซ้อน 3 บรรทัด และไม่มีขีดบอกว่าอยู่แท็บไหน) */}
       <div role="tablist" className="flex overflow-x-auto bg-white rounded-2xl shadow-sm border border-orange-100 px-2 mb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {tabs.map((t, i) => (
+        {shownTabs.map((t, i) => (
           <button key={i} role="tab" aria-selected={tab === i}
             className={`flex-shrink-0 whitespace-nowrap px-3.5 py-3.5 text-sm font-semibold border-b-2 transition-colors ${tab === i ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-orange-600'}`}
-            onClick={(e) => { setTab(i); e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }); }}>
+            onClick={(e) => { setTab(i); if (i === HISTORY_TAB) loadHistory(); e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }); }}>
             {t}
           </button>
         ))}
@@ -584,6 +599,44 @@ export default function PersonDetail() {
             </tbody>
           </table>
         </SubSection>
+      )}
+
+      {/* Tab 7: ประวัติการแก้ไข (เฉพาะแอดมิน) */}
+      {tab === HISTORY_TAB && isAdmin && (
+        <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-4 border-b border-orange-100">
+            <div className="flex items-center gap-2 text-orange-950 font-bold text-sm">
+              <span className="text-orange-500"><History size={16} /></span>ประวัติการแก้ไข
+              {history.loaded && !history.error && <span className="text-xs font-semibold text-gray-500">({history.total} รายการ)</span>}
+            </div>
+            <span className="text-xs text-gray-500">เห็นเฉพาะผู้ดูแลระบบ</span>
+          </div>
+          <p className="px-5 pt-3 text-xs text-gray-500">ใครเพิ่ม แก้ไข หรือลบข้อมูลของคนนี้ เมื่อไหร่ — ระบบไม่เก็บค่าที่แก้ (กันข้อมูลส่วนตัวค้างในประวัติ)</p>
+          {!history.loaded && <div className="flex justify-center py-10"><span className="loading loading-spinner text-primary" /></div>}
+          {history.loaded && history.error && <p className="text-center py-8 text-sm text-red-600">{history.error}</p>}
+          {history.loaded && !history.error && history.items.length === 0 && <p className="text-center py-8 text-sm text-gray-400">ยังไม่มีประวัติ</p>}
+          {history.items.length > 0 && (
+            <ol className="divide-y divide-gray-100 mt-2">
+              {history.items.map((l) => {
+                const a = auditAction(l.action);
+                return (
+                  <li key={l.id} className="px-5 py-3 flex items-start gap-3">
+                    <span className={`flex-shrink-0 mt-0.5 min-w-[3.25rem] text-center px-2 py-0.5 rounded-full text-xs font-bold border ${a.cls}`}>{a.label}</span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-800">{AUDIT_ENTITIES[l.entity] || l.entity}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">โดย {l.userName} · {fmtAuditTime(l.createdAt)}</p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+          {history.items.length < history.total && (
+            <div className="px-5 py-3 border-t border-gray-100 text-center">
+              <button onClick={() => loadHistory(true)} className={SMALL_BTN}>โหลดเพิ่ม ({history.total - history.items.length})</button>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Tab 6: ประเมินทักษะ */}

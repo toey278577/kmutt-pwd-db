@@ -1,34 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { History, Search, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { getAuditLogs, getUsers } from '../api';
-
-const ACTIONS = {
-  CREATE:       { label: 'เพิ่ม',              cls: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-  UPDATE:       { label: 'แก้ไข',              cls: 'bg-amber-100 text-amber-700 border-amber-200' },
-  DELETE:       { label: 'ลบ',                cls: 'bg-red-100 text-red-700 border-red-200' },
-  IMPORT:       { label: 'นำเข้า Excel',       cls: 'bg-sky-100 text-sky-700 border-sky-200' },
-  RESET:        { label: 'ล้างข้อมูลทั้งหมด',   cls: 'bg-red-600 text-white border-red-700' },
-  LOGIN:        { label: 'เข้าสู่ระบบ',         cls: 'bg-gray-100 text-gray-600 border-gray-200' },
-  LOGIN_FAILED: { label: 'ล็อกอินไม่สำเร็จ',    cls: 'bg-rose-100 text-rose-700 border-rose-200' },
-};
-
-const ENTITIES = {
-  person: 'ข้อมูลคนพิการ', disability: 'ข้อมูลความพิการ', training: 'ประวัติอบรม',
-  workexp: 'ประสบการณ์งาน', followup: 'ติดตามผล', skills: 'ทักษะ', personorg: 'สถานประกอบการของคน',
-  photos: 'รูปถ่าย', assessments: 'ผลประเมิน', organization: 'สถานประกอบการ', batch: 'รุ่นอบรม',
-  course: 'หลักสูตร', user: 'ผู้ใช้งาน', system: 'ระบบ', auth: 'บัญชี',
-};
+import { AUDIT_ACTIONS as ACTIONS, AUDIT_ENTITIES as ENTITIES, auditAction, fmtAuditTime as fmtTime } from '../utils/auditLabels';
+import MobileCard from '../components/MobileCard';
 
 const PAGE_SIZE = 50;
 const inputCls = 'rounded-xl border border-gray-100 px-3 py-2 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 transition-all';
 const emptyFilter = { q: '', action: '', userId: '', from: '', to: '' };
 
-const fmtTime = (iso) => new Date(iso).toLocaleString('th-TH', {
-  day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit',
-});
-
 export default function AuditLog() {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState(emptyFilter);
   const [q, setQ] = useState('');            // ช่องค้นหา — หน่วงก่อนยิง API
   const [page, setPage] = useState(1);
@@ -105,9 +87,9 @@ export default function AuditLog() {
         )}
       </div>
 
-      {/* Table */}
+      {/* จอคอม = ตาราง · มือถือ = การ์ด */}
       <div className="bg-white rounded-3xl border border-orange-100/80 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-sm" style={{ minWidth: '720px' }}>
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
@@ -118,7 +100,7 @@ export default function AuditLog() {
             </thead>
             <tbody className={loading ? 'opacity-50' : ''}>
               {data.items.map((l) => {
-                const a = ACTIONS[l.action] || { label: l.action, cls: 'bg-gray-100 text-gray-600 border-gray-200' };
+                const a = auditAction(l.action);
                 return (
                   <tr key={l.id} className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors">
                     <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{fmtTime(l.createdAt)}</td>
@@ -143,6 +125,25 @@ export default function AuditLog() {
               )}
             </tbody>
           </table>
+        </div>
+
+        <div className={`md:hidden divide-y divide-gray-100 ${loading ? 'opacity-50' : ''}`}>
+          {data.items.map((l) => {
+            const a = auditAction(l.action);
+            const linkable = l.personId && !(l.entity === 'person' && l.action === 'DELETE');
+            return (
+              <MobileCard key={l.id} onClick={linkable ? () => navigate(`/persons/${l.personId}`) : undefined}
+                title={l.label || ENTITIES[l.entity] || l.entity}
+                chips={<>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold border ${a.cls}`}>{a.label}</span>
+                  <span className="text-xs text-gray-600">{ENTITIES[l.entity] || l.entity}</span>
+                </>}
+                details={[['ผู้ใช้', l.userName], ['เวลา', fmtTime(l.createdAt)], ['IP', l.ip]]} />
+            );
+          })}
+          {!loading && data.items.length === 0 && (
+            <p className="px-4 py-12 text-center text-gray-400 text-sm">{err || (hasFilter ? 'ไม่พบรายการตามตัวกรอง' : 'ยังไม่มีประวัติการใช้งาน')}</p>
+          )}
         </div>
 
         {/* Pagination */}
