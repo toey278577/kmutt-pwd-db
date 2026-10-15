@@ -327,6 +327,55 @@ export default function PersonList() {
   // ชื่อประเภทความพิการแบบสั้นไว้โชว์ในตารางตัวอย่าง ("ความพิการทางการมองเห็น" → "การมองเห็น")
   const shortDis = (n) => n.replace(/^ความพิการทาง/, '');
 
+  // ส่งออกรายชื่อที่ค้น/กรองอยู่ — ทุกคน (ทุกหน้า ไม่ใช่แค่หน้าที่เห็น) เช่น กรอง "หญิง + ว่างงาน" แล้วเอาไฟล์ไปโทรติดตาม
+  // บรรทัดแรกของไฟล์บอกว่ากรองอะไรไว้ เปิดทีหลังจะได้รู้ว่าเป็นรายชื่อกลุ่มไหน
+  const handleExport = () => {
+    const thaiDate = (iso) => { if (!iso) return ''; const [y, m, d] = iso.slice(0, 10).split('-'); return `${d}/${m}/${+y + 543}`; };
+    const ageOf = (iso) => {
+      if (!iso) return '';
+      const b = new Date(iso), t = new Date();
+      return t.getFullYear() - b.getFullYear() - (t < new Date(t.getFullYear(), b.getMonth(), b.getDate()) ? 1 : 0);
+    };
+    const batchName = (id) => { const b = batches.find((x) => String(x.id) === String(id)); return b ? `รุ่นที่ ${b.batchNumber}/${b.year}` : ''; };
+    const empName = (v) => (v === 'NONE' ? 'ยังไม่ติดตาม' : EMP[v]?.label || v);
+    const filterName = {
+      batch: batchName, gender: (v) => GENDER_LABELS[v] || v, province: (v) => v,
+      dis: (v) => disabilityTypes.find((t) => String(t.id) === v)?.typeName || v, emp: empName,
+    };
+    const q = urlParams.get('q') || '';
+    const used = [q && `ค้นหา "${q}"`, ...FILTERS.filter(({ key }) => filters[key]).map(({ key }) => filterName[key](filters[key]))].filter(Boolean);
+    const header = ['#', 'ชื่อ-นามสกุล', 'ชื่อเล่น', 'เลขบัตรประชาชน', 'เพศ', 'วันเกิด', 'อายุ', 'จังหวัด', 'มือถือ', 'โทรศัพท์',
+      'ระดับการศึกษา', 'ประเภทความพิการ', 'รุ่น', 'งานล่าสุด', 'ติดตามล่าสุดเมื่อ', 'สถานะ'];
+    const rows = persons.map((p, i) => {
+      const fu = p.followUps?.[0];
+      return [i + 1, p.fullName, p.nickname || '', p.thaiId || '', GENDER_LABELS[p.gender] || '', thaiDate(p.birthDate), ageOf(p.birthDate),
+        p.province || '', p.mobile || '', p.phone || '', p.educationLevel || '',
+        (p.disabilityInfos || []).map((d) => d.disabilityType?.typeName).filter(Boolean).join(', '),
+        batchName(p.batchId), fu ? empName(fu.employmentStatus) : 'ยังไม่ติดตาม', fu ? thaiDate(fu.followUpDate) : '',
+        p.lifeStatus === 'DECEASED' ? 'เสียชีวิต' : ''];
+    });
+    const ws = XLSX.utils.aoa_to_sheet([
+      [`รายชื่อคนพิการ — ${used.length ? `ตัวกรอง: ${used.join(' · ')}` : 'ทั้งหมด'} (${persons.length} คน)`],
+      [`ส่งออกเมื่อ ${new Date().toLocaleString('th-TH')}`],
+      [],
+      header,
+      ...rows,
+    ]);
+    ws['!cols'] = [4, 26, 10, 16, 6, 11, 5, 16, 12, 12, 24, 30, 13, 12, 14, 9].map((wch) => ({ wch }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'รายชื่อคนพิการ');
+    // ชื่อไฟล์บอกตัวกรอง (ส่งออกหลายกลุ่มในวันเดียวจะได้แยกไฟล์ออก ไม่ทับกัน) — ตัดอักขระที่ใช้ในชื่อไฟล์ไม่ได้
+    const tag = used.join('-').replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, ' ').slice(0, 80);
+    XLSX.writeFile(wb, `รายชื่อคนพิการ${tag ? `-${tag}` : ''}-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    toast.success('ส่งออก Excel แล้ว', `${persons.length} คน${used.length ? ` (${used.join(' · ')})` : ''}`);
+  };
+  const exportBtn = (cls, label = 'ส่งออก Excel') => (
+    <button onClick={handleExport} disabled={persons.length === 0} title={`ส่งออกรายชื่อที่แสดงอยู่ทั้งหมด ${persons.length} คน (ทุกหน้า)`}
+      className={`${cls} items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none`}>
+      <Download size={14} /> {label} ({persons.length})
+    </button>
+  );
+
   const downloadTemplate = () => {
     const headers = [
       'ชื่อ-นามสกุล', 'ชื่อเล่น', 'เลขบัตรประชาชน', 'เพศ', 'วันเกิด',
@@ -530,16 +579,18 @@ export default function PersonList() {
             มือถือพับเก็บเป็นปุ่มเดียว (กางเต็มกินที่ครึ่งจอ) · จอคอมโชว์ตลอด */}
         <div className="flex items-center gap-2 mt-3 md:hidden">
           <button onClick={() => setShowFilters((v) => !v)} aria-expanded={showFilters}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold border transition-all ${activeFilters ? 'border-orange-400 bg-orange-50 text-orange-700' : 'border-orange-200 bg-white text-gray-700'}`}>
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold whitespace-nowrap border transition-all ${activeFilters ? 'border-orange-400 bg-orange-50 text-orange-700' : 'border-orange-200 bg-white text-gray-700'}`}>
             <SlidersHorizontal size={15} className="text-orange-500" /> ตัวกรอง{activeFilters > 0 && ` (${activeFilters})`}
             <ChevronDown size={14} className={`text-orange-400 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
           </button>
           {activeFilters > 0 && (
             <button onClick={clearFilters}
-              className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-gray-600 hover:text-orange-700 hover:bg-orange-50 transition-all">
-              <X size={14} /> ล้างตัวกรอง ({activeFilters})
+              className="flex items-center gap-1 px-2 py-2 rounded-xl text-xs font-bold whitespace-nowrap text-gray-600 hover:text-orange-700 hover:bg-orange-50 transition-all">
+              <X size={14} /> ล้างตัวกรอง
             </button>
           )}
+          {/* มือถือป้ายสั้น — ชื่อเต็ม 3 ปุ่มเบียดจนตัวหนังสือตกบรรทัด (จำนวนที่เลือกดูได้ที่ปุ่มตัวกรอง) */}
+          {exportBtn('flex ml-auto', 'Excel')}
         </div>
         <div className={`${showFilters ? 'flex' : 'hidden'} md:flex flex-wrap items-center gap-2 mt-2 md:mt-3`}>
           <span className="hidden md:flex items-center gap-1.5 text-xs font-semibold text-gray-500">
@@ -563,6 +614,7 @@ export default function PersonList() {
               <X size={14} /> ล้างตัวกรอง ({activeFilters})
             </button>
           )}
+          {exportBtn('hidden md:flex md:ml-auto')}
         </div>
       </div>
 
