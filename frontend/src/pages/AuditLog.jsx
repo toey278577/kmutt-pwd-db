@@ -4,6 +4,8 @@ import { History, Search, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { getAuditLogs, getUsers } from '../api';
 import { AUDIT_ACTIONS as ACTIONS, AUDIT_ENTITIES as ENTITIES, auditAction, fmtAuditTime as fmtTime } from '../utils/auditLabels';
 import MobileCard from '../components/MobileCard';
+import { useThaiDate } from '../utils/useThaiDate';
+import { endBeforeStart } from '../utils/thaiDate';
 
 const PAGE_SIZE = 50;
 const inputCls = 'rounded-xl border border-gray-100 px-3 py-2 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 transition-all';
@@ -40,7 +42,11 @@ export default function AuditLog() {
   }, [key, filter, page]);
 
   const set = (k) => (e) => { setFilter((f) => ({ ...f, [k]: e.target.value })); setPage(1); };
-  const clear = () => { setFilter(emptyFilter); setQ(''); setPage(1); };
+  const setDate = (k) => (iso) => { setFilter((f) => ({ ...f, [k]: iso })); setPage(1); };
+  // ล้างตัวกรอง → สร้างช่องวันที่ใหม่ด้วย (ถ้าพิมพ์ค้างไว้ไม่ครบ ช่องจะได้ว่างจริง)
+  const [dateNonce, setDateNonce] = useState(0);
+  const clear = () => { setFilter(emptyFilter); setQ(''); setPage(1); setDateNonce((n) => n + 1); };
+  const badRange = filter.from && filter.to && endBeforeStart(filter.from, filter.to);
   const hasFilter = q || Object.values(filter).some(Boolean);
   const pages = Math.max(1, Math.ceil(data.total / PAGE_SIZE));
 
@@ -74,12 +80,9 @@ export default function AuditLog() {
           <option value="">ผู้ใช้ทุกคน</option>
           {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
         </select>
-        <label className="flex items-center gap-2 text-xs text-gray-400">
-          ตั้งแต่ <input type="date" value={filter.from} onChange={set('from')} className={inputCls} />
-        </label>
-        <label className="flex items-center gap-2 text-xs text-gray-400">
-          ถึง <input type="date" value={filter.to} onChange={set('to')} className={inputCls} />
-        </label>
+        <ThaiDateFilter key={`from-${dateNonce}`} label="ตั้งแต่" value={filter.from} onChange={setDate('from')} />
+        <ThaiDateFilter key={`to-${dateNonce}`} label="ถึง" value={filter.to} onChange={setDate('to')} />
+        {badRange && <p className="w-full text-xs text-red-500">"ถึงวันที่" อยู่ก่อน "ตั้งแต่วันที่" — เลยไม่เจอรายการไหน</p>}
         {hasFilter && (
           <button onClick={clear} className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-bold text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all">
             <X size={14} /> ล้างตัวกรอง
@@ -163,6 +166,22 @@ export default function AuditLog() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ช่องวันที่ พ.ศ. แบบเดียวกับทั้งระบบ (พิมพ์ตัวเลข ใส่ / ให้เอง · ตรวจวันจริง · เตือนถ้าเผลอพิมพ์ปี ค.ศ.)
+function ThaiDateFilter({ label, value, onChange }) {
+  const { display, onInput, msg } = useThaiDate(value, onChange);
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="flex items-center gap-2 text-xs text-gray-500">
+        {label}
+        <input type="text" inputMode="numeric" maxLength={10} placeholder="วว/ดด/ปปปป" aria-label={`${label}วันที่ (พ.ศ.)`}
+          value={display} onChange={onInput}
+          className={`${inputCls} w-36 ${msg?.type === 'error' ? '!border-red-400' : ''}`} />
+      </label>
+      {msg && <span className={`text-xs ${msg.type === 'error' ? 'text-red-500' : 'text-gray-500'}`}>{msg.text}</span>}
     </div>
   );
 }
