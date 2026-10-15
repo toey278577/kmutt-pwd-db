@@ -108,7 +108,7 @@ router.delete('/:id/disability/:did', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const { search, province, gender, withPhotos, batchId } = req.query;
+    const { search, province, gender, withPhotos, batchId, disabilityTypeId, employment } = req.query;
     const where = {};
     const q = String(search || '').trim();
     if (q) {
@@ -122,9 +122,12 @@ router.get('/', async (req, res) => {
         where.OR.push({ thaiId: { contains: digits } }, { phone: { contains: digits } }, { mobile: { contains: digits } });
       }
     }
-    if (province) where.province = province;
-    if (gender) where.gender = gender;
-    if (batchId) where.batchId = parseInt(batchId);
+    // ตัวกรอง — ค่าที่ไม่รู้จัก (พิมพ์ URL เอง) ไม่ทำให้พัง แค่ไม่เจอใคร/ไม่กรอง
+    const int = (v) => (/^\d+$/.test(String(v ?? '')) ? parseInt(v, 10) : null);
+    if (province) where.province = String(province);
+    if (gender) where.gender = ['MALE', 'FEMALE', 'OTHER'].includes(gender) ? gender : undefined;
+    if (batchId) where.batchId = int(batchId) ?? -1;
+    if (disabilityTypeId) where.disabilityInfos = { some: { disabilityTypeId: int(disabilityTypeId) ?? -1 } };
 
     const select = {
       id: true, fullName: true, nickname: true, thaiId: true, gender: true,
@@ -137,11 +140,14 @@ router.get('/', async (req, res) => {
     if (withPhotos === 'true') {
       select.photos = { select: { filePath: true }, take: 1 };
     }
-    const persons = await prisma.person.findMany({
+    let persons = await prisma.person.findMany({
       where,
       select,
       orderBy: { createdAt: 'desc' },
     });
+    // สถานะงานล่าสุด = ผลติดตามครั้งล่าสุด (ตัวเดียวกับคอลัมน์ "งานล่าสุด" และ Dashboard) · NONE = ยังไม่เคยติดตาม
+    if (employment === 'NONE') persons = persons.filter((p) => p.followUps.length === 0);
+    else if (employment) persons = persons.filter((p) => p.followUps[0]?.employmentStatus === employment);
     res.json(persons);
   } catch (err) {
     res.status(500).json({ error: err.message });

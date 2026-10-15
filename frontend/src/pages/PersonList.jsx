@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as XLSX from 'xlsx';
-import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown, Users, Camera, X, Layers, FileSpreadsheet, Download, Upload } from 'lucide-react';
+import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown, Users, Camera, X, FileSpreadsheet, Download, Upload, SlidersHorizontal } from 'lucide-react';
 import { getPersons, getPerson, createPerson, importPersons, updatePerson, deletePerson, getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo, getPersonPhotos, uploadPersonPhoto, deletePersonPhoto, getBatches } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -20,6 +20,12 @@ const EMP = {
   UNEMPLOYED: { cls: 'bg-gray-100 text-gray-600 border-gray-200',          label: 'ว่างงาน' },
   STUDYING:   { cls: 'bg-sky-100 text-sky-700 border-sky-200',             label: 'ศึกษาต่อ' },
 };
+// ตัวกรองรายชื่อ (ใช้พร้อมกันได้ + จำไว้ใน URL) — key = ชื่อใน URL, api = ชื่อที่ส่งให้หลังบ้าน
+const FILTERS = [
+  { key: 'batch', api: 'batchId' }, { key: 'gender', api: 'gender' }, { key: 'province', api: 'province' },
+  { key: 'dis', api: 'disabilityTypeId' }, { key: 'emp', api: 'employment' },
+];
+const NO_FILTERS = Object.fromEntries(FILTERS.map(({ key }) => [key, '']));
 const fmtShortDate = (d) => d ? new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }) : '';
 const GENDER_BADGE = { MALE: 'bg-sky-100 text-sky-600 border-sky-200', FEMALE: 'bg-pink-100 text-pink-500 border-pink-200', OTHER: 'bg-gray-100 text-gray-500 border-gray-200' };
 
@@ -75,7 +81,9 @@ export default function PersonList() {
   const [loadError, setLoadError] = useState(false);
   const formBodyRef = useRef(null);
   const [batches, setBatches] = useState([]);
-  const [batchFilter, setBatchFilter] = useState(() => urlParams.get('batch') || '');
+  const [filters, setFilters] = useState(() => Object.fromEntries(FILTERS.map(({ key }) => [key, urlParams.get(key) || ''])));
+  const activeFilters = FILTERS.filter(({ key }) => filters[key]).length;
+  const [showFilters, setShowFilters] = useState(false);   // มือถือ: กดปุ่ม "ตัวกรอง" ถึงจะกางออก
   const [importModal, setImportModal] = useState(false);
   const [importRows, setImportRows] = useState([]);
   const [importing, setImporting] = useState(false);
@@ -103,34 +111,36 @@ export default function PersonList() {
   // โหลดซ้ำโดยอยู่หน้าเดิม — ใช้หลังแก้ไข/ลบ
   // ค้นหาแบบพิมพ์แล้วขึ้นเลย ยิงหลายครั้งติดกัน → ใช้แค่ผลของครั้งล่าสุด (เน็ตช้า ผลเก่าอาจกลับมาทีหลังแล้วทับผลใหม่)
   const loadSeq = useRef(0);
-  const load = (q = '', b = batchFilter) => {
+  const load = (q = '', f = filters) => {
     setLoadError(false);
     const params = {};
     if (q.trim()) params.search = q.trim();
-    if (b) params.batchId = b;
+    for (const { key, api } of FILTERS) if (f[key]) params[api] = f[key];
     const seq = ++loadSeq.current;
     return getPersons(params)
       .then((r) => { if (seq === loadSeq.current) setPersons(r.data); })
       .catch(() => { if (seq === loadSeq.current) setLoadError(true); });
   };
-  // ผลลัพธ์ชุดใหม่ (ค้นหา / เปลี่ยนรุ่น / เพิ่มคน / นำเข้า) → จำคำค้น+รุ่นลง URL แล้วเริ่มหน้า 1
+  // ผลลัพธ์ชุดใหม่ (ค้นหา / เปลี่ยนตัวกรอง / เพิ่มคน / นำเข้า) → จำคำค้น+ตัวกรองลง URL แล้วเริ่มหน้า 1
   // เขียน URL ตอนผู้ใช้กดเท่านั้น ไม่เขียนตอนโหลดเสร็จ กันกรณีกดไปหน้าอื่นแล้วโดนดึงกลับ
   const searchTimer = useRef(null);
-  const applyFilter = (q = search, b = batchFilter) => {
+  const applyFilter = (q = search, f = filters) => {
     clearTimeout(searchTimer.current);   // มีค้นหาที่รอยิงอยู่ → ยกเลิก ใช้ค่าล่าสุดนี้แทน
     q = q.trim();
     setUrlParams(() => {
       const p = new URLSearchParams();
       if (q) p.set('q', q);
-      if (b) p.set('batch', b);
+      for (const { key } of FILTERS) if (f[key]) p.set(key, f[key]);
       return p;
     }, { replace: true });
-    return load(q, b);
+    return load(q, f);
   };
-  const handleBatchFilter = (b) => {
-    setBatchFilter(b);
-    applyFilter(search, b);
+  const setFilter = (key, value) => {
+    const f = { ...filters, [key]: value };
+    setFilters(f);
+    applyFilter(search, f);
   };
+  const clearFilters = () => { setFilters(NO_FILTERS); applyFilter(search, NO_FILTERS); };
   // พิมพ์แล้วค้นให้เอง เมื่อหยุดพิมพ์ 0.35 วินาที (เดิมต้องกดปุ่ม "ค้นหา" หรือ Enter)
   const handleSearchInput = (v) => {
     setSearch(v);
@@ -139,7 +149,7 @@ export default function PersonList() {
   };
   useEffect(() => () => clearTimeout(searchTimer.current), []);   // ออกจากหน้าก่อนครบเวลา → ไม่ต้องค้น
   useEffect(() => {
-    load(search);   // search / batchFilter / page เริ่มจากค่าใน URL แล้ว
+    load(search);   // คำค้น / ตัวกรอง / หน้า เริ่มจากค่าใน URL แล้ว
     getDisabilityTypes().then((r) => setDisabilityTypes(r.data)).catch(() => {});
     getBatches().then((r) => setBatches(r.data)).catch(() => {});
   }, []);
@@ -465,7 +475,7 @@ export default function PersonList() {
             <h1 className="text-xl font-black page-title leading-tight">ข้อมูลคนพิการ</h1>
             <p className="text-gray-500 text-sm mt-0.5">
               {/* กำลังค้น/กรองรุ่นอยู่ → บอกว่า "พบ" ไม่ใช่ "ในระบบ" (เดิมค้นเจอ 1 คน ขึ้นว่าในระบบมี 1 รายการ) */}
-              {urlParams.get('q') || urlParams.get('batch')
+              {urlParams.get('q') || FILTERS.some(({ key }) => urlParams.get(key))
                 ? <>ค้นพบ <span className="text-orange-600 font-bold">{persons.length}</span> รายการ</>
                 : <><span className="text-orange-600 font-bold">{persons.length}</span> รายการในระบบ</>}
             </p>
@@ -516,26 +526,44 @@ export default function PersonList() {
           )}
         </div>
 
-        {/* Batch filter — รายชื่อแยกรุ่น (Dropdown) */}
-        {batches.length > 0 && (
-          <div className="flex items-center gap-2 mt-3">
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-500">
-              <Layers size={13} className="text-orange-400" /> แยกรุ่น:
-            </span>
-            <div className="relative">
-              <select
-                value={batchFilter}
-                onChange={(e) => handleBatchFilter(e.target.value)}
-                className="appearance-none text-sm font-semibold rounded-xl border border-orange-200 bg-white text-gray-700 pl-3 pr-9 py-2 hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 cursor-pointer transition-all">
-                <option value="">ทุกรุ่น</option>
-                {batches.map(b => (
-                  <option key={b.id} value={String(b.id)}>รุ่นที่ {b.batchNumber}/{b.year}</option>
-                ))}
-              </select>
-              <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-orange-400 pointer-events-none" />
-            </div>
+        {/* ตัวกรองหลายเงื่อนไขพร้อมกัน (เดิมกรองได้แค่รุ่น) — ช่องที่เลือกอยู่เป็นสีส้ม
+            มือถือพับเก็บเป็นปุ่มเดียว (กางเต็มกินที่ครึ่งจอ) · จอคอมโชว์ตลอด */}
+        <div className="flex items-center gap-2 mt-3 md:hidden">
+          <button onClick={() => setShowFilters((v) => !v)} aria-expanded={showFilters}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold border transition-all ${activeFilters ? 'border-orange-400 bg-orange-50 text-orange-700' : 'border-orange-200 bg-white text-gray-700'}`}>
+            <SlidersHorizontal size={15} className="text-orange-500" /> ตัวกรอง{activeFilters > 0 && ` (${activeFilters})`}
+            <ChevronDown size={14} className={`text-orange-400 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+          </button>
+          {activeFilters > 0 && (
+            <button onClick={clearFilters}
+              className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-gray-600 hover:text-orange-700 hover:bg-orange-50 transition-all">
+              <X size={14} /> ล้างตัวกรอง ({activeFilters})
+            </button>
+          )}
+        </div>
+        <div className={`${showFilters ? 'flex' : 'hidden'} md:flex flex-wrap items-center gap-2 mt-2 md:mt-3`}>
+          <span className="hidden md:flex items-center gap-1.5 text-xs font-semibold text-gray-500">
+            <SlidersHorizontal size={13} className="text-orange-400" /> ตัวกรอง:
+          </span>
+          <div className="grid grid-cols-2 gap-2 w-full md:flex md:flex-wrap md:w-auto">
+            <FilterSelect label="รุ่น" value={filters.batch} onChange={(v) => setFilter('batch', v)}
+              options={[['', 'ทุกรุ่น'], ...batches.map((b) => [String(b.id), `รุ่นที่ ${b.batchNumber}/${b.year}`])]} />
+            <FilterSelect label="เพศ" value={filters.gender} onChange={(v) => setFilter('gender', v)}
+              options={[['', 'ทุกเพศ'], ['MALE', 'ชาย'], ['FEMALE', 'หญิง'], ['OTHER', 'อื่นๆ']]} />
+            <FilterSelect label="จังหวัด" value={filters.province} onChange={(v) => setFilter('province', v)}
+              options={[['', 'ทุกจังหวัด'], ...THAI_PROVINCES.map((p) => [p, p])]} />
+            <FilterSelect label="ประเภทความพิการ" value={filters.dis} onChange={(v) => setFilter('dis', v)}
+              options={[['', 'ทุกประเภทความพิการ'], ...disabilityTypes.map((t) => [String(t.id), t.typeName.replace(/^ความพิการทาง/, '')])]} />
+            <FilterSelect label="งานล่าสุด" value={filters.emp} onChange={(v) => setFilter('emp', v)}
+              options={[['', 'งานล่าสุด: ทั้งหมด'], ['EMPLOYED', 'มีงานทำ'], ['UNEMPLOYED', 'ว่างงาน'], ['STUDYING', 'ศึกษาต่อ'], ['NONE', 'ยังไม่ติดตาม']]} />
           </div>
-        )}
+          {activeFilters > 0 && (
+            <button onClick={clearFilters}
+              className="hidden md:flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-gray-600 hover:text-orange-700 hover:bg-orange-50 transition-all">
+              <X size={14} /> ล้างตัวกรอง ({activeFilters})
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Table */}
@@ -1134,6 +1162,20 @@ export default function PersonList() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ช่องตัวกรองเหนือรายชื่อ — เลือกค่าอยู่ = สีส้ม ให้เห็นว่ากำลังกรองอะไร
+function FilterSelect({ label, value, onChange, options }) {
+  return (
+    <div className="relative min-w-0">
+      <select aria-label={label} value={value} onChange={(e) => onChange(e.target.value)}
+        className={`w-full appearance-none text-sm font-semibold rounded-xl border pl-3 pr-8 py-2 cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 truncate
+          ${value ? 'border-orange-400 bg-orange-50 text-orange-700' : 'border-orange-200 bg-white text-gray-700 hover:border-orange-300'}`}>
+        {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+      </select>
+      <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-orange-400 pointer-events-none" />
     </div>
   );
 }

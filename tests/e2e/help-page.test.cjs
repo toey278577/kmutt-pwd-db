@@ -19,7 +19,7 @@ const { prisma, browser, eq, summary, sleep, shot } = require('../lib.cjs');
     await open('ข้อมูลคนพิการ');
     const persons = await mainText();
     eq('หัวข้อคนพิการ: ค้นหาทันที / ตารางรายชื่อ / ถามก่อนปิดฟอร์ม / นำเข้า Excel',
-      ['ขึ้นเองทันที ไม่ต้องกดปุ่ม', 'งานล่าสุด', 'เผลอกดปิดฟอร์ม ข้อมูลไม่หาย', 'นำเข้าหลายคนจาก Excel'].map((t) => persons.includes(t)), [true, true, true, true]);
+      ['ขึ้นเองทันที ไม่ต้องกดปุ่ม', 'งานล่าสุด', 'เผลอกดปิดฟอร์ม ข้อมูลไม่หาย', 'นำเข้าหลายคนจาก Excel', 'ตัวกรองรายชื่อ'].map((t) => persons.includes(t)), [true, true, true, true, true]);
     eq('ไม่มีคำสั่งเก่า "กด ค้นหา"', persons.includes('แล้วกด "ค้นหา"'), false);
     await b.screenshot(shot('help-persons.png'));
 
