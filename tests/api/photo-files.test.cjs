@@ -1,5 +1,5 @@
 // ข้อ 2: ลบคนแล้วไฟล์รูปต้องหาย + สคริปต์เก็บกวาดลบเฉพาะไฟล์กำพร้า
-const { prisma, jwt, B, API: U, UPLOAD_DIR } = require('../lib.cjs');
+const { prisma, jwt, B, API: U, UPLOAD_DIR, SECRET } = require('../lib.cjs');
 const path = require('path');
 const fs = require('fs');
 const { execFileSync } = require('child_process');
@@ -10,7 +10,7 @@ const eq = (n, g, w) => { const ok = JSON.stringify(g) === JSON.stringify(w); ok
 (async () => {
   for (let i = 0; i < 30; i++) { try { await fetch(U + '/ping'); break; } catch { await new Promise(r => setTimeout(r, 500)); } }
   const admin = await prisma.user.findFirst({ where: { role: 'ADMIN', isActive: true } });
-  const H = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + jwt.sign({ id: admin.id }, process.env.JWT_SECRET || 'kmutt_pwd_secret_2024', { expiresIn: '5m' }) };
+  const H = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + jwt.sign({ id: admin.id }, SECRET, { expiresIn: '5m' }) };
   const call = async (m, p, b) => { const r = await fetch(U + p, { method: m, headers: H, body: b && JSON.stringify(b) }); return { status: r.status, body: await r.json().catch(() => null) }; };
   const jpg = 'data:image/jpeg;base64,' + Buffer.alloc(50 * 1024, 9).toString('base64');
   const fileOf = (fp) => path.join(DIR, path.basename(fp));

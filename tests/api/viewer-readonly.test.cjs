@@ -1,7 +1,7 @@
 // ทดสอบว่า VIEWER อ่านได้อย่างเดียว ส่วน STAFF/ADMIN ยังเขียนได้ปกติ
 const { prisma, jwt, B, API: U, UPLOAD_DIR } = require('../lib.cjs');
 const path = require('path');
-const SECRET = process.env.JWT_SECRET || 'kmutt_pwd_secret_2024';
+const { SECRET } = require('../lib.cjs');
 
 let pass = 0, fail = 0;
 const check = (name, got, want) => {

@@ -27,7 +27,7 @@ const { PHOTO_DIR: UPLOAD_DIR } = require(path.join(B, 'src/utils/uploadDir'));
 const APP = process.env.TEST_APP_URL;
 const API = process.env.TEST_API_URL;
 const CDP_PORT = process.env.TEST_CDP_PORT;
-const SECRET = process.env.JWT_SECRET || 'kmutt_pwd_secret_2024';
+const { JWT_SECRET: SECRET } = require(path.join(B, 'src/utils/jwtSecret'));   // ค่าเดียวกับหลังบ้านทดสอบ
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ภาพหน้าจอเก็บไว้ดูด้วยตาที่ tests/.output/shots

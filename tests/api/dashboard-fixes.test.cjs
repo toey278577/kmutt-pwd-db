@@ -1,5 +1,5 @@
 // ทดสอบ: ตัวเลข Dashboard (นับคน/ผู้เข้าอบรม), ล้าง cache ทันที, error ภาษาไทย
-const { prisma, jwt, B, API: U, UPLOAD_DIR } = require('../lib.cjs');
+const { prisma, jwt, B, API: U, UPLOAD_DIR, SECRET } = require('../lib.cjs');
 const path = require('path');
 
 let pass = 0, fail = 0;
@@ -13,7 +13,7 @@ const emp = (s) => Object.fromEntries(s.byEmployment.map((e) => [e.name, e.value
 (async () => {
   for (let i = 0; i < 30; i++) { try { await fetch(U + '/ping'); break; } catch { await new Promise(r => setTimeout(r, 500)); } }
   const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
-  const H = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + jwt.sign({ id: admin.id }, process.env.JWT_SECRET || 'kmutt_pwd_secret_2024', { expiresIn: '5m' }) };
+  const H = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + jwt.sign({ id: admin.id }, SECRET, { expiresIn: '5m' }) };
   const call = async (m, p, b) => { const r = await fetch(U + p, { method: m, headers: H, body: b && JSON.stringify(b) }); return { status: r.status, body: await r.json().catch(() => null) }; };
   const persons = [], batches = [];
   let seq = 0;

@@ -1,5 +1,5 @@
 // ทดสอบ GET /api/data/followup-due กับข้อมูลจำลองใน DB เครื่อง แล้วลบทิ้ง
-const { prisma, jwt, B, API: U, UPLOAD_DIR } = require('../lib.cjs');
+const { prisma, jwt, B, API: U, UPLOAD_DIR, SECRET } = require('../lib.cjs');
 const path = require('path');
 const { todayBangkok } = require(path.join(B, 'src/utils/followupDue'));
 const DAY = 86_400_000;
@@ -44,7 +44,7 @@ const eq = (name, got, want) => {
     await person(F, 'ทดสอบ เพิ่งจบ');
 
     const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
-    const r = await fetch(U + '/data/followup-due', { headers: { Authorization: 'Bearer ' + jwt.sign({ id: admin.id }, process.env.JWT_SECRET || 'kmutt_pwd_secret_2024') } });
+    const r = await fetch(U + '/data/followup-due', { headers: { Authorization: 'Bearer ' + jwt.sign({ id: admin.id }, SECRET) } });
     const data = await r.json();
     const mine = data.items.filter(i => i.fullName.startsWith('ทดสอบ'));
     const by = Object.fromEntries(mine.map(i => [i.fullName, i]));

@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const prisma = require('../prismaClient');
-const JWT_SECRET = process.env.JWT_SECRET || 'kmutt_pwd_secret_2024';
+const { JWT_SECRET } = require('../utils/jwtSecret');
 const WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 async function authenticate(req, res, next) {

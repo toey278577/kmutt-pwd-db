@@ -6,7 +6,7 @@ const prisma = require('../prismaClient');
 const { authenticate } = require('../middleware/auth');
 const { writeAudit } = require('../middleware/audit');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'kmutt_pwd_secret_2024';
+const { JWT_SECRET } = require('../utils/jwtSecret');
 
 router.post('/login', async (req, res) => {
   try {

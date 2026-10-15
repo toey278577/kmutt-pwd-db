@@ -1,5 +1,5 @@
 // ข้อ 3: ขนาดรูป/ข้อมูลที่ส่งเข้าหลังบ้าน
-const { prisma, jwt, B, API: U, UPLOAD_DIR } = require('../lib.cjs');
+const { prisma, jwt, B, API: U, UPLOAD_DIR, SECRET } = require('../lib.cjs');
 const path = require('path');
 const fs = require('fs');
 let pass = 0, fail = 0;
@@ -8,7 +8,7 @@ const eq = (n, g, w) => { const ok = JSON.stringify(g) === JSON.stringify(w); ok
 (async () => {
   for (let i = 0; i < 30; i++) { try { await fetch(U + '/ping'); break; } catch { await new Promise(r => setTimeout(r, 500)); } }
   const admin = await prisma.user.findFirst({ where: { role: 'ADMIN', isActive: true } });
-  const H = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + jwt.sign({ id: admin.id }, process.env.JWT_SECRET || 'kmutt_pwd_secret_2024', { expiresIn: '5m' }) };
+  const H = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + jwt.sign({ id: admin.id }, SECRET, { expiresIn: '5m' }) };
   const raw = async (body) => { const r = await fetch(U + `/persons/${pid}/photos`, { method: 'POST', headers: H, body }); return { status: r.status, body: await r.json().catch(() => '(ไม่ใช่ JSON)') }; };
   const jpg = (mb) => JSON.stringify({ filePath: 'data:image/jpeg;base64,' + Buffer.alloc(Math.round(mb * 1024 * 1024), 3).toString('base64'), photoType: 'profile' });
   const p = await prisma.person.create({ data: { fullName: 'ทดสอบขนาดรูป', gender: 'MALE', thaiId: '9999999940001' } });
