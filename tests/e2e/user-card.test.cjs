@@ -15,7 +15,7 @@ const CARD = `document.querySelector('aside [data-user-card]')`;
     eq('การ์ดใส (พื้นโปร่ง + เบลอหลัง) ไม่มีวงกลมไล่สี/จุดเขียวข้างใน', await b.evaluate(`(() => { const cs = getComputedStyle(${CARD});
       return [cs.backgroundColor, cs.backgroundImage.includes('rgba(255, 255, 255, 0.24)'), cs.backdropFilter.includes('blur'),
               [...${CARD}.querySelectorAll('*')].some(e => getComputedStyle(e).backgroundImage.includes('gradient'))]; })()`), ['rgba(0, 0, 0, 0)', true, true, false]);
-    eq('ชื่อตัวขาวเรืองแสง + ไม่ตัดขอบ (แสงไม่เป็นกล่องเหลี่ยม วรรณยุกต์ไม่หาย)', await b.evaluate(`(() => { const cs = getComputedStyle(${CARD}.querySelector('p')); return [cs.color, cs.textShadow.includes('rgba(255, 214, 170, 0.9)'), cs.overflow]; })()`), ['rgb(255, 255, 255)', true, 'visible']);
+    eq('ชื่อตัวขาวเรืองแสง + ไม่ตัดขอบ (แสงไม่เป็นกล่องเหลี่ยม วรรณยุกต์ไม่หาย)', await b.evaluate(`(() => { const cs = getComputedStyle(${CARD}.querySelector('p')); return [cs.color, cs.textShadow.includes('rgba(255, 214, 170, 0.6)'), cs.overflow]; })()`), ['rgb(255, 255, 255)', true, 'visible']);
     await b.screenshot(shot('usercard-staff.png'));
 
     await b.login(admin.id);

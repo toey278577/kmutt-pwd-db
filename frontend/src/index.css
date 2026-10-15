@@ -109,7 +109,7 @@ main tr.row-link:hover > td { background-color: #fff7ed; }  /* main tr = ชน�
   -webkit-backdrop-filter: blur(10px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 6px 18px rgba(124,45,18,0.22);
 }
-.user-card-glow { text-shadow: 0 0 2px #fff, 0 0 8px rgba(255,255,255,0.9), 0 0 18px rgba(255,214,170,0.9), 0 0 32px rgba(255,180,120,0.6); }  /* นีออนขาว (พี่เต้ยเลือกแบบ E) · ห้ามใส่ truncate/overflow-hidden ที่ชื่อ แสงจะโดนตัดเป็นกล่องเหลี่ยม */
+.user-card-glow { text-shadow: 0 0 10px rgba(255,255,255,0.6), 0 0 22px rgba(255,214,170,0.6); }  /* เรืองนุ่ม (พี่เต้ยเลือก F จากภาพขนาดจริง — แบบ E นีออนแรงเกิน ขอบตัวหนังสือเบลอ) · ห้ามใส่ truncate/overflow-hidden ที่ชื่อ แสงจะโดนตัดเป็นกล่องเหลี่ยม */
 
 /* ─── Design system (Minimal SaaS — clean white + orange accent) ─── */
 .page-fade { animation: pageFade .35s ease-out; }
