@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, BookOpen, Printer, Menu, X, Sun, Moon, Layers, UserRound, History, Accessibility } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, BookOpen, Printer, Menu, X, Sun, Moon, Layers, History, Accessibility } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -16,7 +16,6 @@ const menu = [
 ];
 
 const ROLE_LABEL = { ADMIN: 'ผู้ดูแลระบบ', STAFF: 'เจ้าหน้าที่', VIEWER: 'ผู้ดูข้อมูล' };
-const ROLE_COLOR = { ADMIN: 'from-rose-400 to-red-500', STAFF: 'from-amber-300 to-orange-500', VIEWER: 'from-sky-300 to-cyan-500' };
 
 // โทนส้มสว่าง (ลดสว่างลงนิด อิ่มขึ้น) + ลายจุดจางๆ + แสงเรืองมุมบน (รวมใน background เดียว — ปลอดภัย ไม่เพิ่ม DOM)
 const SIDEBAR_BG = `
@@ -136,27 +135,20 @@ export default function Layout({ children }) {
           </button>
         </div>
 
-        {/* ── User Card ── */}
+        {/* ── User Card — การ์ดขาวบนพื้นส้ม (พี่เต้ยเลือกจาก 5 แบบ 15 ต.ค. 69)
+            เดิม: วงกลมไล่สี + จุดเขียว + ป้ายบทบาทซ้ำกับชื่อ + ปุ่มออกจางจนแทบไม่เห็น ── */}
         <div className="p-3 border-t border-white/15" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
-          <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
-            {/* avatar เป็นไอคอนคน + จุดออนไลน์ */}
-            <div className="relative flex-shrink-0">
-              <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${ROLE_COLOR[user?.role] || 'from-amber-300 to-orange-500'} flex items-center justify-center shadow-md ring-2 ring-white/40`}>
-                <UserRound size={19} className="text-white" strokeWidth={2.4} />
-              </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-orange-600"
-                style={{ boxShadow: '0 0 6px rgba(52,211,153,0.9)' }} />
-            </div>
+          <div data-user-card className="flex items-center gap-2.5 px-3 py-2.5 rounded-2xl bg-white shadow-[0_6px_16px_rgba(124,45,18,0.28)]">
             <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-bold leading-tight truncate">{user?.name}</p>
-              <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/25 text-white border border-white/30">
-                <span className="w-1 h-1 rounded-full bg-white/90" />
-                {ROLE_LABEL[user?.role] || 'เจ้าหน้าที่'}
-              </span>
+              <p className="text-orange-950 text-sm font-extrabold leading-tight truncate">{user?.name}</p>
+              {/* บทบาทซ้ำกับชื่อ (บัญชีแอดมินชื่อ "ผู้ดูแลระบบ") → ไม่ต้องโชว์ซ้ำ */}
+              {ROLE_LABEL[user?.role] && ROLE_LABEL[user?.role] !== user?.name && (
+                <p className="text-orange-700 text-xs font-semibold mt-0.5 truncate">{ROLE_LABEL[user?.role]}</p>
+              )}
             </div>
-            <button onClick={handleLogout} title="ออกจากระบบ"
-              className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-white/10 text-white/80 hover:bg-red-500 hover:text-white transition-all active:scale-90">
-              <LogOut size={15} />
+            <button onClick={handleLogout} title="ออกจากระบบ" aria-label="ออกจากระบบ"
+              className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl bg-orange-50 border border-orange-200 text-orange-700 hover:bg-red-500 hover:border-red-500 hover:text-white transition-all active:scale-90">
+              <LogOut size={16} />
             </button>
           </div>
         </div>
