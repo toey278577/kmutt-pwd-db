@@ -6,20 +6,31 @@ import { ToastProvider } from './context/ToastContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import ErrorBoundary, { ReconnectingBanner } from './components/ErrorBoundary';
+import UpdateBanner from './components/UpdateBanner';
+
+// แท็บที่เปิดค้างตั้งแต่ก่อนอัปเดต จะเรียกไฟล์หน้าชื่อเก่าที่ถูกลบไปแล้ว → โหลดหน้าใหม่ให้เอง 1 ครั้ง (เดิมขึ้น "เกิดข้อผิดพลาด")
+const lazyPage = (load) => lazy(() => load()
+  .then((m) => { sessionStorage.removeItem('page-reloaded'); return m; })
+  .catch((err) => {
+    if (sessionStorage.getItem('page-reloaded')) throw err;   // โหลดใหม่แล้วยังไม่ได้ = พังจริง ให้กล่องแจ้งเตือนทำงาน
+    sessionStorage.setItem('page-reloaded', '1');
+    window.location.reload();
+    return new Promise(() => {});
+  }));
 
 // Lazy load ทุก page — โหลดเฉพาะหน้าที่ผู้ใช้เปิด
-const Dashboard        = lazy(() => import('./pages/Dashboard'));
-const PersonList       = lazy(() => import('./pages/PersonList'));
-const PersonDetail     = lazy(() => import('./pages/PersonDetail'));
-const OrganizationList = lazy(() => import('./pages/OrganizationList'));
-const FollowUpList     = lazy(() => import('./pages/FollowUpList'));
-const TrainingList     = lazy(() => import('./pages/TrainingList'));
-const UserManagement   = lazy(() => import('./pages/UserManagement'));
-const Help             = lazy(() => import('./pages/Help'));
-const ReportPage       = lazy(() => import('./pages/ReportPage'));
-const BatchPage        = lazy(() => import('./pages/BatchPage'));
-const AuditLog         = lazy(() => import('./pages/AuditLog'));
-const DisabilityTypes  = lazy(() => import('./pages/DisabilityTypes'));
+const Dashboard        = lazyPage(() => import('./pages/Dashboard'));
+const PersonList       = lazyPage(() => import('./pages/PersonList'));
+const PersonDetail     = lazyPage(() => import('./pages/PersonDetail'));
+const OrganizationList = lazyPage(() => import('./pages/OrganizationList'));
+const FollowUpList     = lazyPage(() => import('./pages/FollowUpList'));
+const TrainingList     = lazyPage(() => import('./pages/TrainingList'));
+const UserManagement   = lazyPage(() => import('./pages/UserManagement'));
+const Help             = lazyPage(() => import('./pages/Help'));
+const ReportPage       = lazyPage(() => import('./pages/ReportPage'));
+const BatchPage        = lazyPage(() => import('./pages/BatchPage'));
+const AuditLog         = lazyPage(() => import('./pages/AuditLog'));
+const DisabilityTypes  = lazyPage(() => import('./pages/DisabilityTypes'));
 
 function PageLoader() {
   return (
@@ -90,6 +101,7 @@ export default function App() {
           <ToastProvider>
             <AuthProvider>
               <ReconnectingBanner />
+              <UpdateBanner />
               <AppRoutes />
             </AuthProvider>
           </ToastProvider>

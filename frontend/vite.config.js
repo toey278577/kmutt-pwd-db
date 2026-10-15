@@ -25,7 +25,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
+      // อัปเดตตัวเก็บไฟล์อัตโนมัติ (เหมือนเดิม) แต่ลงทะเบียนเองใน components/UpdateBanner.jsx
+      // เพื่อขึ้นแถบ "มีเวอร์ชันใหม่ กดโหลดใหม่" — เดิมแท็บที่เปิดค้างเห็นหน้าตาเก่าโดยไม่รู้ตัว
       registerType: 'autoUpdate',
+      injectRegister: false,
       includeAssets: ['logo-icon.png', 'logo.jpg', 'favicon.svg'],
       manifest: {
         name: 'ระบบฐานข้อมูลคนพิการ มจธ.',
@@ -63,6 +66,11 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // ตัวใหม่เข้าทำงานทันทีที่ deploy (เดิมรอคิวจนกว่าจะปิดทุกแท็บ — รีเฟรชแท็บเดิมก็ยังได้ของเก่า)
+        // หน้าที่เปิดค้างอยู่จะขึ้นแถบ "มีเวอร์ชันใหม่" (components/UpdateBanner.jsx) · ลบไฟล์เวอร์ชันเก่าทิ้ง
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,ico,png,jpg,svg,woff2}'],
         runtimeCaching: [
           {

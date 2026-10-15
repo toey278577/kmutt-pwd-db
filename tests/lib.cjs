@@ -51,11 +51,12 @@ async function browser(port = CDP_PORT) {
   for (let i = 0; i < 40; i++) { try { targets = await (await fetch(`http://127.0.0.1:${port}/json`)).json(); break; } catch { await sleep(250); } }
   const page = targets.find((t) => t.type === 'page');
   const ws = new WebSocket(page.webSocketDebuggerUrl);
-  let id = 0; const pending = new Map(); const errors = [];
+  let id = 0; const pending = new Map(); const errors = []; const listeners = {};
   ws.onmessage = (m) => {
     const d = JSON.parse(m.data);
     if (d.id && pending.has(d.id)) { pending.get(d.id)(d); pending.delete(d.id); }
     if (d.method === 'Runtime.exceptionThrown') errors.push(d.params.exceptionDetails.exception?.description || d.params.exceptionDetails.text);
+    if (d.method && listeners[d.method]) for (const cb of listeners[d.method]) cb(d.params);
   };
   await new Promise((r) => (ws.onopen = r));
   const send = (method, params = {}) => new Promise((r) => { const i = ++id; pending.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); });
@@ -91,8 +92,10 @@ async function browser(port = CDP_PORT) {
   const toastText = () => evaluate(`[...document.querySelectorAll('body *')].filter(e => e.children.length === 0 && /สำเร็จ|ไม่สำเร็จ|ไม่ครบ|ไม่ได้/.test(e.textContent)).map(e => e.textContent.trim()).join(' | ')`);
   const screenshot = async (file) => { const r = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(file, Buffer.from(r.result.data, 'base64')); };
   // รอปิดให้เสร็จก่อน exit — ปิดแล้ว exit ทันที Node บน Windows แครช (UV_HANDLE_CLOSING) ทั้งที่เทสต์ผ่าน
+  // ฟังเหตุการณ์จาก Chrome (เช่น Fetch.requestPaused ไว้จำลองเน็ตพัง/ไฟล์หาย)
+  const on = (method, cb) => { (listeners[method] ||= []).push(cb); };
   const close = () => new Promise((r) => { ws.onclose = () => r(); ws.close(); setTimeout(r, 1500); });
-  return { send, evaluate, waitFor, nav, login, clickText, setValue, toastText, screenshot, errors, close };
+  return { send, evaluate, waitFor, nav, login, clickText, setValue, toastText, screenshot, errors, close, on };
 }
 
 module.exports = { prisma, browser, eq, summary, sleep, API, APP, SECRET, jwt, B, FE, ROOT, OUT, shot, fixturePng, UPLOAD_DIR };
