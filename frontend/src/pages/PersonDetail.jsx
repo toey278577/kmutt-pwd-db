@@ -5,10 +5,10 @@ import {
   getPerson, getTraining, createTraining, updateTraining, deleteTraining,
   getWorkExp, createWorkExp, updateWorkExp, deleteWorkExp,
   getFollowUp, createFollowUp, updateFollowUp, deleteFollowUp,
-  getSkills, createSkill, deleteSkill,
+  getSkills, createSkill, updateSkill, deleteSkill,
   getPersonOrgs, createPersonOrg, updatePersonOrg, deletePersonOrg,
   getOrganizations,
-  getDisabilityTypes, createDisabilityInfo, deleteDisabilityInfo,
+  getDisabilityTypes, createDisabilityInfo, updateDisabilityInfo, deleteDisabilityInfo,
   getPersonPhotos, uploadPersonPhoto, deletePersonPhoto,
   getAssessments, saveAssessment, deleteAssessment, getBatches,
 } from '../api';
@@ -28,9 +28,9 @@ const MARITAL_LABELS = { SINGLE: 'โสด', MARRIED: 'สมรส', OTHER: '�
 const EMP_BADGE = { EMPLOYED: 'badge-success', UNEMPLOYED: 'badge-ghost', STUDYING: 'badge-info' };
 const EMP_LABELS = { EMPLOYED: 'มีงานทำ', UNEMPLOYED: 'ว่างงาน', STUDYING: 'ศึกษาต่อ' };
 const SKILL_COLOR = {
-  BEGINNER: 'text-amber-500 bg-amber-50 border-amber-200',
-  INTERMEDIATE: 'text-cyan-600 bg-cyan-50 border-cyan-200',
-  ADVANCED: 'text-emerald-600 bg-emerald-50 border-emerald-200',
+  BEGINNER: 'text-amber-700 bg-amber-50 border-amber-200',
+  INTERMEDIATE: 'text-cyan-700 bg-cyan-50 border-cyan-200',
+  ADVANCED: 'text-emerald-700 bg-emerald-50 border-emerald-200',
 };
 const ROLE_TYPE_LABELS = { INTERNSHIP: 'ฝึกงาน', EMPLOYMENT: 'จ้างงาน', OTHER: 'อื่นๆ' };
 const TRAINING_TYPE_LABELS = { TRAIN: 'อบรม', LEARN: 'เรียนรู้', EARN: 'ฝึกงาน' };
@@ -224,9 +224,9 @@ export default function PersonDetail() {
       else if (dialogType === 'workexp') { await (eid ? updateWorkExp(id, eid, form) : createWorkExp(id, form)); getWorkExp(id).then((r) => setWorkexp(r.data)); }
       else if (dialogType === 'followup') { await (eid ? updateFollowUp(id, eid, form) : createFollowUp(id, form)); getFollowUp(id).then((r) => setFollowup(r.data)); }
       else if (dialogType === 'personorg' && eid) { await updatePersonOrg(id, eid, form); getPersonOrgs(id).then((r) => setPersonOrgs(r.data)); }
-      else if (dialogType === 'skill') { await createSkill(id, form); getSkills(id).then((r) => setSkills(r.data)); }
+      else if (dialogType === 'skill') { await (eid ? updateSkill(id, eid, form) : createSkill(id, form)); getSkills(id).then((r) => setSkills(r.data)); }
       else if (dialogType === 'personorg') { await createPersonOrg(id, form); getPersonOrgs(id).then((r) => setPersonOrgs(r.data)); }
-      else if (dialogType === 'disability') { await createDisabilityInfo(id, form); getPerson(id).then((r) => setPerson(r.data)); }
+      else if (dialogType === 'disability') { await (eid ? updateDisabilityInfo(id, eid, form) : createDisabilityInfo(id, form)); getPerson(id).then((r) => setPerson(r.data)); }
       modalRef.current?.close();
       toast.success(editingId ? 'แก้ไขสำเร็จ!' : 'บันทึกสำเร็จ!');
     } catch (err) { toast.error('บันทึกไม่สำเร็จ', err.response?.data?.error || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'); }
@@ -376,13 +376,20 @@ export default function PersonDetail() {
                 {person.disabilityInfos.map((d) => (
                   <div key={d.id} className="rounded-xl bg-orange-50 border border-orange-100 p-3 relative">
                     {canEdit && (
-                      <button title="ลบ"
-                        className="absolute top-1.5 right-1.5 w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                        onClick={() => delWith('ข้อมูลความพิการ', () => deleteDisabilityInfo(id, d.id), () => getPerson(id).then(r => setPerson(r.data)))}>
-                        <Trash2 size={13} />
-                      </button>
+                      <div className="absolute top-1.5 right-1.5 flex gap-0.5">
+                        <button title="แก้ไข"
+                          className="w-7 h-7 rounded-lg flex items-center justify-center text-amber-500 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+                          onClick={() => openDialog('disability', d)}>
+                          <Pencil size={13} />
+                        </button>
+                        <button title="ลบ"
+                          className="w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                          onClick={() => delWith('ข้อมูลความพิการ', () => deleteDisabilityInfo(id, d.id), () => getPerson(id).then(r => setPerson(r.data)))}>
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     )}
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700 mb-2 mr-8">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700 mb-2 mr-16">
                       {d.disabilityType?.typeName}
                     </span>
                     <p className="text-xs text-gray-600">ระดับ: {d.disabilityLevel || '—'}</p>
@@ -480,13 +487,18 @@ export default function PersonDetail() {
             ? <p className="text-center py-8 text-gray-400 text-sm">ยังไม่มีทักษะ</p>
             : <div className="flex flex-wrap gap-2 p-4">
                 {skills.map((s) => (
-                  <div key={s.id} className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-semibold ${SKILL_COLOR[s.skillLevel] || 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                  <div key={s.id} className={`flex items-center gap-2 px-3 py-1 rounded-full border text-sm font-semibold ${SKILL_COLOR[s.skillLevel] || 'bg-gray-50 text-gray-600 border-gray-200'}`}>
                     <span>{s.skillName}</span>
-                    <span className="text-xs opacity-60">({s.skillLevel === 'BEGINNER' ? 'เริ่มต้น' : s.skillLevel === 'INTERMEDIATE' ? 'ปานกลาง' : 'เชี่ยวชาญ'})</span>
+                    <span className="text-xs font-medium">({s.skillLevel === 'BEGINNER' ? 'เริ่มต้น' : s.skillLevel === 'INTERMEDIATE' ? 'ปานกลาง' : 'เชี่ยวชาญ'})</span>
                     {canEdit && (
-                      <button className="hover:text-red-500 transition-colors ml-1" onClick={() => delWith('ทักษะ', () => deleteSkill(id, s.id), () => getSkills(id).then(r => setSkills(r.data)))}>
-                        <Trash2 size={11} />
-                      </button>
+                      <span className="flex items-center -mr-1.5">
+                        <button title="แก้ไข" className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/70 transition-colors" onClick={() => openDialog('skill', s)}>
+                          <Pencil size={12} />
+                        </button>
+                        <button title="ลบ" className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/70 hover:text-red-600 transition-colors" onClick={() => delWith('ทักษะ', () => deleteSkill(id, s.id), () => getSkills(id).then(r => setSkills(r.data)))}>
+                          <Trash2 size={12} />
+                        </button>
+                      </span>
                     )}
                   </div>
                 ))}
@@ -758,9 +770,9 @@ export default function PersonDetail() {
                 {dialogType === 'training' && (editingId ? 'แก้ไขการอบรม' : 'เพิ่มการอบรม')}
                 {dialogType === 'workexp' && (editingId ? 'แก้ไขประสบการณ์งาน' : 'เพิ่มประสบการณ์งาน')}
                 {dialogType === 'followup' && (editingId ? 'แก้ไขการติดตามผล' : 'บันทึกติดตามผล')}
-                {dialogType === 'skill' && 'เพิ่มทักษะ'}
+                {dialogType === 'skill' && (editingId ? 'แก้ไขทักษะ' : 'เพิ่มทักษะ')}
                 {dialogType === 'personorg' && (editingId ? 'แก้ไขสถานประกอบการที่เกี่ยวข้อง' : 'เชื่อมสถานประกอบการ')}
-                {dialogType === 'disability' && 'เพิ่มข้อมูลความพิการ'}
+                {dialogType === 'disability' && (editingId ? 'แก้ไขข้อมูลความพิการ' : 'เพิ่มข้อมูลความพิการ')}
               </h3>
               <p className="text-orange-300/80 text-xs mt-0.5">กรุณากรอกข้อมูลให้ครบถ้วน</p>
             </div>
@@ -822,7 +834,7 @@ export default function PersonDetail() {
             {dialogType === 'disability' && <>
               <SelData12 label="ประเภทความพิการ *" value={form.disabilityTypeId} onChange={v => setForm({...form, disabilityTypeId: v})}
                 options={[['','— เลือกประเภทความพิการ —'], ...disabilityTypes
-                  .filter(t => !(person.disabilityInfos || []).some(d => d.disabilityTypeId === t.id))   // ไม่ให้เลือกประเภทที่มีอยู่แล้ว
+                  .filter(t => !(person.disabilityInfos || []).some(d => d.disabilityTypeId === t.id && d.id !== editingId))   // ไม่ให้เลือกประเภทที่มีอยู่แล้ว (ยกเว้นอันที่กำลังแก้)
                   .map(t => [String(t.id), t.typeName])]} />
               <F12 label="ระดับความพิการ" value={form.disabilityLevel} onChange={v => setForm({...form, disabilityLevel: v})} />
               <F12 label="อุปกรณ์ช่วยเหลือ" value={form.assistiveDevice} onChange={v => setForm({...form, assistiveDevice: v})} />
@@ -903,6 +915,8 @@ const EDIT_FIELDS = {
   workexp: ['organizationName', 'jobType', 'workMode', 'income', 'startDate', 'endDate', 'outcome'],
   followup: ['followUpDate', 'employmentStatus', 'jobType', 'income', 'skillMatch', 'satisfaction', 'issues'],
   personorg: ['orgId', 'roleType', 'startDate', 'endDate', 'amount', 'note', 'supportDetail'],
+  skill: ['skillName', 'skillLevel'],
+  disability: ['disabilityTypeId', 'disabilityLevel', 'assistiveDevice', 'workLimitation', 'accommodationNeed'],
 };
 function toEditForm(type, record) {
   return Object.fromEntries((EDIT_FIELDS[type] || []).map((k) => [k, /Date$/.test(k) ? day(record[k]) : txt(record[k])]));

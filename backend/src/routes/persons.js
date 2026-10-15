@@ -68,6 +68,34 @@ router.post('/:id/disability', async (req, res) => {
   }
 });
 
+// แก้ไขข้อมูลความพิการ (เดิมต้องลบแล้วเพิ่มใหม่) — เปลี่ยนประเภทได้ แต่ห้ามซ้ำกับที่คนนี้มีอยู่แล้ว
+router.put('/:id/disability/:did', async (req, res) => {
+  try {
+    const personId = parseInt(req.params.id), did = parseInt(req.params.did);
+    if (!(await ensureOwned(res, 'disabilityInfo', did, personId))) return;
+    const { disabilityTypeId, disabilityLevel, assistiveDevice, workLimitation, accommodationNeed } = req.body;
+    if (!disabilityTypeId) return res.status(400).json({ error: 'กรุณาเลือกประเภทความพิการ' });
+    const typeId = parseInt(disabilityTypeId);
+    if (!(await prisma.disabilityType.findUnique({ where: { id: typeId } }))) return res.status(400).json({ error: 'ไม่พบประเภทความพิการนี้ในระบบ' });
+    const dup = await prisma.disabilityInfo.findFirst({ where: { personId, disabilityTypeId: typeId, id: { not: did } } });
+    if (dup) return res.status(400).json({ error: 'คนนี้มีประเภทความพิการนี้อยู่แล้ว' });
+    const info = await prisma.disabilityInfo.update({
+      where: { id: did },
+      data: {
+        disabilityTypeId: typeId,
+        disabilityLevel: disabilityLevel || null,
+        assistiveDevice: assistiveDevice || null,
+        workLimitation: workLimitation || null,
+        accommodationNeed: accommodationNeed || null,
+      },
+      include: { disabilityType: true },
+    });
+    res.json(info);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 router.delete('/:id/disability/:did', async (req, res) => {
   try {
     if (!(await ensureOwned(res, 'disabilityInfo', parseInt(req.params.did), parseInt(req.params.id)))) return;

@@ -81,6 +81,7 @@ export const deletePerson = (id) => api.delete(`/persons/${id}`).then(r => { inv
 export const getDisabilityTypes = () => cached('disability-types', () => api.get('/persons/disability-types'), 10 * 60_000);
 export const getDisabilityInfos = (id) => api.get(`/persons/${id}/disability`);
 export const createDisabilityInfo = (id, data) => api.post(`/persons/${id}/disability`, data).then(r => { invalidate(`person:${id}`); return r; });
+export const updateDisabilityInfo = (id, did, data) => api.put(`/persons/${id}/disability/${did}`, data).then(r => { invalidate(`person:${id}`); return r; });
 export const deleteDisabilityInfo = (id, did) => api.delete(`/persons/${id}/disability/${did}`).then(r => { invalidate(`person:${id}`); return r; });
 
 export const getTraining = (id) => api.get(`/persons/${id}/training`);
@@ -100,6 +101,7 @@ export const deleteFollowUp = (id, fid) => api.delete(`/persons/${id}/followup/$
 
 export const getSkills = (id) => api.get(`/persons/${id}/skills`);
 export const createSkill = (id, data) => api.post(`/persons/${id}/skills`, data);
+export const updateSkill = (id, sid, data) => api.put(`/persons/${id}/skills/${sid}`, data);
 export const deleteSkill = (id, sid) => api.delete(`/persons/${id}/skills/${sid}`);
 
 export const getPersonOrgs = (id) => api.get(`/persons/${id}/personorg`);
