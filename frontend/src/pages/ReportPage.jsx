@@ -28,6 +28,13 @@ const REPORT_TYPES = [
   { id: 'company', label: 'รายงานส่งบริษัท', icon: Building2, desc: 'รายงานผลการดำเนินงาน' },
 ];
 
+// ทักษะด้านคอมพิวเตอร์ของคนนี้ (ใช้ในแบบสังเกตพฤติกรรม ทั้งตอนพิมพ์และ Excel)
+// เดิมเทียบ "word"/"excel" แบบตัวพิมพ์เล็กตรงตัว — กรอก "Excel", "Microsoft Word" ก็ไม่นับ
+const COMPUTER_WORDS = ['computer', 'คอมพิวเตอร์', 'word', 'excel', 'powerpoint', 'office'];
+const computerSkillsOf = (p) => (p.skills || [])
+  .filter((s) => COMPUTER_WORDS.some((w) => s.skillName.toLowerCase().includes(w)))
+  .map((s) => s.skillName).join(', ');
+
 export default function ReportPage() {
   const [activeType, setActiveType] = useState('list');
   const [persons, setPersons] = useState([]);
@@ -69,7 +76,7 @@ export default function ReportPage() {
   const [selectedOrgIds, setSelectedOrgIds] = useState([]);
 
   const [loadError, setLoadError] = useState(false);
-  const load = () => Promise.all([getPersons({ withPhotos: 'true' }), getOrganizations(), getBatches()])
+  const load = () => Promise.all([getPersons({ withPhotos: 'true', withSkills: 'true' }), getOrganizations(), getBatches()])
     .then(([pRes, oRes, bRes]) => {
       setPersons(pRes.data);
       setOrgs(oRes.data);
@@ -158,12 +165,7 @@ export default function ReportPage() {
         [],
         header,
         ...filteredPersons.map((p, i) => {
-          const computerSkills = p.skills?.filter(s =>
-            s.skillName.toLowerCase().includes('computer') ||
-            s.skillName.includes('คอมพิวเตอร์') ||
-            s.skillName.includes('word') ||
-            s.skillName.includes('excel')
-          ).map(s => s.skillName).join(', ') || '';
+          const computerSkills = computerSkillsOf(p);
           return [
             i + 1,
             p.fullName,
@@ -578,12 +580,7 @@ export default function ReportPage() {
                   {filteredPersons.map((p, i) => {
                     const age = calcAge(p.birthDate);
                     const disType = p.disabilityInfos?.map(d => d.disabilityType?.typeName).join(', ') || '';
-                    const computerSkills = p.skills?.filter(s =>
-                      s.skillName.toLowerCase().includes('computer') ||
-                      s.skillName.includes('คอมพิวเตอร์') ||
-                      s.skillName.includes('word') ||
-                      s.skillName.includes('excel')
-                    ).map(s => s.skillName).join(', ') || '';
+                    const computerSkills = computerSkillsOf(p);
                     return (
                       <tr key={p.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="border border-gray-300 px-2 py-2 text-center align-middle">{i + 1}</td>

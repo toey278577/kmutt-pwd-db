@@ -108,7 +108,7 @@ router.delete('/:id/disability/:did', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const { search, province, gender, withPhotos, batchId, disabilityTypeId, employment } = req.query;
+    const { search, province, gender, withPhotos, withSkills, batchId, disabilityTypeId, employment } = req.query;
     const where = {};
     const q = String(search || '').trim();
     if (q) {
@@ -137,8 +137,12 @@ router.get('/', async (req, res) => {
       // ผลติดตามล่าสุด (วันที่ล่าสุด ถ้าวันเดียวกันเอาที่บันทึกทีหลัง — แบบเดียวกับ Dashboard) ใช้โชว์คอลัมน์ "งานล่าสุด"
       followUps: { select: { employmentStatus: true, followUpDate: true }, orderBy: [{ followUpDate: 'desc' }, { id: 'desc' }], take: 1 },
     };
+    // หน้าออกรายงาน: รูปโปรไฟล์ (เดิมเอารูปแรกที่เจอ ไม่ได้ดูประเภท) + ทักษะ (เดิมไม่ส่งมาเลย ช่องทักษะคอมพิวเตอร์ในรายงานว่างทุกคน)
     if (withPhotos === 'true') {
-      select.photos = { select: { filePath: true }, take: 1 };
+      select.photos = { where: { photoType: 'profile' }, select: { filePath: true }, orderBy: { id: 'desc' }, take: 1 };
+    }
+    if (withSkills === 'true') {
+      select.skills = { select: { skillName: true, skillLevel: true } };
     }
     let persons = await prisma.person.findMany({
       where,
