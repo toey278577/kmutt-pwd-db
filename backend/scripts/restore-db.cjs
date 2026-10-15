@@ -7,6 +7,7 @@
  *   $env:DB_URL="postgresql://ปลายทาง..."; node scripts/restore-db.cjs backups/backup-xxxx.json
  *
  * ใส่ --wipe ถ้าต้องการล้างข้อมูลเดิมในปลายทางก่อน (ระวัง! ลบจริง)
+ * ขั้นตอนกู้ทั้งระบบ (ฐานข้อมูล + รูป): docs/deploy/กู้ข้อมูล.md — ซ้อมกู้อัตโนมัติอยู่ใน npm test (api/backup-restore)
  */
 require('dotenv').config();
 const fs = require('fs');
@@ -48,7 +49,7 @@ const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: url 
     for (const m of [...ORDER].reverse()) await prisma[m].deleteMany({});
   }
 
-  let total = 0;
+  let total = 0, skipped = 0;
   for (const m of ORDER) {
     const rows = data[m] || [];
     if (rows.length === 0) { console.log(`   ${m.padEnd(20)} 0 แถว (ข้าม)`); continue; }
@@ -60,17 +61,20 @@ const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: url 
       }
       return o;
     });
-    await prisma[m].createMany({ data: clean, skipDuplicates: true });
+    // แถวที่ id ชนกับของที่มีอยู่แล้วจะถูกข้าม — นับจากผลจริง (เดิมพิมพ์จำนวนในไฟล์ ข้ามไปกี่แถวก็ไม่รู้)
+    const { count } = await prisma[m].createMany({ data: clean, skipDuplicates: true });
     // รีเซ็ต sequence ให้ id ถัดไปไม่ชนของเดิม
     const t = TABLE[m];
     await prisma.$executeRawUnsafe(
       `SELECT setval(pg_get_serial_sequence('"${t}"','id'), COALESCE((SELECT MAX(id) FROM "${t}"), 1))`
     );
-    total += clean.length;
-    console.log(`   ${m.padEnd(20)} ${clean.length} แถว ✓`);
+    total += count;
+    skipped += clean.length - count;
+    console.log(`   ${m.padEnd(20)} ${count} แถว ✓${count < clean.length ? `  (ข้าม ${clean.length - count} แถวที่มี id นี้อยู่แล้ว)` : ''}`);
   }
 
   console.log(`\n✅ กู้คืนเสร็จ ${total} แถว`);
+  if (skipped) console.log(`⚠️  กู้ไม่ครบ: ข้าม ${skipped} แถวเพราะฐานปลายทางมี id นั้นอยู่แล้ว (ข้อมูลเดิมไม่ถูกแทนที่) — ถ้าต้องการให้เหมือนไฟล์สำรองทุกอย่าง ใส่ --wipe`);
   await prisma.$disconnect();
 })().catch(async (e) => {
   console.error('❌ ผิดพลาด:', e.message);

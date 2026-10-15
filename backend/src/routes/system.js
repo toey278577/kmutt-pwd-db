@@ -71,7 +71,7 @@ router.post('/reset', async (req, res) => {
       const data = {};
       for (const m of BACKUP_MODELS) data[m] = await prisma[m].findMany();
 
-      const dir = path.join(__dirname, '..', '..', 'backups');
+      const dir = require('../utils/backupDir').BACKUP_DIR;
       fs.mkdirSync(dir, { recursive: true });
       const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
       backupFile = `before-reset-${stamp}.json`;

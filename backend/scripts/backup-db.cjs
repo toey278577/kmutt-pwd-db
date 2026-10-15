@@ -5,7 +5,8 @@
  *   $env:DB_URL="postgresql://user:pass@host/db?sslmode=require"; node scripts/backup-db.cjs
  * ถ้าไม่ใส่ DB_URL จะใช้ DATABASE_URL จาก .env (คือ DB ในเครื่อง)
  *
- * ผลลัพธ์: backend/backups/backup-YYYY-MM-DDTHH-mm.json
+ * ผลลัพธ์: backend/backups/backup-YYYY-MM-DDTHH-mm.json (ตั้งโฟลเดอร์อื่นได้ด้วย BACKUP_DIR)
+ * วิธีกู้คืน: docs/deploy/กู้ข้อมูล.md
  */
 require('dotenv').config();
 const fs = require('fs');
@@ -41,7 +42,7 @@ const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: url 
     console.log(`   ${m.padEnd(20)} ${data[m].length} แถว`);
   }
 
-  const dir = path.join(__dirname, '..', 'backups');
+  const dir = require('../src/utils/backupDir').BACKUP_DIR;
   fs.mkdirSync(dir, { recursive: true });
   const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
   const file = path.join(dir, `backup-${stamp}.json`);

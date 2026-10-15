@@ -49,7 +49,7 @@ const ENV = {
   ...process.env,
   KMUTT_TEST: '1',
   DATABASE_URL: TEST_DB, DB_URL: TEST_DB,
-  UPLOAD_ROOT: path.join(OUT, 'uploads'),
+  UPLOAD_ROOT: path.join(OUT, 'uploads'), BACKUP_DIR: path.join(OUT, 'backups'),
   PORT: String(PORT.api), CORS_ORIGIN: APP_URL,
   VITE_API_URL: API_URL, API_PROXY_TARGET: `http://localhost:${PORT.api}`,
   TEST_API_URL: API_URL, TEST_APP_URL: APP_URL, TEST_CDP_PORT: String(PORT.cdp),

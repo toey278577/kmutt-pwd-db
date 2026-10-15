@@ -97,7 +97,9 @@ cd backend && npx prisma migrate dev --name <ชื่อ>   # เปลี่�
 | `users` | บัญชีผู้ใช้งานระบบ |
 | `audit_logs` | ประวัติว่าใครเพิ่ม/แก้/ลบอะไร + ล็อกอิน (ไม่ผูก FK เก็บไว้แม้ข้อมูลถูกลบ) |
 
-**สำคัญ:** เพิ่มตารางใหม่ต้องเพิ่มใน `scripts/backup-db.cjs` + `scripts/restore-db.cjs` และพิจารณา `WIPE_ORDER` ใน `routes/system.js` ด้วย (audit_logs ตั้งใจไม่ล้างตอนรีเซ็ต)
+**กู้ข้อมูลระบบจริง:** ทีละขั้นที่ `docs/deploy/กู้ข้อมูล.md` · ซ้อมกู้อัตโนมัติใน `npm test` (api/backup-restore) · โฟลเดอร์สำรองตั้งได้ด้วย `BACKUP_DIR` (`src/utils/backupDir.js`)
+
+**สำคัญ:** เพิ่มตารางใหม่ต้องเพิ่มใน `scripts/backup-db.cjs` + `scripts/restore-db.cjs` (และ `MODELS` ใน `tests/api/backup-restore.test.cjs`) และพิจารณา `WIPE_ORDER` ใน `routes/system.js` ด้วย (audit_logs ตั้งใจไม่ล้างตอนรีเซ็ต)
 
 ### Enum
 ```
