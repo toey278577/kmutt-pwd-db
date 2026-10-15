@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAllFollowUp, getFollowUpDue } from '../api';
 import FollowUpDue from '../components/FollowUpDue';
 import LoadError from '../components/LoadError';
-import { nameInitials } from '../utils/name';
-import MobileCard, { MobileAvatar } from '../components/MobileCard';
+import MobileCard from '../components/MobileCard';
 
 const EMP = {
   EMPLOYED:   { bg: 'bg-emerald-100 text-emerald-700 border-emerald-200', label: 'มีงานทำ' },
@@ -13,11 +12,6 @@ const EMP = {
   STUDYING:   { bg: 'bg-sky-100 text-sky-700 border-sky-200',            label: 'ศึกษาต่อ' },
 };
 
-const AVATAR_COLORS = [
-  'from-orange-500 to-red-500', 'from-cyan-500 to-blue-500',
-  'from-emerald-500 to-teal-500', 'from-violet-500 to-purple-500',
-  'from-pink-500 to-rose-500',
-];
 
 const fmtDate = (iso) => {
   if (!iso) return null;
@@ -94,7 +88,7 @@ export default function FollowUpList() {
                   </td>
                 </tr>
               )}
-              {rows.map((f, i) => {
+              {rows.map((f) => {
                 const e = EMP[f.employmentStatus] || EMP.UNEMPLOYED;
                 return (
                   <tr key={f.id} className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors">
@@ -106,9 +100,6 @@ export default function FollowUpList() {
                     <td className="px-4 py-3.5">
                       <button onClick={() => navigate(`/persons/${f.personId}`)}
                         className="flex items-center gap-2.5 text-left group">
-                        <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${AVATAR_COLORS[i % 5]} text-white text-xs font-black flex items-center justify-center flex-shrink-0`}>
-                          {nameInitials(f.personName)}
-                        </div>
                         <span className="font-semibold text-gray-800 text-sm group-hover:text-orange-600 transition-colors">{f.personName}</span>
                       </button>
                     </td>
@@ -142,11 +133,10 @@ export default function FollowUpList() {
               <p className="text-sm font-medium">ไม่มีข้อมูลการติดตามผล</p>
             </div>
           )}
-          {rows.map((f, i) => {
+          {rows.map((f) => {
             const e = EMP[f.employmentStatus] || EMP.UNEMPLOYED;
             return (
               <MobileCard key={f.id} onClick={() => navigate(`/persons/${f.personId}`)}
-                avatar={<MobileAvatar text={nameInitials(f.personName)} i={i} />}
                 title={f.personName}
                 chips={<>
                   <span className="bg-orange-50 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-lg border border-orange-100">{fmtDate(f.followUpDate) || '—'}</span>

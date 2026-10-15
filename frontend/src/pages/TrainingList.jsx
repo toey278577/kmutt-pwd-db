@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react';
 import { GraduationCap, Layers, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadError from '../components/LoadError';
-import { nameInitials } from '../utils/name';
 import { getAllTraining, getBatchEnrollments } from '../api';
-import MobileCard, { MobileAvatar } from '../components/MobileCard';
+import MobileCard from '../components/MobileCard';
 
 const TYPE = {
   TRAIN: { bg: 'bg-amber-100 text-amber-700 border-amber-200',   label: 'อบรม' },
@@ -12,11 +11,6 @@ const TYPE = {
   EARN:  { bg: 'bg-emerald-100 text-emerald-700 border-emerald-200', label: 'ฝึกงาน' },
 };
 
-const AVATAR_COLORS = [
-  'from-orange-500 to-red-500', 'from-cyan-500 to-blue-500',
-  'from-emerald-500 to-teal-500', 'from-violet-500 to-purple-500',
-  'from-pink-500 to-rose-500',
-];
 
 const fmtDate = (iso) => {
   if (!iso) return null;
@@ -38,12 +32,9 @@ const DateRange = ({ start, end }) => (
 
 const th = 'px-4 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wide';
 
-function PersonCell({ id, name, i, navigate }) {
+function PersonCell({ id, name, navigate }) {
   return (
     <button onClick={() => navigate(`/persons/${id}`)} className="flex items-center gap-2.5 text-left group">
-      <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${AVATAR_COLORS[i % 5]} text-white text-xs font-black flex items-center justify-center flex-shrink-0`}>
-        {nameInitials(name)}
-      </div>
       <span className="font-semibold text-gray-800 text-sm group-hover:text-orange-600 transition-colors">{name}</span>
     </button>
   );
@@ -178,9 +169,9 @@ export default function TrainingList() {
               </thead>
               <tbody>
                 {shownEnrolls.length === 0 && <EmptyRow cols={6} text="ยังไม่มีคนในรุ่นอบรม — เลือกรุ่นได้ที่ฟอร์มข้อมูลคนพิการ" />}
-                {shownEnrolls.map((e, i) => (
+                {shownEnrolls.map((e) => (
                   <tr key={e.personId} className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors">
-                    <td className="px-4 py-3.5"><PersonCell id={e.personId} name={e.personName} i={i} navigate={navigate} /></td>
+                    <td className="px-4 py-3.5"><PersonCell id={e.personId} name={e.personName} navigate={navigate} /></td>
                     <td className="px-4 py-3.5 font-bold text-gray-700 whitespace-nowrap">รุ่นที่ {e.batchNumber}/{e.year}</td>
                     <td className="px-4 py-3.5 text-gray-600 max-w-[220px]">
                       <p className="font-semibold text-gray-800 truncate">{e.course || '—'}</p>
@@ -206,11 +197,11 @@ export default function TrainingList() {
               </thead>
               <tbody>
                 {rows.length === 0 && <EmptyRow cols={7} text={'ไม่มีประวัติอบรมรายคน — เพิ่มได้ที่แท็บ "การอบรม" ในหน้ารายละเอียดคนพิการ'} />}
-                {rows.map((t, i) => {
+                {rows.map((t) => {
                   const tp = TYPE[t.trainingType];
                   return (
                     <tr key={t.id} className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors">
-                      <td className="px-4 py-3.5"><PersonCell id={t.personId} name={t.personName} i={i} navigate={navigate} /></td>
+                      <td className="px-4 py-3.5"><PersonCell id={t.personId} name={t.personName} navigate={navigate} /></td>
                       <td className="px-4 py-3.5 font-semibold text-gray-800 max-w-[160px] truncate">{t.courseName}</td>
                       <td className="px-4 py-3.5 text-gray-500 text-sm">{t.organizer || '—'}</td>
                       <td className="px-4 py-3.5">
@@ -232,9 +223,8 @@ export default function TrainingList() {
         <div className="md:hidden divide-y divide-gray-100">
           {tab === 'batch' ? <>
             {shownEnrolls.length === 0 && <MobileEmpty text="ยังไม่มีคนในรุ่นอบรม — เลือกรุ่นได้ที่ฟอร์มข้อมูลคนพิการ" />}
-            {shownEnrolls.map((e, i) => (
+            {shownEnrolls.map((e) => (
               <MobileCard key={e.personId} onClick={() => navigate(`/persons/${e.personId}`)}
-                avatar={<MobileAvatar text={nameInitials(e.personName)} i={i} />}
                 title={e.personName}
                 subtitle={[e.course, e.program].filter(Boolean).join(' · ')}
                 chips={<>
@@ -250,11 +240,10 @@ export default function TrainingList() {
             ))}
           </> : <>
             {rows.length === 0 && <MobileEmpty text={'ไม่มีประวัติอบรมรายคน — เพิ่มได้ที่แท็บ "การอบรม" ในหน้ารายละเอียดคนพิการ'} />}
-            {rows.map((t, i) => {
+            {rows.map((t) => {
               const tp = TYPE[t.trainingType];
               return (
                 <MobileCard key={t.id} onClick={() => navigate(`/persons/${t.personId}`)}
-                  avatar={<MobileAvatar text={nameInitials(t.personName)} i={i} />}
                   title={t.personName}
                   subtitle={t.courseName}
                   chips={tp && <span className={`px-2 py-0.5 rounded-full text-xs font-bold border ${tp.bg}`}>{tp.label}</span>}

@@ -31,12 +31,3 @@ export function nameInitials(fullName = '') {
   if (words.length === 0) return '?';
   return initialOf(words[0]) + initialOf(words[1]);
 }
-
-// ตัวย่อชื่อองค์กร — ตัดคำนำหน้า/ท้ายที่ทุกบริษัทมีออก (เดิมขึ้น "บร" จาก "บริษัท" เกือบทุกแห่ง)
-const ORG_PREFIX = /^(บริษัท|บจก\.?|บมจ\.?|ห้างหุ้นส่วนจำกัด|ห้างหุ้นส่วน|หจก\.?|ร้าน|มูลนิธิ|สมาคม|โรงเรียน|โรงพยาบาล|สำนักงาน)\s*/;
-const ORG_SUFFIX = /^(จำกัด|\(?มหาชน\)?|co\.?|ltd\.?|inc\.?)$/i;
-export function orgInitials(orgName = '') {
-  const words = String(orgName || '').trim().replace(ORG_PREFIX, '').split(/\s+/).filter((w) => w && !ORG_SUFFIX.test(w.replace(/,+$/, '')));
-  if (words.length === 0) return initialOf(String(orgName || '').trim()) || '?';
-  return initialOf(words[0]) + initialOf(words[1]);
-}

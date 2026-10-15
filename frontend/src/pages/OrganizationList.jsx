@@ -6,15 +6,9 @@ import { useToast } from '../context/ToastContext';
 import LoadError from '../components/LoadError';
 import { useDiscardGuard } from '../utils/useDiscardGuard';
 import DiscardBar from '../components/DiscardBar';
-import { orgInitials } from '../utils/name';
 import MobileCard, { MobileEditBtn, MobileDelBtn } from '../components/MobileCard';
 
 const emptyForm = { orgName: '', businessType: '', address: '', contactName: '', phone: '', email: '', note: '' };
-const AVATAR_GRADIENTS = [
-  'from-orange-500 to-red-500', 'from-cyan-500 to-blue-500',
-  'from-emerald-500 to-teal-500', 'from-violet-500 to-purple-500',
-  'from-pink-500 to-rose-500', 'from-amber-500 to-orange-500',
-];
 
 const inputCls = 'w-full rounded-2xl border border-gray-100 px-3.5 py-2.5 text-sm text-gray-800 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 transition-all';
 const labelCls = 'block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide';
@@ -122,9 +116,6 @@ export default function OrganizationList() {
                   <td className="px-4 py-3.5 text-gray-400 text-xs font-mono">{i + 1}</td>
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-2xl bg-gradient-to-br ${AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]} text-white text-xs font-black flex items-center justify-center flex-shrink-0 shadow-sm`}>
-                        {orgInitials(o.orgName)}
-                      </div>
                       <div>
                         <p className="font-bold text-gray-800 text-sm leading-none whitespace-nowrap">{o.orgName}</p>
                         {o.address && <p className="text-gray-400 text-xs mt-0.5 truncate max-w-[160px]">{o.address}</p>}
@@ -169,9 +160,8 @@ export default function OrganizationList() {
               <p className="text-sm font-medium">ไม่พบข้อมูล</p>
             </div>
           )}
-          {orgs.map((o, i) => (
+          {orgs.map((o) => (
             <MobileCard key={o.id}
-              avatar={<div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]} text-white text-sm font-black flex items-center justify-center flex-shrink-0`}>{orgInitials(o.orgName)}</div>}
               title={o.orgName}
               chips={(o.businessType || o._count?.persons > 0) && <>
                 {o.businessType && <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-orange-50 text-orange-700 border border-orange-100">{o.businessType}</span>}

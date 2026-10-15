@@ -7,7 +7,6 @@ import DangerZone from '../components/DangerZone';
 import LoadError from '../components/LoadError';
 import { useDiscardGuard } from '../utils/useDiscardGuard';
 import DiscardBar from '../components/DiscardBar';
-import { nameInitials } from '../utils/name';
 import MobileCard, { MobileEditBtn, MobileDelBtn } from '../components/MobileCard';
 
 const ROLES = {
@@ -149,9 +148,6 @@ export default function UserManagement() {
                   <tr key={u.id} className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors">
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-2xl bg-gradient-to-br ${role.grad} text-white text-xs font-black flex items-center justify-center flex-shrink-0 shadow-sm`}>
-                          {nameInitials(u.name)}
-                        </div>
                         <div>
                           <div className="flex items-center gap-1.5">
                             <span className="font-bold text-gray-800 text-sm leading-none whitespace-nowrap">{u.name}</span>
@@ -207,7 +203,6 @@ export default function UserManagement() {
             const self = u.id === me?.id;
             return (
               <MobileCard key={u.id}
-                avatar={<div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${role.grad} text-white text-sm font-black flex items-center justify-center flex-shrink-0`}>{nameInitials(u.name)}</div>}
                 title={<>{u.name}{self && <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200 align-middle">คุณ</span>}</>}
                 subtitle={u.email}
                 chips={<>

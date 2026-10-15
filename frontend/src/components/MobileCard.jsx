@@ -2,7 +2,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 
 // การ์ดแทนแถวตารางบนมือถือ (จอคอมยังเป็นตาราง) — เดิมตารางหลายคอลัมน์ต้องเลื่อนข้าง ชื่อ/ป้ายแตกหลายบรรทัด
 // ใช้: <div className="md:hidden divide-y divide-gray-100"> {rows.map(r => <MobileCard ... />)} </div>
-//   avatar   วงกลมตัวย่อ (ไม่ใส่ก็ได้)        title / subtitle  ชื่อหลัก + บรรทัดรอง
+//   avatar   รูป/ไอคอนหน้าชื่อ (ไม่ใส่ก็ได้)   title / subtitle  ชื่อหลัก + บรรทัดรอง
 //   chips    ป้ายเล็กๆ (วันที่ สถานะ)        details  [['หัวข้อ', ค่า], ...] โชว์เฉพาะที่มีค่า
 //   actions  ปุ่มด้านขวา (MobileEditBtn / MobileDelBtn)   onClick  กดทั้งการ์ด (เช่น ไปหน้ารายละเอียด)
 export default function MobileCard({ avatar, title, subtitle, chips, details = [], actions, onClick }) {
@@ -37,15 +37,6 @@ export default function MobileCard({ avatar, title, subtitle, chips, details = [
   );
 }
 
-// วงกลมตัวย่อชื่อ — สีไล่ตามลำดับแถว
-const AVATAR = ['from-orange-500 to-red-500', 'from-cyan-500 to-blue-500', 'from-emerald-500 to-teal-500', 'from-violet-500 to-purple-500', 'from-pink-500 to-rose-500'];
-export function MobileAvatar({ text, i = 0 }) {
-  return (
-    <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${AVATAR[i % AVATAR.length]} text-white text-sm font-black flex items-center justify-center flex-shrink-0`}>
-      {text}
-    </div>
-  );
-}
 
 // ปุ่มใหญ่ 40px กดง่ายบนมือถือ (แบบเดียวกับการ์ดหน้ารายชื่อคนพิการ)
 export function MobileEditBtn({ onClick }) {

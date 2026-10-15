@@ -6,7 +6,7 @@ import { getPersons, getPerson, createPerson, importPersons, updatePerson, delet
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { THAI_PROVINCES, checkProvince } from '../utils/province';
-import { PREFIXES, splitPrefix, nameInitials } from '../utils/name';
+import { PREFIXES, splitPrefix } from '../utils/name';
 import { resizeImage } from '../utils/resizeImage';
 import { useThaiDate } from '../utils/useThaiDate';
 import { matchBatch, matchCourse, matchDisabilities } from '../utils/importCheck';
@@ -664,10 +664,6 @@ export default function PersonList() {
                   <td className="px-3 py-3.5 text-gray-400 text-xs font-mono">{(page - 1) * PAGE_SIZE + i + 1}</td>
                   <td className="px-3 py-3.5">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-2xl text-white text-xs font-black flex items-center justify-center flex-shrink-0 shadow-sm"
-                        style={{ background: `linear-gradient(135deg,${['#ea580c','#06b6d4','#10b981','#8b5cf6','#ec4899'][i % 5]},${['#c2410c','#0284c7','#047857','#7c3aed','#db2777'][i % 5]})` }}>
-                        {nameInitials(p.fullName)}
-                      </div>
                       <div>
                         <p className="font-bold text-gray-800 text-sm leading-none whitespace-nowrap">
                           {p.fullName}{p.nickname && <span className="font-normal text-gray-500"> ({p.nickname})</span>}
@@ -734,15 +730,11 @@ export default function PersonList() {
               <p className="text-sm font-medium">ไม่พบข้อมูล</p>
             </div>
           )}
-          {paged.map((p, i) => {
+          {paged.map((p) => {
             const b = batches.find((x) => x.id === p.batchId);
             return (
               <div key={p.id} className="p-4 active:bg-orange-50/50" onClick={() => navigate(`/persons/${p.id}`)}>
                 <div className="flex items-start gap-3">
-                  <div className="w-11 h-11 rounded-2xl text-white text-sm font-black flex items-center justify-center flex-shrink-0 shadow-sm"
-                    style={{ background: `linear-gradient(135deg,${['#ea580c','#06b6d4','#10b981','#8b5cf6','#ec4899'][i % 5]},${['#c2410c','#0284c7','#047857','#7c3aed','#db2777'][i % 5]})` }}>
-                    {nameInitials(p.fullName)}
-                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-gray-800 text-[15px] leading-snug">
                       {p.fullName}{p.nickname && <span className="font-normal text-gray-500"> ({p.nickname})</span>}
