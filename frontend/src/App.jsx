@@ -19,6 +19,7 @@ const Help             = lazy(() => import('./pages/Help'));
 const ReportPage       = lazy(() => import('./pages/ReportPage'));
 const BatchPage        = lazy(() => import('./pages/BatchPage'));
 const AuditLog         = lazy(() => import('./pages/AuditLog'));
+const DisabilityTypes  = lazy(() => import('./pages/DisabilityTypes'));
 
 function PageLoader() {
   return (
@@ -65,6 +66,11 @@ function AppRoutes() {
                 <Route path="/audit"        element={
                   <ProtectedRoute adminOnly>
                     <AuditLog />
+                  </ProtectedRoute>
+                } />
+                <Route path="/disability-types" element={
+                  <ProtectedRoute adminOnly>
+                    <DisabilityTypes />
                   </ProtectedRoute>
                 } />
               </Routes>

@@ -29,6 +29,7 @@ function parsePath(method, url) {
   }
   if (root === 'organizations') return { action, entity: 'organization', entityId: toInt(a), personId: null };
   if (root === 'users') return { action, entity: 'user', entityId: toInt(a), personId: null };
+  if (root === 'disability-types') return { action, entity: 'disabilityType', entityId: toInt(a), personId: null };
   if (root === 'system' && a === 'reset') return { action: 'RESET', entity: 'system', entityId: null, personId: null };
   return null;
 }
@@ -45,6 +46,10 @@ async function lookupLabel(info) {
   if (info.entity === 'organization') {
     const o = await prisma.organization.findUnique({ where: { id: info.entityId }, select: { orgName: true } });
     return o?.orgName ?? null;
+  }
+  if (info.entity === 'disabilityType') {
+    const t = await prisma.disabilityType.findUnique({ where: { id: info.entityId }, select: { typeName: true } });
+    return t?.typeName ?? null;
   }
   if (info.entity === 'batch') {
     return batchLabel(await prisma.trainingBatch.findUnique({ where: { id: info.entityId } }));
@@ -64,7 +69,7 @@ async function lookupLabel(info) {
 function labelFromBody(info, body) {
   if (!body || typeof body !== 'object') return null;
   if (info.action === 'IMPORT') return `นำเข้า ${body.created ?? 0} คน`;
-  return body.fullName || body.orgName || body.name || batchLabel(body.batchNumber ? body : null) || null;
+  return body.fullName || body.orgName || body.name || body.typeName || batchLabel(body.batchNumber ? body : null) || null;
 }
 
 function writeAudit(data) {

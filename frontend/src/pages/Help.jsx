@@ -3,7 +3,7 @@ import {
   BookOpen, LogIn, Shield, Users, GraduationCap, Target,
   Building2, UserCog, ChevronRight, CheckCircle, LayoutDashboard,
   Printer, Camera, AlertCircle, FileText, Award, Info,
-  Layers, TrendingUp, History,
+  Layers, TrendingUp, History, Accessibility,
 } from 'lucide-react';
 
 const sections = [
@@ -21,6 +21,7 @@ const sections = [
   { id: 'report',     label: 'ออกรายงาน',             icon: Printer },
   { id: 'users',      label: 'จัดการผู้ใช้ (Admin)',   icon: UserCog },
   { id: 'audit',      label: 'ประวัติการใช้งาน (Admin)', icon: History },
+  { id: 'distypes',   label: 'ประเภทความพิการ (Admin)', icon: Accessibility },
 ];
 
 /* ── Shared Components ── */
@@ -268,6 +269,20 @@ const CONTENT = {
         <Li>ในหน้า <strong>ข้อมูลคนพิการ</strong> ใช้ตัวกรอง <strong>"รุ่น"</strong> เพื่อดูรายชื่อเฉพาะรุ่นนั้น (ใช้ร่วมกับตัวกรองอื่นได้)</Li>
         <Li>ในหน้า <strong>ออกรายงาน</strong> เลือกรุ่นเพื่อออกรายงานเฉพาะคนในรุ่นได้</Li>
       </ul>
+    </div>
+  ),
+
+  /* ─ Disability types ─ */
+  distypes: (
+    <div>
+      <H2>ประเภทความพิการ (เฉพาะผู้ดูแลระบบ)</H2>
+      <p className="text-sm text-gray-600 mb-4">เมนู <strong>ผู้ดูแลระบบ → ประเภทความพิการ</strong> — รายการประเภทที่ใช้ในฟอร์ม ตัวกรอง นำเข้า Excel รายงาน และ Dashboard</p>
+      <ul className="mb-4">
+        <Li><strong>เพิ่ม</strong>: พิมพ์ชื่อในช่องด้านบน แล้วกด "เพิ่มประเภท" (หรือกด Enter) — ชื่อซ้ำกับที่มีอยู่จะเพิ่มไม่ได้</Li>
+        <Li><strong>แก้ชื่อ</strong>: กดดินสอ → แก้ในช่อง → กด ✓ (หรือ Enter) · กด Esc เพื่อยกเลิก — ทุกคนที่ใช้ประเภทนี้เห็นชื่อใหม่ทันที</Li>
+        <Li><strong>ลบ</strong>: ได้เฉพาะประเภทที่ยังไม่มีใครใช้ (มีคนใช้อยู่ ปุ่มลบจะจาง กดไม่ได้ — ให้แก้ชื่อแทน)</Li>
+      </ul>
+      <Warn>เปลี่ยนชื่อประเภทแล้ว ไฟล์ Excel ที่จะนำเข้าต้องใช้ชื่อใหม่ (ดาวน์โหลดเทมเพลตใหม่ได้ ชีต "ประเภทความพิการ" จะเป็นรายการล่าสุด)</Warn>
     </div>
   ),
 

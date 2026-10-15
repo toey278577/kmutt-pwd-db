@@ -9,15 +9,14 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   const types = ['ความพิการทางการมองเห็น', 'ความพิการทางการได้ยิน', 'ความพิการทางร่างกายหรือการเคลื่อนไหว', 'ความพิการทางสติปัญญา', 'ความพิการทางจิตใจหรือพฤติกรรม', 'ความพิการทางการเรียนรู้', 'ความพิการทางการออทิสติก'];
 
-  for (const typeName of types) {
-    await prisma.disabilityType.upsert({
-      where: { id: types.indexOf(typeName) + 1 },
-      update: {},
-      create: { typeName },
-    });
+  // ใส่ 7 ประเภทมาตรฐานเฉพาะตอนติดตั้งครั้งแรก (ตารางยังว่าง)
+  // เดิมสร้างตามเลข id ทุกครั้งที่รัน — แอดมินลบประเภทไปแล้ว รัน seed อีกรอบจะกลับมาเอง
+  if ((await prisma.disabilityType.count()) === 0) {
+    await prisma.disabilityType.createMany({ data: types.map((typeName) => ({ typeName })) });
+    console.log('Seed data inserted: DisabilityType');
+  } else {
+    console.log('DisabilityType มีอยู่แล้ว — ไม่ใส่ซ้ำ (แก้/เพิ่มที่หน้า "ประเภทความพิการ")');
   }
-
-  console.log('Seed data inserted: DisabilityType');
 
   const adminHash = await bcrypt.hash('admin123', 10);
   await prisma.user.upsert({

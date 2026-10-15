@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, BookOpen, Printer, Menu, X, Sun, Moon, Layers, UserRound, History } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, BookOpen, Printer, Menu, X, Sun, Moon, Layers, UserRound, History, Accessibility } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -116,6 +116,7 @@ export default function Layout({ children }) {
               <p className="text-white/60 text-[10px] font-bold tracking-[0.15em] px-4 mb-2 mt-4 uppercase">ผู้ดูแลระบบ</p>
               <NavItem label="จัดการผู้ใช้" icon={UserCog} {...nav("/users")} />
               <NavItem label="ประวัติการใช้งาน" icon={History} {...nav("/audit")} />
+              <NavItem label="ประเภทความพิการ" icon={Accessibility} {...nav("/disability-types")} />
             </>
           )}
         </nav>

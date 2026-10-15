@@ -78,6 +78,11 @@ export const updatePerson = (id, data) => api.put(`/persons/${id}`, data).then(r
 export const deletePerson = (id) => api.delete(`/persons/${id}`).then(r => { invalidatePrefix('persons:'); invalidate(`person:${id}`); return r; });
 
 // disability types ไม่เปลี่ยนตลอด session — cache ไว้เลย
+// จัดการประเภทความพิการ (แอดมิน) — เขียนแล้วล้าง cache รายการประเภทที่ฟอร์ม/ตัวกรองใช้
+export const getDisabilityTypeList = () => api.get('/disability-types');
+export const createDisabilityType = (data) => api.post('/disability-types', data).then(r => { invalidate('disability-types'); return r; });
+export const updateDisabilityType = (id, data) => api.put(`/disability-types/${id}`, data).then(r => { invalidate('disability-types'); return r; });
+export const deleteDisabilityType = (id) => api.delete(`/disability-types/${id}`).then(r => { invalidate('disability-types'); return r; });
 export const getDisabilityTypes = () => cached('disability-types', () => api.get('/persons/disability-types'), 10 * 60_000);
 export const getDisabilityInfos = (id) => api.get(`/persons/${id}/disability`);
 export const createDisabilityInfo = (id, data) => api.post(`/persons/${id}/disability`, data).then(r => { invalidate(`person:${id}`); return r; });

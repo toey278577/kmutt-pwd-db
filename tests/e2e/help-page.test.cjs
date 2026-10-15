@@ -11,7 +11,7 @@ const { prisma, browser, eq, summary, sleep, shot } = require('../lib.cjs');
     await b.nav('/help');
     await b.waitFor(`document.querySelector('main')?.textContent.includes('ภาพรวมระบบ')`, 'หน้าคู่มือ');
     const labels = ['ภาพรวมระบบ', 'การเข้าสู่ระบบ', 'สิทธิ์ผู้ใช้งาน', 'Dashboard', 'จัดการรุ่น', 'ข้อมูลคนพิการ', 'รูปถ่าย 1 นิ้ว', 'การอบรม & ฝึกงาน',
-      'ประเมินทักษะ', 'ติดตามผล', 'สถานประกอบการ', 'ออกรายงาน', 'จัดการผู้ใช้ (Admin)', 'ประวัติการใช้งาน (Admin)'];
+      'ประเมินทักษะ', 'ติดตามผล', 'สถานประกอบการ', 'ออกรายงาน', 'จัดการผู้ใช้ (Admin)', 'ประวัติการใช้งาน (Admin)', 'ประเภทความพิการ (Admin)'];
     const empty = [];
     for (const l of labels) { await open(l); if ((await b.evaluate(`document.querySelectorAll('main h2').length`)) === 0) empty.push(l); }
     eq('ทุกหัวข้อเปิดได้ มีเนื้อหา', empty, []);

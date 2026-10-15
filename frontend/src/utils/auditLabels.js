@@ -14,7 +14,7 @@ export const AUDIT_ENTITIES = {
   person: 'ข้อมูลคนพิการ', disability: 'ข้อมูลความพิการ', training: 'ประวัติอบรม',
   workexp: 'ประสบการณ์งาน', followup: 'ติดตามผล', skills: 'ทักษะ', personorg: 'สถานประกอบการของคน',
   photos: 'รูปถ่าย', assessments: 'ผลประเมิน', organization: 'สถานประกอบการ', batch: 'รุ่นอบรม',
-  course: 'หลักสูตร', user: 'ผู้ใช้งาน', system: 'ระบบ', auth: 'บัญชี',
+  course: 'หลักสูตร', user: 'ผู้ใช้งาน', system: 'ระบบ', auth: 'บัญชี', disabilityType: 'ประเภทความพิการ',
 };
 
 export const fmtAuditTime = (iso) => new Date(iso).toLocaleString('th-TH', {

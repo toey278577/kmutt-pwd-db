@@ -29,7 +29,7 @@ web app สำหรับจัดการข้อมูลคนพิกา
 │   │   └── routes/          ← persons, training, workexp, followup, skills, personorg,
 │   │                          photos, assessments, organizations, batches, dashboard,
 │   │                          aggregate, auth, users, system, audit
-│   ├── prisma/              ← schema.prisma, migrations/, seed.js (ประเภทความพิการ 7 ประเภท + แอดมิน)
+│   ├── prisma/              ← schema.prisma, migrations/, seed.js (ประเภทความพิการ 7 ประเภท เฉพาะตอนตารางว่าง + แอดมิน)
 │   ├── scripts/             ← backup-db, restore-db + สคริปต์ซ่อมข้อมูล fix-* / cleanup-orphan-photos (ดูก่อน, --apply แก้จริง)
 │   ├── uploads/photos/      ← ไฟล์รูปถ่าย (ไม่ได้เก็บใน DB แล้ว)
 │   └── backups/             ← ไฟล์สำรอง (ไม่ขึ้น git)
@@ -133,6 +133,7 @@ GET  /api/dashboard/stats  ·  /api/data/training-all  ·  /api/data/followup-al
 GET  /api/data/followup-due   ← ใครถึงรอบติดตามผล 3ด/6ด/1ปี (คำนวณใน utils/followupDue.js)
 
 ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /api/audit-logs
+/api/disability-types[/:id]   ← อ่านได้ทุกคน (+จำนวนคนที่ใช้) · เพิ่ม/แก้/ลบ เฉพาะ ADMIN (ลบได้เฉพาะที่ไม่มีคนใช้)
 ```
 
 ---
@@ -153,6 +154,7 @@ ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /a
 | `/help` | คู่มือการใช้งาน | `Help.jsx` |
 | `/users` | จัดการผู้ใช้ (ADMIN) | `UserManagement.jsx` |
 | `/audit` | ประวัติการใช้งาน (ADMIN) | `AuditLog.jsx` |
+| `/disability-types` | ประเภทความพิการ เพิ่ม/แก้/ลบ (ADMIN) | `DisabilityTypes.jsx` |
 
 ---
 
@@ -188,5 +190,4 @@ ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /a
 
 ## สิ่งที่อาจทำต่อ
 
-- เพิ่ม/แก้ประเภทความพิการผ่าน UI
 - แจ้งเตือนรอบติดตามผลทาง Telegram ทุกเช้าวันจันทร์ (มีระบบส่ง Telegram ใน healthcheck แล้ว) — พี่เต้ยบอกพักไว้ก่อน (15 ต.ค. 69)
