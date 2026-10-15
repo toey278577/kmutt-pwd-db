@@ -1,4 +1,4 @@
-// กล่องผู้ใช้มุมซ้ายล่าง แบบ "การ์ดขาว" (พี่เต้ยเลือกจาก 5 แบบ 15 ต.ค. 69)
+// กล่องผู้ใช้มุมซ้ายล่าง แบบ "การ์ดใส ตัวหนังสือเรืองแสง" (พี่เต้ย 15 ต.ค. 69 — การ์ดขาวไม่สวย)
 // ชื่อ + บทบาท (ไม่โชว์ซ้ำถ้าบทบาทตรงกับชื่อ) · ไม่มีวงกลมไล่สี/จุดเขียว · ปุ่มออกจากระบบใช้ได้ · มือถือ (เมนูพับ) · โหมดมืด
 const { prisma, browser, eq, summary, sleep, shot } = require('../lib.cjs');
 const CARD = `document.querySelector('aside [data-user-card]')`;
@@ -12,7 +12,10 @@ const CARD = `document.querySelector('aside [data-user-card]')`;
     await b.login(staff.id);
     await open();
     eq('เจ้าหน้าที่: เห็นชื่อ + บทบาท', await b.evaluate(`${CARD}.innerText.split('\\n').map(s => s.trim()).filter(Boolean)`), [staff.name, 'เจ้าหน้าที่']);
-    eq('การ์ดพื้นขาว ไม่มีวงกลมไล่สี/จุดเขียว', await b.evaluate(`[getComputedStyle(${CARD}).backgroundColor, [...${CARD}.querySelectorAll('*')].some(e => getComputedStyle(e).backgroundImage.includes('gradient'))]`), ['rgb(255, 255, 255)', false]);
+    eq('การ์ดใส (พื้นโปร่ง + เบลอหลัง) ไม่มีวงกลมไล่สี/จุดเขียวข้างใน', await b.evaluate(`(() => { const cs = getComputedStyle(${CARD});
+      return [cs.backgroundColor, cs.backgroundImage.includes('rgba(255, 255, 255, 0.24)'), cs.backdropFilter.includes('blur'),
+              [...${CARD}.querySelectorAll('*')].some(e => getComputedStyle(e).backgroundImage.includes('gradient'))]; })()`), ['rgba(0, 0, 0, 0)', true, true, false]);
+    eq('ชื่อตัวขาวเรืองแสง + ไม่ตัดขอบ (แสงไม่เป็นกล่องเหลี่ยม วรรณยุกต์ไม่หาย)', await b.evaluate(`(() => { const cs = getComputedStyle(${CARD}.querySelector('p')); return [cs.color, cs.textShadow.includes('rgba(255, 214, 170, 0.9)'), cs.overflow]; })()`), ['rgb(255, 255, 255)', true, 'visible']);
     await b.screenshot(shot('usercard-staff.png'));
 
     await b.login(admin.id);
@@ -21,7 +24,7 @@ const CARD = `document.querySelector('aside [data-user-card]')`;
 
     const lightColor = await b.evaluate(`getComputedStyle(${CARD}.querySelector('p')).color`);
     await b.evaluate(`document.documentElement.classList.add('dark'); true`); await sleep(300);
-    eq('โหมดมืด: การ์ดยังอ่านชัด (พื้นขาว ตัวหนังสือเข้ม)', await b.evaluate(`[getComputedStyle(${CARD}).backgroundColor, getComputedStyle(${CARD}.querySelector('p')).color]`), ['rgb(255, 255, 255)', lightColor]);
+    eq('โหมดมืด: การ์ดเหมือนโหมดสว่าง (แถบเมนูสีส้มเหมือนเดิม)', await b.evaluate(`[getComputedStyle(${CARD}).backgroundColor, getComputedStyle(${CARD}.querySelector('p')).color]`), ['rgba(0, 0, 0, 0)', lightColor]);
     await b.evaluate(`document.documentElement.classList.remove('dark'); true`);
 
     await b.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });

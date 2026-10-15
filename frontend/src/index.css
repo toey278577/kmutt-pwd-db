@@ -92,6 +92,25 @@ html.dark {
 .btn-orange { background-image: linear-gradient(135deg,#fb923c,#ea580c); }
 .btn-orange:hover { background-image: linear-gradient(135deg,#f97316,#c2410c); }
 
+/* แถวตารางที่กดเข้าไปดูได้ — ชี้แล้วต้องรู้ทันทีว่ากดได้ (เดิม orange-50/30 จางจนมองไม่เห็น)
+   พื้นส้มอ่อนทั้งแถว (รวมช่องปุ่มที่ติดขอบขวา) + แถบส้มซ้าย + ชื่อเป็นสีส้ม */
+.row-link { cursor: pointer; }
+.row-link > td { transition: background-color .15s, box-shadow .15s; }
+main tr.row-link:hover > td { background-color: #fff7ed; }  /* main tr = ชนะกฎพื้นครีม html:not(.dark) main .bg-white ของช่องปุ่ม */
+.row-link:hover > td:first-child { box-shadow: inset 3px 0 0 #ea580c; }
+.row-link-name { transition: color .15s; }
+.row-link:hover .row-link-name { color: #c2410c; }
+
+/* กล่องผู้ใช้มุมซ้ายล่าง — การ์ดใส (กระจก) บนพื้นส้ม + ชื่อเรืองแสง */
+.user-card-glass {
+  background: linear-gradient(135deg, rgba(255,255,255,0.24), rgba(255,255,255,0.08));
+  border: 1px solid rgba(255,255,255,0.38);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 6px 18px rgba(124,45,18,0.22);
+}
+.user-card-glow { text-shadow: 0 0 2px #fff, 0 0 8px rgba(255,255,255,0.9), 0 0 18px rgba(255,214,170,0.9), 0 0 32px rgba(255,180,120,0.6); }  /* นีออนขาว (พี่เต้ยเลือกแบบ E) · ห้ามใส่ truncate/overflow-hidden ที่ชื่อ แสงจะโดนตัดเป็นกล่องเหลี่ยม */
+
 /* ─── Design system (Minimal SaaS — clean white + orange accent) ─── */
 .page-fade { animation: pageFade .35s ease-out; }
 @keyframes pageFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -167,6 +186,8 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #4a4a50; }
   html.dark main tr.bg-gray-50           { background-color: #1e1e22 !important; }
   html.dark main td, html.dark main th   { color: #f5f5f4 !important; }
   html.dark main .bg-gray-50 th          { color: #9b9ca4 !important; }
+  html.dark main .row-link:hover > td    { background-color: #33302c !important; }
+  html.dark main .row-link:hover .row-link-name { color: #fb923c !important; }
 
   /* Dividers */
   html.dark main .border-b               { border-color: #34343b !important; }

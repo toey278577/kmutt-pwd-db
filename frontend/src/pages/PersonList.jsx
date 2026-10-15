@@ -659,13 +659,13 @@ export default function PersonList() {
                 const fu = p.followUps?.[0];
                 return (
                 <tr key={p.id}
-                  className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors cursor-pointer group"
+                  className="row-link group border-b border-gray-50" title="กดเพื่อดูรายละเอียด"
                   onClick={() => navigate(`/persons/${p.id}`)}>
                   <td className="px-3 py-3.5 text-gray-400 text-xs font-mono">{(page - 1) * PAGE_SIZE + i + 1}</td>
                   <td className="px-3 py-3.5">
                     <div className="flex items-center gap-3">
                       <div>
-                        <p className="font-bold text-gray-800 text-sm leading-none whitespace-nowrap">
+                        <p className="row-link-name font-bold text-gray-800 text-sm leading-none whitespace-nowrap">
                           {p.fullName}{p.nickname && <span className="font-normal text-gray-500"> ({p.nickname})</span>}
                           {p.lifeStatus === 'DECEASED' && <span className="ml-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold bg-gray-100 text-gray-600 border border-gray-300 align-middle">เสียชีวิต</span>}
                         </p>
@@ -694,7 +694,7 @@ export default function PersonList() {
                   {/* ปุ่มจัดการติดขอบขวา — จอแคบเลื่อนตารางได้ แต่ปุ่มยังเห็นตลอด */}
                   <td className="px-3 py-3.5 sticky right-0 bg-white" onClick={e => e.stopPropagation()}>
                     <div className="flex items-center justify-center gap-1">
-                      <button className="w-7 h-7 rounded-xl flex items-center justify-center text-orange-400 hover:bg-orange-50 hover:text-orange-600 transition-all" onClick={() => navigate(`/persons/${p.id}`)}>
+                      <button className="w-7 h-7 rounded-xl flex items-center justify-center text-orange-400 group-hover:text-orange-600 hover:bg-orange-100 transition-all" title="ดูรายละเอียด" onClick={() => navigate(`/persons/${p.id}`)}>
                         <Eye size={14} />
                       </button>
                       {canEdit && <>

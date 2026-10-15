@@ -135,19 +135,18 @@ export default function Layout({ children }) {
           </button>
         </div>
 
-        {/* ── User Card — การ์ดขาวบนพื้นส้ม (พี่เต้ยเลือกจาก 5 แบบ 15 ต.ค. 69)
-            เดิม: วงกลมไล่สี + จุดเขียว + ป้ายบทบาทซ้ำกับชื่อ + ปุ่มออกจางจนแทบไม่เห็น ── */}
+        {/* ── User Card — การ์ดใสบนพื้นส้ม ตัวหนังสือเรืองแสง (พี่เต้ย 15 ต.ค. 69: การ์ดขาวไม่สวย "เอาสีใสๆ") ── */}
         <div className="p-3 border-t border-white/15" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
-          <div data-user-card className="flex items-center gap-2.5 px-3 py-2.5 rounded-2xl bg-white shadow-[0_6px_16px_rgba(124,45,18,0.28)]">
+          <div data-user-card className="user-card-glass flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl">
             <div className="flex-1 min-w-0">
-              <p className="text-orange-950 text-sm font-extrabold leading-tight truncate">{user?.name}</p>
+              <p className="user-card-glow text-white text-sm font-extrabold leading-tight break-words">{user?.name}</p>
               {/* บทบาทซ้ำกับชื่อ (บัญชีแอดมินชื่อ "ผู้ดูแลระบบ") → ไม่ต้องโชว์ซ้ำ */}
               {ROLE_LABEL[user?.role] && ROLE_LABEL[user?.role] !== user?.name && (
-                <p className="text-orange-700 text-xs font-semibold mt-0.5 truncate">{ROLE_LABEL[user?.role]}</p>
+                <p className="text-orange-50 text-xs font-semibold mt-0.5 truncate">{ROLE_LABEL[user?.role]}</p>
               )}
             </div>
             <button onClick={handleLogout} title="ออกจากระบบ" aria-label="ออกจากระบบ"
-              className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl bg-orange-50 border border-orange-200 text-orange-700 hover:bg-red-500 hover:border-red-500 hover:text-white transition-all active:scale-90">
+              className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl bg-white/15 border border-white/35 text-white hover:bg-red-500 hover:border-red-400 transition-all active:scale-90">
               <LogOut size={16} />
             </button>
           </div>
