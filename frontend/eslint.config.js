@@ -14,8 +14,13 @@ export default defineConfig([
       reactRefresh.configs.vite,
     ],
     languageOptions: {
-      globals: globals.browser,
+      // __APP_VERSION__ = เลขเวอร์ชันจาก package.json ที่ vite.config.js ฝังให้ (define)
+      globals: { ...globals.browser, __APP_VERSION__: 'readonly' },
       parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    rules: {
+      // ไฟล์ context ส่งออก Provider คู่กับ hook ของมัน (useAuth/useTheme/useToast) — แบบแผนของโปรเจกต์นี้
+      'react-refresh/only-export-components': ['error', { allowConstantExport: true, allowExportNames: ['useAuth', 'useTheme', 'useToast'] }],
     },
   },
 ])

@@ -33,6 +33,15 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// ต่อเวลาเข้าระบบอีก 8 ชม. (กด "ใช้งานต่อ" ที่แถบเตือนตอนเหลือไม่ถึง 10 นาที) — ต้องมีตั๋วที่ยังไม่หมดอายุ
+// ข้อมูลผู้ใช้มาจาก DB (authenticate) · เป็น GET เพราะไม่ได้เปลี่ยนข้อมูล และผู้ดูข้อมูล (VIEWER) ต้องต่อเวลาได้ด้วย (authenticate กัน POST ของ VIEWER)
+router.get('/refresh', authenticate, (req, res) => {
+  const u = req.user;
+  const token = jwt.sign({ id: u.id, email: u.email, name: u.name, role: u.role }, JWT_SECRET, { expiresIn: '8h' });
+  res.set('Cache-Control', 'no-store');
+  res.json({ token, user: { id: u.id, name: u.name, email: u.email, role: u.role } });
+});
+
 router.get('/me', authenticate, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({

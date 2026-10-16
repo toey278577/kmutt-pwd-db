@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { Search, Plus, Eye, Pencil, Trash2, UserRound, ChevronDown, Users, Camera, X, FileSpreadsheet, Download, Upload, SlidersHorizontal } from 'lucide-react';
@@ -112,13 +112,12 @@ export default function PersonList() {
   // ค้นหาแบบพิมพ์แล้วขึ้นเลย ยิงหลายครั้งติดกัน → ใช้แค่ผลของครั้งล่าสุด (เน็ตช้า ผลเก่าอาจกลับมาทีหลังแล้วทับผลใหม่)
   const loadSeq = useRef(0);
   const load = (q = '', f = filters) => {
-    setLoadError(false);
     const params = {};
     if (q.trim()) params.search = q.trim();
     for (const { key, api } of FILTERS) if (f[key]) params[api] = f[key];
     const seq = ++loadSeq.current;
     return getPersons(params)
-      .then((r) => { if (seq === loadSeq.current) setPersons(r.data); })
+      .then((r) => { if (seq === loadSeq.current) { setPersons(r.data); setLoadError(false); } })
       .catch(() => { if (seq === loadSeq.current) setLoadError(true); });
   };
   // ผลลัพธ์ชุดใหม่ (ค้นหา / เปลี่ยนตัวกรอง / เพิ่มคน / นำเข้า) → จำคำค้น+ตัวกรองลง URL แล้วเริ่มหน้า 1
@@ -148,11 +147,6 @@ export default function PersonList() {
     searchTimer.current = setTimeout(() => applyFilter(v), 350);
   };
   useEffect(() => () => clearTimeout(searchTimer.current), []);   // ออกจากหน้าก่อนครบเวลา → ไม่ต้องค้น
-  useEffect(() => {
-    load(search);   // คำค้น / ตัวกรอง / หน้า เริ่มจากค่าใน URL แล้ว
-    getDisabilityTypes().then((r) => setDisabilityTypes(r.data)).catch(() => {});
-    getBatches().then((r) => setBatches(r.data)).catch(() => {});
-  }, []);
 
   const openModal = async (row = null) => {
     setFormNonce((n) => n + 1);   // สร้างช่องในฟอร์มใหม่ทุกครั้งที่เปิด — ไม่ให้ตัวเลขที่พิมพ์ค้างจากรอบก่อนโผล่มา
@@ -198,6 +192,20 @@ export default function PersonList() {
   };
 
   // ประเภทที่ยังเหลืออยู่ (ไม่นับที่กดถังขยะไว้) และประเภทที่ยังเลือกเพิ่มได้ (ไม่ให้เลือกซ้ำ)
+  // เปิดหน้า: โหลดรายชื่อ (คำค้น / ตัวกรอง / หน้า เริ่มจากค่าใน URL) + ตัวเลือกในฟอร์ม — ครั้งเดียว
+  // มาจากหน้า "ข้อมูลยังไม่ครบ" (?edit=<id>) → เปิดฟอร์มแก้ไขคนนั้นให้เลย แล้วเอา edit ออกจาก URL (รีเฟรชแล้วไม่เปิดซ้ำ)
+  const onOpenPage = useEffectEvent(() => {
+    const editParam = Number(urlParams.get('edit')) || 0;
+    load(search).then(() => {
+      if (!editParam) return;
+      setUrlParams((prev) => { const p = new URLSearchParams(prev); p.delete('edit'); return p; }, { replace: true });
+      if (canEdit) openModal({ id: editParam });
+    });
+    getDisabilityTypes().then((r) => setDisabilityTypes(r.data)).catch(() => {});
+    getBatches().then((r) => setBatches(r.data)).catch(() => {});
+  });
+  useEffect(() => { onOpenPage(); }, []);
+
   const keptDisabilities = editPersonDisabilities.filter((d) => !removedDisabilityIds.includes(d.id));
   const availableDisabilityTypes = disabilityTypes.filter((t) => !keptDisabilities.some((d) => d.disabilityTypeId === t.id));
 

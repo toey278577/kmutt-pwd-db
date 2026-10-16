@@ -7,6 +7,7 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import ErrorBoundary, { ReconnectingBanner } from './components/ErrorBoundary';
 import UpdateBanner from './components/UpdateBanner';
+import SessionGuard from './components/SessionGuard';
 
 // แท็บที่เปิดค้างตั้งแต่ก่อนอัปเดต จะเรียกไฟล์หน้าชื่อเก่าที่ถูกลบไปแล้ว → โหลดหน้าใหม่ให้เอง 1 ครั้ง (เดิมขึ้น "เกิดข้อผิดพลาด")
 const lazyPage = (load) => lazy(() => load()
@@ -31,6 +32,7 @@ const ReportPage       = lazyPage(() => import('./pages/ReportPage'));
 const BatchPage        = lazyPage(() => import('./pages/BatchPage'));
 const AuditLog         = lazyPage(() => import('./pages/AuditLog'));
 const DisabilityTypes  = lazyPage(() => import('./pages/DisabilityTypes'));
+const DataCheck        = lazyPage(() => import('./pages/DataCheck'));
 
 function PageLoader() {
   return (
@@ -65,6 +67,7 @@ function AppRoutes() {
                 <Route path="/persons/:id"  element={<PersonDetail />} />
                 <Route path="/training"     element={<TrainingList />} />
                 <Route path="/followup"     element={<FollowUpList />} />
+                <Route path="/data-check"   element={<DataCheck />} />
                 <Route path="/organizations" element={<OrganizationList />} />
                 <Route path="/help"         element={<Help />} />
                 <Route path="/report"       element={<ReportPage />} />
@@ -102,6 +105,7 @@ export default function App() {
             <AuthProvider>
               <ReconnectingBanner />
               <UpdateBanner />
+              <SessionGuard />
               <AppRoutes />
             </AuthProvider>
           </ToastProvider>

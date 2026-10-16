@@ -40,6 +40,23 @@ const look = (i) => `(() => { const r = ${ROW(i)}, td = [...r.children], cs = (e
     await b.evaluate(`${ROW(1)}.children[4].click(), true`);
     await b.waitFor(`/^\\/persons\\/\\d+$/.test(location.pathname)`, 'หน้ารายละเอียด');
     eq('กดแถว → เข้าหน้ารายละเอียดคนนั้น', await b.evaluate(`document.querySelector('main').innerText.includes(${JSON.stringify(id.split(' (')[0])})`), true);
+
+    // หน้าอื่นที่แถวพาไปหน้าคนพิการ (เดิมต้องกดตรงชื่อเท่านั้น — พี่เต้ย 16 ต.ค. 69 ให้กดได้ทั้งแถวเหมือนกัน)
+    for (const [label, url, tab] of [['ติดตามผล', '/followup'], ['การอบรม ตามรุ่น', '/training', 'ตามรุ่นอบรม'], ['การอบรม รายคน', '/training', 'ประวัติอบรมรายคน']]) {
+      await b.nav(url);
+      await b.waitFor(`document.querySelector('main')`, label); await sleep(500);
+      if (tab) { await b.evaluate(`[...document.querySelectorAll('main button')].find(x => x.textContent.trim().startsWith(${JSON.stringify(tab)})).click(), true`); }
+      await b.waitFor(`document.querySelectorAll('tbody tr.row-link').length >= 1`, `แถว ${label}`); await sleep(300);
+      await mouseAway(); await mouseTo(0);
+      const s = await b.evaluate(look(0));
+      await b.screenshot(shot(`row-hover-${url.slice(1)}${tab ? '-' + (tab === 'ตามรุ่นอบรม' ? 'batch' : 'records') : ''}.png`));
+      eq(`${label}: ชี้แถว → พื้นส้มทั้งแถว + แถบซ้าย + ชื่อส้ม + เคอร์เซอร์มือ`, [s.bg, s.bar, s.name, s.cursor], [['rgb(255, 247, 237)'], true, 'rgb(194, 65, 12)', 'pointer']);
+      const name = await b.evaluate(`${ROW(0)}.querySelector('.row-link-name').textContent.trim()`);
+      await b.evaluate(`${ROW(0)}.children[2].click(), true`);
+      await b.waitFor(`/^\\/persons\\/\\d+$/.test(location.pathname) && document.querySelector('main').innerText.includes(${JSON.stringify(name)})`, `${label}: หน้ารายละเอียด`);
+      eq(`${label}: กดตรงไหนของแถวก็ได้ (ไม่ใช่แค่ชื่อ) → เข้าหน้าคนนั้น + ย้อนกลับครั้งเดียวถึงหน้าเดิม`,
+        await b.evaluate(`new Promise(r => { history.back(); setTimeout(() => r(location.pathname), 400); })`), url);
+    }
     eq('ไม่มี JS error', b.errors, []);
   } catch (e) { console.log('ERROR', e.message); await b.screenshot(shot('crash-row-hover.png')); eq('สคริปต์รันจบ', false, true); }
   await b.close(); await prisma.$disconnect();

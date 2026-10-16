@@ -32,12 +32,9 @@ const DateRange = ({ start, end }) => (
 
 const th = 'px-4 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wide';
 
-function PersonCell({ id, name, navigate }) {
-  return (
-    <button onClick={() => navigate(`/persons/${id}`)} className="flex items-center gap-2.5 text-left group">
-      <span className="font-semibold text-gray-800 text-sm group-hover:text-orange-600 transition-colors">{name}</span>
-    </button>
-  );
+// ชื่อในตาราง — กดทั้งแถวได้ (onClick ที่ tr.row-link) · ปุ่มไว้ให้กด Tab มาถึงด้วยคีย์บอร์ด
+function PersonCell({ name }) {
+  return <button type="button" className="row-link-name font-semibold text-gray-800 text-sm text-left">{name}</button>;
 }
 
 function EmptyRow({ cols, text }) {
@@ -170,8 +167,8 @@ export default function TrainingList() {
               <tbody>
                 {shownEnrolls.length === 0 && <EmptyRow cols={6} text="ยังไม่มีคนในรุ่นอบรม — เลือกรุ่นได้ที่ฟอร์มข้อมูลคนพิการ" />}
                 {shownEnrolls.map((e) => (
-                  <tr key={e.personId} className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors">
-                    <td className="px-4 py-3.5"><PersonCell id={e.personId} name={e.personName} navigate={navigate} /></td>
+                  <tr key={e.personId} className="row-link border-b border-gray-50" title="กดเพื่อดูรายละเอียด" onClick={() => navigate(`/persons/${e.personId}`)}>
+                    <td className="px-4 py-3.5"><PersonCell name={e.personName} /></td>
                     <td className="px-4 py-3.5 font-bold text-gray-700 whitespace-nowrap">รุ่นที่ {e.batchNumber}/{e.year}</td>
                     <td className="px-4 py-3.5 text-gray-600 max-w-[220px]">
                       <p className="font-semibold text-gray-800 truncate">{e.course || '—'}</p>
@@ -200,8 +197,8 @@ export default function TrainingList() {
                 {rows.map((t) => {
                   const tp = TYPE[t.trainingType];
                   return (
-                    <tr key={t.id} className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors">
-                      <td className="px-4 py-3.5"><PersonCell id={t.personId} name={t.personName} navigate={navigate} /></td>
+                    <tr key={t.id} className="row-link border-b border-gray-50" title="กดเพื่อดูรายละเอียด" onClick={() => navigate(`/persons/${t.personId}`)}>
+                      <td className="px-4 py-3.5"><PersonCell name={t.personName} /></td>
                       <td className="px-4 py-3.5 font-semibold text-gray-800 max-w-[160px] truncate">{t.courseName}</td>
                       <td className="px-4 py-3.5 text-gray-500 text-sm">{t.organizer || '—'}</td>
                       <td className="px-4 py-3.5">

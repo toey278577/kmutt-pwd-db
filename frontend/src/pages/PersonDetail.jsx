@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Plus, Pencil, Trash2, GraduationCap, Briefcase, Star, Target, ChevronDown, Building2, Accessibility, Camera, ClipboardList, TrendingUp, Save, History } from 'lucide-react';
 import {
@@ -34,6 +34,9 @@ const SKILL_COLOR = {
   INTERMEDIATE: 'text-cyan-700 bg-cyan-50 border-cyan-200',
   ADVANCED: 'text-emerald-700 bg-emerald-50 border-emerald-200',
 };
+// ค่าในฟอร์มประเมินจากผลที่บันทึกไว้ (ไม่มี = ช่องว่าง)
+const ASSESS_FIELDS = ['preTestScore', 'postTestScore', 'softSkillComm', 'softSkillTime', 'softSkillMotiv', 'softSkillDuty'];
+const assessFormFrom = (saved) => Object.fromEntries(ASSESS_FIELDS.map((k) => [k, saved?.[k] ?? '']));
 const ROLE_TYPE_LABELS = { INTERNSHIP: 'ฝึกงาน', EMPLOYMENT: 'จ้างงาน', OTHER: 'อื่นๆ' };
 const TRAINING_TYPE_LABELS = { TRAIN: 'อบรม', LEARN: 'เรียนรู้', EARN: 'ฝึกงาน' };
 const WORK_MODE_LABELS = { INTERNSHIP: 'ฝึกงาน', EMPLOYMENT: 'จ้างงาน', FREELANCE: 'Freelance' };
@@ -111,8 +114,10 @@ export default function PersonDetail() {
   const photoInputRef = useRef(null);
   const [assessments, setAssessments] = useState([]);
   const [batches, setBatches] = useState([]);
-  const [assessBatchId, setAssessBatchId] = useState('');
-  const [assessForm, setAssessForm] = useState({ preTestScore: '', postTestScore: '', softSkillComm: '', softSkillTime: '', softSkillMotiv: '', softSkillDuty: '' });
+  // รุ่นในแท็บประเมิน: ยังไม่เลือกเอง (null) = รุ่นที่คนนี้สังกัด
+  const [assessBatchPick, setAssessBatchPick] = useState(null);
+  // ตัวเลขที่พิมพ์ค้างไว้ (ยังไม่บันทึก) ของรุ่นไหน — ไม่มี = โชว์ผลที่บันทึกไว้ของรุ่นนั้น
+  const [assessEdit, setAssessEdit] = useState(null);
   const [assessSaving, setAssessSaving] = useState(false);
 
   const reloadAll = () => {
@@ -135,27 +140,10 @@ export default function PersonDetail() {
     getBatches().then((r) => setBatches(r.data)).catch(() => {});
   };
 
-  // default รุ่นในแท็บประเมิน = รุ่นที่คนนี้สังกัด
-  useEffect(() => {
-    if (person?.batchId) setAssessBatchId(String(person.batchId));
-  }, [person?.batchId]);
-
-  // prefill ฟอร์มประเมินจากผลที่บันทึกไว้ของรุ่นที่เลือก (auto sync เมื่อ assessments เปลี่ยน)
-  useEffect(() => {
-    if (!assessBatchId) {
-      setAssessForm({ preTestScore: '', postTestScore: '', softSkillComm: '', softSkillTime: '', softSkillMotiv: '', softSkillDuty: '' });
-      return;
-    }
-    const existing = assessments.find(a => String(a.batchId) === String(assessBatchId));
-    setAssessForm(existing ? {
-      preTestScore: existing.preTestScore ?? '',
-      postTestScore: existing.postTestScore ?? '',
-      softSkillComm: existing.softSkillComm ?? '',
-      softSkillTime: existing.softSkillTime ?? '',
-      softSkillMotiv: existing.softSkillMotiv ?? '',
-      softSkillDuty: existing.softSkillDuty ?? '',
-    } : { preTestScore: '', postTestScore: '', softSkillComm: '', softSkillTime: '', softSkillMotiv: '', softSkillDuty: '' });
-  }, [assessBatchId, assessments]);
+  // ฟอร์มประเมิน = ผลที่บันทึกไว้ของรุ่นที่เลือก (คำนวณตรงๆ เดิม copy ใส่ state ใน effect) เว้นแต่กำลังพิมพ์แก้รุ่นนั้นอยู่
+  const assessBatchId = assessBatchPick ?? (person?.batchId ? String(person.batchId) : '');
+  const assessForm = assessEdit?.batchId === assessBatchId ? assessEdit.form : assessFormFrom(assessments.find(a => String(a.batchId) === String(assessBatchId)));
+  const setAssessField = (key, value) => setAssessEdit({ batchId: assessBatchId, form: { ...assessForm, [key]: value } });
 
   const handleSaveAssessment = async () => {
     if (!assessBatchId) return toast.error('ยังไม่ได้เลือกรุ่น', 'กรุณาเลือกรุ่นก่อนบันทึกผลประเมิน');
@@ -164,6 +152,7 @@ export default function PersonDetail() {
       await saveAssessment(id, { batchId: Number(assessBatchId), ...assessForm });
       const r = await getAssessments(id);
       setAssessments(r.data);
+      setAssessEdit(null);   // โชว์ค่าที่บันทึกแล้ว
       toast.success('บันทึกผลประเมินสำเร็จ!');
     } catch { toast.error('บันทึกไม่สำเร็จ', 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง'); }
     finally { setAssessSaving(false); }
@@ -173,7 +162,7 @@ export default function PersonDetail() {
     if (!(await toast.confirm({ title: 'ลบข้อมูลประเมินนี้?', message: 'ข้อมูลที่ลบแล้วกู้คืนไม่ได้' }))) return;
     try {
       await deleteAssessment(id, aid);
-      getAssessments(id).then(r => setAssessments(r.data));
+      getAssessments(id).then(r => { setAssessments(r.data); setAssessEdit(null); });
       toast.success('ลบสำเร็จ!');
     } catch { toast.error('ลบไม่สำเร็จ', 'เกิดข้อผิดพลาด'); }
   };
@@ -207,7 +196,9 @@ export default function PersonDetail() {
     } catch { toast.error('ลบรูปไม่สำเร็จ', 'เกิดข้อผิดพลาด'); }
   };
 
-  useEffect(() => { reloadAll(); }, [id]);
+  // เปิดคนใหม่ (id เปลี่ยน) → โหลดทุกแท็บ · reloadAll ใช้ซ้ำหลังเพิ่ม/แก้/ลบ เลยห่อเป็น effect event
+  const loadPerson = useEffectEvent(() => reloadAll());
+  useEffect(() => { loadPerson(); }, [id]);
 
   // record = รายการที่จะแก้ไข (ไม่ส่ง = เพิ่มใหม่) — เดิมเพิ่มได้อย่างเดียว พิมพ์ผิดต้องลบแล้วเพิ่มใหม่
   const openDialog = (type, record = null) => {
@@ -655,7 +646,7 @@ export default function PersonDetail() {
                 <select
                   className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400 transition-all"
                   value={assessBatchId}
-                  onChange={e => setAssessBatchId(e.target.value)}>
+                  onChange={e => { setAssessBatchPick(e.target.value); setAssessEdit(null); }}>
                   <option value="">— เลือกรุ่น —</option>
                   {batches.map(b => (
                     <option key={b.id} value={b.id}>รุ่นที่ {b.batchNumber} ปี พ.ศ. {b.year} {b.status === 'ACTIVE' ? '(กำลังดำเนินการ)' : ''}</option>
@@ -675,14 +666,14 @@ export default function PersonDetail() {
                       <input type="number" min="0" max="100" placeholder="คะแนน (0-100)"
                         className="w-full rounded-lg border border-blue-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/40 bg-white"
                         value={assessForm.preTestScore}
-                        onChange={e => setAssessForm({...assessForm, preTestScore: e.target.value})} />
+                        onChange={e => setAssessField('preTestScore', e.target.value)} />
                     </div>
                     <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
                       <p className="text-xs font-bold text-emerald-600 mb-2 uppercase tracking-wide">Post-test</p>
                       <input type="number" min="0" max="100" placeholder="คะแนน (0-100)"
                         className="w-full rounded-lg border border-emerald-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/40 bg-white"
                         value={assessForm.postTestScore}
-                        onChange={e => setAssessForm({...assessForm, postTestScore: e.target.value})} />
+                        onChange={e => setAssessField('postTestScore', e.target.value)} />
                     </div>
                   </div>
 
@@ -701,7 +692,7 @@ export default function PersonDetail() {
                           <input type="number" min="0" max="5" step="0.5" placeholder="0–5"
                             className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/40 bg-white"
                             value={assessForm[key]}
-                            onChange={e => setAssessForm({...assessForm, [key]: e.target.value})} />
+                            onChange={e => setAssessField(key, e.target.value)} />
                         </div>
                       ))}
                     </div>

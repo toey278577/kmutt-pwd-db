@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient');
 const { evaluatePerson, todayBangkok } = require('../utils/followupDue');
+const { CHECKS, missingFields } = require('../utils/incomplete');
 
 // รายการอบรมทั้งหมดพร้อมชื่อคน — 1 query แทนที่จะเป็น N+1
 router.get('/training-all', async (req, res) => {
@@ -129,6 +130,35 @@ router.get('/followup-due', async (req, res) => {
         upcoming: items.filter((i) => i.status === 'upcoming').length,
       },
       noEndDateBatches: Object.values(noEndDate).sort((a, b) => b.year - a.year || b.batchNumber - a.batchNumber),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ใครข้อมูลยังไม่ครบ (หน้า "ข้อมูลยังไม่ครบ") — เติมให้ครบก่อนออกรายงานส่งหน่วยงาน · ช่องที่ตรวจอยู่ใน utils/incomplete.js
+router.get('/incomplete', async (req, res) => {
+  try {
+    const persons = await prisma.person.findMany({
+      select: {
+        id: true, fullName: true, nickname: true, thaiId: true, phone: true, mobile: true, birthDate: true,
+        province: true, educationLevel: true, lifeStatus: true, batchId: true,
+        batch: { select: { batchNumber: true, year: true } },
+        _count: { select: { disabilityInfos: true } },
+      },
+    });
+    const items = persons
+      .map((p) => ({
+        id: p.id, fullName: p.fullName, nickname: p.nickname, lifeStatus: p.lifeStatus, batch: p.batch,
+        missing: missingFields({ ...p, disabilityCount: p._count.disabilityInfos }),
+      }))
+      .filter((p) => p.missing.length > 0)
+      // ขาดหลายช่องขึ้นก่อน แล้วเรียงชื่อ
+      .sort((a, b) => b.missing.length - a.missing.length || a.fullName.localeCompare(b.fullName, 'th'));
+    res.json({
+      total: persons.length,
+      items,
+      checks: CHECKS.map(({ key, label }) => ({ key, label, count: items.filter((i) => i.missing.includes(key)).length })),
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

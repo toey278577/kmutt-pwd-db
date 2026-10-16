@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useEffectEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, LogIn, CheckCircle2, XCircle, Mail, Lock, Users, BarChart3, FileText } from 'lucide-react';
 import { login, getHealth } from '../api';
@@ -6,8 +6,10 @@ import { useAuth } from '../context/AuthContext';
 
 /* ── Toast ── */
 function Toast({ type, message, onClose }) {
+  // ปิดเองใน 3.5 วิ นับครั้งเดียวตอนขึ้น (onClose เปลี่ยนทุกครั้งที่หน้า render ไม่ต้องเริ่มนับใหม่)
+  const close = useEffectEvent(onClose);
   useEffect(() => {
-    const t = setTimeout(onClose, 3500);
+    const t = setTimeout(() => close(), 3500);
     return () => clearTimeout(t);
   }, []);
 

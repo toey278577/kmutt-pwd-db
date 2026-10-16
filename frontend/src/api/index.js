@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { cached, invalidate, invalidatePrefix } from '../utils/apiCache';
+import { waitForRelogin } from '../utils/session';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -37,6 +38,16 @@ api.interceptors.response.use(
   async (err) => {
     const isLoginEndpoint = err.config?.url?.includes('/auth/login');
     if (err.response?.status === 401 && !isLoginEndpoint) {
+      // หมดเวลาเข้าระบบระหว่างใช้งาน (8 ชม.) → ขอรหัสผ่านในหน้าเดิม แล้วส่งคำขอเดิมซ้ำ
+      // เดิมเด้งไปหน้าเข้าสู่ระบบทันที ข้อมูลที่กรอกค้างหายหมด · บัญชีถูกปิด = ไปหน้าเข้าสู่ระบบเลย (ใส่รหัสก็เข้าไม่ได้)
+      const disabled = err.response.data?.error === 'Account disabled';
+      if (sessionStorage.getItem('token') && !disabled && !err.config._reauthed) {
+        try {
+          await waitForRelogin();
+          err.config._reauthed = true;
+          return api.request(err.config);   // ตั๋วใหม่ถูกใส่ให้ใน interceptor ขาออก
+        } catch { /* กด "ออกจากระบบ" ในกล่อง */ }
+      }
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('user');
       window.location.href = '/login';
@@ -55,6 +66,7 @@ api.interceptors.response.use(
 export const getHealth = () => api.get('/health');
 export const login = (data) => api.post('/auth/login', data);
 export const getMe = () => api.get('/auth/me');
+export const refreshSession = () => api.get('/auth/refresh');
 
 export const getUsers = () => api.get('/users');
 export const createUser = (data) => api.post('/users', data);
@@ -128,6 +140,7 @@ export const getAllTraining = () => api.get('/data/training-all');
 export const getBatchEnrollments = () => api.get('/data/batch-enrollments');
 export const getAllFollowUp = () => api.get('/data/followup-all');
 export const getFollowUpDue = () => api.get('/data/followup-due');
+export const getIncomplete = () => api.get('/data/incomplete');
 
 export const getPersonPhotos = (id) => api.get(`/persons/${id}/photos`);
 export const uploadPersonPhoto = (id, data) => api.post(`/persons/${id}/photos`, data);

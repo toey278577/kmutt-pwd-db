@@ -3,7 +3,7 @@ import {
   BookOpen, LogIn, Shield, Users, GraduationCap, Target,
   Building2, UserCog, ChevronRight, CheckCircle, LayoutDashboard,
   Printer, Camera, AlertCircle, FileText, Award, Info,
-  Layers, TrendingUp, History, Accessibility,
+  Layers, TrendingUp, History, Accessibility, ClipboardCheck,
 } from 'lucide-react';
 
 const sections = [
@@ -17,6 +17,7 @@ const sections = [
   { id: 'training',   label: 'การอบรม & ฝึกงาน',      icon: GraduationCap },
   { id: 'assessment', label: 'ประเมินทักษะ',          icon: TrendingUp },
   { id: 'followup',   label: 'ติดตามผล',              icon: Target },
+  { id: 'datacheck',  label: 'ข้อมูลยังไม่ครบ',        icon: ClipboardCheck },
   { id: 'orgs',       label: 'สถานประกอบการ',         icon: Building2 },
   { id: 'report',     label: 'ออกรายงาน',             icon: Printer },
   { id: 'users',      label: 'จัดการผู้ใช้ (Admin)',   icon: UserCog },
@@ -124,7 +125,7 @@ const CONTENT = {
 
       <H3>URL ระบบ</H3>
       <div className="bg-gray-900 rounded-2xl px-5 py-3.5 font-mono text-sm text-orange-400 font-bold tracking-wide mb-4">
-        https://kmutt-pwd-db.vercel.app
+        https://kmutt-pwd.duckdns.org
       </div>
 
       <H3>ระบบผู้ใช้งาน 3 ระดับ</H3>
@@ -144,18 +145,22 @@ const CONTENT = {
 
       <H3>ขั้นตอนการเข้าสู่ระบบ</H3>
       <div className="mb-4">
-        <Step n="1">เปิดเบราว์เซอร์ไปที่ <span className="font-mono text-orange-600 font-bold">https://kmutt-pwd-db.vercel.app</span></Step>
+        <Step n="1">เปิดเบราว์เซอร์ไปที่ <span className="font-mono text-orange-600 font-bold">https://kmutt-pwd.duckdns.org</span></Step>
         <Step n="2">กรอก <strong>Email</strong> และ <strong>Password</strong></Step>
         <Step n="3">กดปุ่ม <strong>"เข้าสู่ระบบ"</strong></Step>
         <Step n="4">ระบบจะพาไปหน้า Dashboard อัตโนมัติ</Step>
       </div>
 
-      <H3>บัญชีเริ่มต้น (Admin)</H3>
-      <Table
-        headers={['Email', 'Password', 'หมายเหตุ']}
-        rows={[['admin@kmutt.ac.th', 'admin1234', 'ควรเปลี่ยนรหัสผ่านหลังใช้งานครั้งแรก']]}
-      />
-      <Warn>Session มีอายุ 8 ชั่วโมง หลังจากนั้นระบบจะ logout อัตโนมัติ ต้องเข้าสู่ระบบใหม่</Warn>
+      <H3>ลืมรหัสผ่าน</H3>
+      <ul className="mb-3">
+        <Li>ติดต่อผู้ดูแลระบบ (ADMIN) ให้ตั้งรหัสผ่านใหม่ที่เมนู <strong>"จัดการผู้ใช้"</strong></Li>
+      </ul>
+
+      <H3>ใช้งานต่อเนื่องได้ครั้งละ 8 ชั่วโมง</H3>
+      <ul className="mb-3">
+        <Li>เหลือไม่ถึง 10 นาที จะมีแถบเตือนด้านบน กด <strong>"ใช้งานต่อ"</strong> ได้อีก 8 ชั่วโมงทันที</Li>
+        <Li>ถ้าหมดเวลาระหว่างกรอกข้อมูล ตอนกดบันทึกจะขึ้นกล่องให้ใส่รหัสผ่าน — <strong>ข้อมูลที่กรอกไว้ไม่หาย</strong> ใส่รหัสแล้วระบบบันทึกต่อให้เอง</Li>
+      </ul>
 
       <H3>การออกจากระบบ</H3>
       <ul>
@@ -585,6 +590,31 @@ const CONTENT = {
         <Li>กดเบอร์โทรเพื่อโทรออกได้ทันที (บนมือถือ) · กดชื่อเพื่อเปิดหน้ารายละเอียดแล้วบันทึกผล</Li>
       </ul>
       <Warn>ถ้าขึ้นกล่องสีเหลือง "ยังไม่ได้ใส่วันสิ้นสุดอบรม" ให้ไปที่ <strong>จัดการรุ่น</strong> → แก้ไขรุ่นนั้น → ใส่วันสิ้นสุด ระบบจึงจะคำนวณรอบติดตามผลได้ (รุ่นที่ยังอบรมอยู่ไม่ต้องใส่)</Warn>
+    </div>
+  ),
+
+  /* ─ Data check ─ */
+  datacheck: (
+    <div>
+      <H2>ข้อมูลยังไม่ครบ</H2>
+      <p className="text-sm text-gray-600 mb-4">รวมรายชื่อคนที่ยังขาดข้อมูลที่ใช้ทำรายงานไว้ที่เดียว — เติมให้ครบก่อนออกรายงานส่งหน่วยงาน</p>
+
+      <H3>ช่องที่ระบบตรวจ</H3>
+      <div className="flex gap-2 flex-wrap mb-4">
+        {['เลขบัตรประชาชน (13 หลัก)', 'เบอร์โทร (บ้านหรือมือถือ)', 'วันเกิด', 'จังหวัด', 'ระดับการศึกษา', 'รุ่นอบรม', 'ประเภทความพิการ'].map((t) => <Chip key={t}>{t}</Chip>)}
+      </div>
+
+      <H3>วิธีเติมข้อมูล</H3>
+      <div className="mb-4">
+        <Step n="1">ไปที่เมนู <strong>"ข้อมูลยังไม่ครบ"</strong> — ป้ายสีเหลืองบอกว่าแต่ละคนขาดอะไร</Step>
+        <Step n="2">อยากดูเฉพาะเรื่อง กดปุ่มด้านบน เช่น <strong>"ไม่มีเบอร์โทร"</strong></Step>
+        <Step n="3">กดที่แถว (หรือปุ่ม <strong>"เติมข้อมูล"</strong>) → ฟอร์มแก้ไขของคนนั้นเปิดขึ้นมาเลย</Step>
+        <Step n="4">เติมแล้วกด <strong>"บันทึกข้อมูล"</strong> — คนที่ครบแล้วจะหายจากรายการเอง</Step>
+      </div>
+      <ul>
+        <Li>คนที่เสียชีวิตแล้ว ไม่ต้องตามเบอร์โทร</Li>
+        <Li>ผู้ดูข้อมูล (VIEWER) ดูรายการได้ กดแล้วไปหน้ารายละเอียด (แก้ไขไม่ได้)</Li>
+      </ul>
     </div>
   ),
 

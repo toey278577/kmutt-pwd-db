@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, BookOpen, Printer, Menu, X, Sun, Moon, Layers, History, Accessibility } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, BookOpen, Printer, Menu, X, Sun, Moon, Layers, History, Accessibility, ClipboardCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -9,6 +9,7 @@ const menu = [
   { label: 'ข้อมูลคนพิการ', icon: Users, path: '/persons' },
   { label: 'การอบรม & ฝึกงาน', icon: GraduationCap, path: '/training' },
   { label: 'ติดตามผล', icon: Target, path: '/followup' },
+  { label: 'ข้อมูลยังไม่ครบ', icon: ClipboardCheck, path: '/data-check' },
   { label: 'สถานประกอบการ', icon: Building2, path: '/organizations' },
   { label: 'จัดการรุ่น', icon: Layers, path: '/batches' },
   { label: 'ออกรายงาน', icon: Printer, path: '/report' },

@@ -63,7 +63,7 @@ cd backend && npx prisma migrate dev --name <ชื่อ>   # เปลี่�
 
 - Backend API: http://localhost:5000/api · Health: `/api/health` (เช็ค DB ด้วย) · `/api/ping` (ไม่แตะ DB)
 - DB dev: `postgresql://postgres:postgres123@localhost:5432/kmutt_pwd_db`
-- **ชุดทดสอบ:** `cd backend && npm test` (ทั้งหมด ~2 นาที) · `npm test -- unit|api|e2e|<ชื่อไฟล์บางส่วน>` → ดู `tests/` ด้านล่าง
+- **ชุดทดสอบ:** `cd backend && npm test` (ทั้งหมด ~5 นาที) · `npm test -- unit|api|e2e|<ชื่อไฟล์บางส่วน>` → ดู `tests/` ด้านล่าง
 
 ---
 
@@ -117,7 +117,7 @@ BatchStatus: ACTIVE|COMPLETED      UserRole: ADMIN|STAFF|VIEWER
 ## API Endpoints หลัก (ทุกตัวต้องมี token ยกเว้น login/health/ping)
 
 ```
-POST   /api/auth/login · GET /api/auth/me
+POST   /api/auth/login · GET /api/auth/me · GET /api/auth/refresh (ต่อเวลาอีก 8 ชม. ต้องมีตั๋วที่ยังไม่หมด)
 
 GET/POST       /api/persons              ← รายชื่อ / เพิ่ม · ?search= (ชื่อ ชื่อเล่น เลขบัตร เบอร์) &batchId= &gender= &province=
                                             &disabilityTypeId= &employment=EMPLOYED|UNEMPLOYED|STUDYING|NONE (ผลติดตามล่าสุด) · ส่ง followUps ล่าสุด 1 รายการมาด้วย
@@ -131,6 +131,7 @@ GET            /api/persons/batch/:batchId/assessments
 /api/organizations[/:id]  ·  /api/batches[/:id]  ·  /api/batches/:id/courses[/:courseId]
 GET  /api/dashboard/stats  ·  /api/data/training-all  ·  /api/data/followup-all
 GET  /api/data/followup-due   ← ใครถึงรอบติดตามผล 3ด/6ด/1ปี (คำนวณใน utils/followupDue.js)
+GET  /api/data/incomplete     ← ใครข้อมูลยังไม่ครบ (ช่องที่ตรวจอยู่ใน utils/incomplete.js — ตรงกับช่องบังคับในฟอร์มแก้ไข)
 
 ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /api/audit-logs
 /api/disability-types[/:id]   ← อ่านได้ทุกคน (+จำนวนคนที่ใช้) · เพิ่ม/แก้/ลบ เฉพาะ ADMIN (ลบได้เฉพาะที่ไม่มีคนใช้)
@@ -155,6 +156,7 @@ ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /a
 | `/users` | จัดการผู้ใช้ (ADMIN) | `UserManagement.jsx` |
 | `/audit` | ประวัติการใช้งาน (ADMIN) | `AuditLog.jsx` |
 | `/disability-types` | ประเภทความพิการ เพิ่ม/แก้/ลบ (ADMIN) | `DisabilityTypes.jsx` |
+| `/data-check` | ข้อมูลยังไม่ครบ — กดแถวเปิดฟอร์มแก้ไข (`/persons?edit=<id>`) | `DataCheck.jsx` |
 
 ---
 
@@ -172,7 +174,8 @@ ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /a
 - จังหวัดใน Excel ต้องสะกดตรง ไม่งั้นนำเข้าไม่ได้ (ดู `utils/province.js`)
 - server อยู่หลัง nginx → ตั้ง `trust proxy` แล้ว `req.ip` เป็น IP จริงของผู้ใช้
 - audit log ไม่เก็บ body ของ request (กันข้อมูลส่วนตัว/รหัสผ่านค้างใน log)
-- eslint ยังมี error เก่าค้าง ~18 จุดใน PersonList / ReportPage ฯลฯ (setState ใน effect, ตัวแปรไม่ได้ใช้) — ทำงานปกติ แก้ทีละไฟล์พร้อมทดสอบ
+- eslint สะอาด **0 จุด** (16 ต.ค. 69) — แก้หน้าเว็บแล้วรัน `cd frontend && npx eslint .` ให้ยังเป็น 0 · โหลดครั้งเดียวตอนเปิดหน้า/ตอน id เปลี่ยน ใช้ `useEffectEvent` (ไม่ต้องใส่ deps ปลอม) · ค่าที่คำนวณจาก state ได้ อย่า copy ใส่ state ใน effect
+- หมดเวลาเข้าระบบ (8 ชม.): `components/SessionGuard.jsx` + `utils/session.js` — เหลือ <10 นาทีแถบเตือน "ใช้งานต่อ" · หมดระหว่างใช้งาน api เจอ 401 → กล่องใส่รหัสผ่าน (dialog showModal ทับฟอร์ม) แล้วส่งคำขอเดิมซ้ำ ข้อมูลไม่หาย · เปิดหน้าใหม่ตอนตั๋วหมด = ไปหน้าเข้าสู่ระบบเลย
 - Dashboard: "ผู้เข้าอบรม" = คนในรุ่นหรือมีประวัติอบรม · "สถานะการมีงานทำ" นับคนจากผลติดตามล่าสุด · cache สถิติถูกล้างทุกครั้งที่เขียนข้อมูลสำเร็จ
 - error จาก Prisma ถูกแปลงเป็นข้อความไทยกลางที่ `index.js` (ของจริงอยู่ใน log `[DB ERROR]`)
 - route รายการย่อยของคน (`/persons/:id/<sub>/:subId`) ต้องเช็คเจ้าของด้วย `ensureOwned` + รับช่องด้วย `pick` (`utils/owned.js`) — อย่า spread `req.body` เข้า DB

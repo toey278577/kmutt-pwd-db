@@ -91,17 +91,15 @@ export default function FollowUpList() {
               {rows.map((f) => {
                 const e = EMP[f.employmentStatus] || EMP.UNEMPLOYED;
                 return (
-                  <tr key={f.id} className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors">
+                  <tr key={f.id} className="row-link border-b border-gray-50" title="กดเพื่อดูรายละเอียด" onClick={() => navigate(`/persons/${f.personId}`)}>
                     <td className="px-4 py-3.5">
                       <span className="bg-orange-50 text-orange-600 text-xs font-bold px-2.5 py-1 rounded-lg border border-orange-100">
                         {fmtDate(f.followUpDate) || '—'}
                       </span>
                     </td>
                     <td className="px-4 py-3.5">
-                      <button onClick={() => navigate(`/persons/${f.personId}`)}
-                        className="flex items-center gap-2.5 text-left group">
-                        <span className="font-semibold text-gray-800 text-sm group-hover:text-orange-600 transition-colors">{f.personName}</span>
-                      </button>
+                      {/* กดทั้งแถวได้ (onClick ที่ tr) · ปุ่มไว้ให้กด Tab มาถึงด้วยคีย์บอร์ด */}
+                      <button type="button" className="row-link-name font-semibold text-gray-800 text-sm text-left">{f.personName}</button>
                     </td>
                     <td className="px-4 py-3.5">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${e.bg}`}>{e.label}</span>
