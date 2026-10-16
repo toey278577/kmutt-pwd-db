@@ -32,7 +32,7 @@ function rewarm() {
 api.interceptors.response.use(
   (res) => {
     // เพิ่ม/แก้/ลบอะไรสำเร็จ → ทิ้งสถิติ Dashboard ที่จำไว้ กลับไปหน้าแรกจะได้เห็นตัวเลขใหม่ทันที
-    if (res.config.method !== 'get') invalidate('dashboard-stats');
+    if (res.config.method !== 'get') { invalidate('dashboard-stats'); invalidate('incomplete'); }
     return res;
   },
   async (err) => {
@@ -140,7 +140,8 @@ export const getAllTraining = () => api.get('/data/training-all');
 export const getBatchEnrollments = () => api.get('/data/batch-enrollments');
 export const getAllFollowUp = () => api.get('/data/followup-all');
 export const getFollowUpDue = () => api.get('/data/followup-due');
-export const getIncomplete = () => api.get('/data/incomplete');
+// จำไว้ 30 วิ (เมนูข้างซ้ายเรียกทุกครั้งที่เปลี่ยนหน้า) · เพิ่ม/แก้/ลบอะไรสำเร็จ ล้างทิ้งเอง (interceptor ด้านบน)
+export const getIncomplete = () => cached('incomplete', () => api.get('/data/incomplete'), 30_000);
 
 export const getPersonPhotos = (id) => api.get(`/persons/${id}/photos`);
 export const uploadPersonPhoto = (id, data) => api.post(`/persons/${id}/photos`, data);

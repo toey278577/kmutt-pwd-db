@@ -1,5 +1,5 @@
 // หน้า "ข้อมูลยังไม่ครบ" (/data-check) — เห็นใครขาดอะไร · กรองตามช่อง · กดแถว → เปิดฟอร์มแก้ไขคนนั้นทันที เติมแล้วหายจากรายการ
-// มือถือเป็นการ์ด · ผู้ดูข้อมูลกดแล้วไปหน้ารายละเอียด (แก้ไม่ได้)
+// มือถือเป็นการ์ด · ผู้ดูข้อมูลกดแล้วไปหน้ารายละเอียด (แก้ไม่ได้) · ตัวเลขข้างเมนู + การ์ดบน Dashboard (เติมแล้วตัวเลขลดเอง)
 const { prisma, browser, eq, summary, sleep, shot } = require('../lib.cjs');
 const { missingFields } = require('../../backend/src/utils/incomplete');
 const ROWS = `[...document.querySelectorAll('main tbody tr.row-link')]`;
@@ -14,6 +14,9 @@ const DLG = `document.querySelector('dialog[open]')`;
   const b = await browser();
   const rowNames = () => b.evaluate(`${ROWS}.map(r => r.querySelector('.row-link-name').textContent.trim())`);
   const open = async () => { await b.nav('/data-check'); await b.waitFor(`document.querySelector('main h1')?.textContent.includes('ข้อมูลยังไม่ครบ') && !document.querySelector('main .animate-spin')`, 'หน้าข้อมูลยังไม่ครบ'); await sleep(300); };
+  const countDb = async () => (await prisma.person.findMany({ include: { _count: { select: { disabilityInfos: true } } } }))
+    .filter((p) => missingFields({ ...p, disabilityCount: p._count.disabilityInfos }).length > 0).length;
+  const badge = () => b.evaluate(`document.querySelector('aside [data-nav-badge]')?.textContent.trim() || ''`);
   const filter = (text) => b.evaluate(`[...document.querySelectorAll('main button')].find(x => x.textContent.trim().startsWith(${JSON.stringify(text)})).click(), true`);
   try {
     await b.login(staff.id);
@@ -27,6 +30,14 @@ const DLG = `document.querySelector('dialog[open]')`;
     await prisma.disabilityInfo.create({ data: { personId: fix.id, disabilityTypeId: type.id } });
     const many = await prisma.person.create({ data: { fullName: 'ทดสอบเติม ขาดเยอะ', gender: 'FEMALE' } });
     made.push(fix.id, many.id);
+
+    await b.nav('/'); await b.waitFor(`document.querySelector('[data-incomplete-card]') && document.querySelector('aside [data-nav-badge]')`, 'การ์ด + ตัวเลขข้างเมนู'); await sleep(300);
+    const n0 = await countDb();
+    eq('Dashboard: การ์ดบอกจำนวนคนที่ขาด + ตัวเลขข้างเมนูตรงกัน', [await b.evaluate(`document.querySelector('[data-incomplete-card]').innerText.includes('ข้อมูลยังไม่ครบ ${n0} คน')`), await badge()], [true, String(n0)]);
+    await b.screenshot(shot('dash-incomplete.png'));
+    await b.evaluate(`document.querySelector('[data-incomplete-card]').click(), true`);
+    await b.waitFor(`location.pathname === '/data-check' && document.querySelectorAll('main tbody tr.row-link').length > 0`, 'กดการ์ดแล้วไปหน้าข้อมูลยังไม่ครบ');
+    eq('กดการ์ด → หน้าข้อมูลยังไม่ครบ', true, true);
     await open();
     const names = await rowNames();
     eq('คนที่ขาดขึ้นในรายการ · ขาดเยอะขึ้นก่อน', [names.includes('ทดสอบเติม จังหวัดหาย'), names.indexOf('ทดสอบเติม ขาดเยอะ') < names.indexOf('ทดสอบเติม จังหวัดหาย')], [true, true]);
@@ -47,7 +58,9 @@ const DLG = `document.querySelector('dialog[open]')`;
     await b.clickText('บันทึกข้อมูล', DLG);
     await b.waitFor(`!${DLG}`, 'ฟอร์มปิดหลังบันทึก', 15000); await sleep(400);
     eq('เติมจังหวัดแล้วบันทึกได้', (await prisma.person.findUnique({ where: { id: fix.id } })).province, 'นนทบุรี');
-    await open();
+    await b.evaluate(`[...document.querySelectorAll('aside button')].find(x => x.offsetParent && x.textContent.startsWith('ข้อมูลยังไม่ครบ')).click(), true`);   // เปลี่ยนหน้าในแอป (ไม่โหลดหน้าใหม่) — ตัวเลขต้องไม่ค้างค่าเก่า
+    await b.waitFor(`location.pathname === '/data-check' && document.querySelector('main tbody tr.row-link')`, 'กลับหน้าข้อมูลยังไม่ครบ'); await sleep(500);
+    eq('เติมแล้ว → ตัวเลขข้างเมนูลดลง 1 ทันที (ไม่ค้างค่าที่จำไว้)', await badge(), String(n0 - 1));
     eq('เติมครบแล้ว → หายจากรายการ', (await rowNames()).includes('ทดสอบเติม จังหวัดหาย'), false);
 
     await b.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });

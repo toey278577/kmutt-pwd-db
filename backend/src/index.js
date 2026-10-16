@@ -54,7 +54,8 @@ const msg = (error) => ({ error });
 // ทั้งระบบ: กันยิงถล่ม แต่ตั้งหลวมพอให้ทั้งสำนักงานใช้พร้อมกันได้ (หลายคนอาจออกเน็ต IP เดียวกัน)
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 2000,
+  // ชุดทดสอบเปิดหน้าใหม่หลายร้อยครั้งใน 5 นาที (ถี่กว่าคนใช้จริงมาก) — tests/run.cjs ตั้ง API_RATE_MAX สูงไว้ · ระบบจริงไม่ได้ตั้ง = 2000
+  max: Number(process.env.API_RATE_MAX) || 2000,
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => req.path === '/health',   // health check ต้องเรียกได้เสมอ

@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Users, Building2, GraduationCap, TrendingUp, Layers, CheckCircle, Clock, ArrowRight, Sparkles, UserPlus, ClipboardList } from 'lucide-react';
+import { Users, Building2, GraduationCap, TrendingUp, Layers, CheckCircle, Clock, ArrowRight, Sparkles, UserPlus, ClipboardList, ClipboardCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getDashboardStats, getBatches, getFollowUpDue } from '../api';
+import { getDashboardStats, getBatches, getFollowUpDue, getIncomplete } from '../api';
 import FollowUpDue from '../components/FollowUpDue';
 
 const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อื่นๆ' };
@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [batches, setBatches] = useState([]);
   const [followDue, setFollowDue] = useState(null);
+  const [incomplete, setIncomplete] = useState(null);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
 
@@ -25,6 +26,7 @@ export default function Dashboard() {
     getDashboardStats().then(r => setStats(r.data)).catch(() => setError(true));
     getBatches().then(r => setBatches(r.data)).catch(() => {});
     getFollowUpDue().then(r => setFollowDue(r.data)).catch(() => {});
+    getIncomplete().then(r => setIncomplete(r.data)).catch(() => {});
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -138,6 +140,26 @@ export default function Dashboard() {
       {/* ═══ ถึงรอบติดตามผล — โชว์เฉพาะตอนมีคนต้องตาม หรือมีรุ่นที่ยังไม่ใส่วันสิ้นสุด ═══ */}
       {(followDue?.items.length > 0 || followDue?.noEndDateBatches.length > 0) && (
         <FollowUpDue data={followDue} limit={5} onViewAll={() => navigate('/followup')} />
+      )}
+
+      {/* ═══ ข้อมูลยังไม่ครบ — โชว์เฉพาะตอนมีคนขาดข้อมูล กดแล้วไปหน้าเติมข้อมูล ═══ */}
+      {incomplete?.items.length > 0 && (
+        <button data-incomplete-card onClick={() => navigate('/data-check')}
+          className="w-full text-left bg-white rounded-3xl border border-orange-100 shadow-sm px-5 py-4 flex flex-wrap items-center gap-3 hover:border-orange-300 hover:shadow-md transition-all group">
+          <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center flex-shrink-0">
+            <ClipboardCheck size={18} className="text-amber-600" />
+          </div>
+          <div className="flex-1 min-w-[200px]">
+            <p className="font-bold text-gray-800 text-sm">ข้อมูลยังไม่ครบ <span className="text-orange-600">{incomplete.items.length} คน</span>
+              <span className="font-normal text-xs text-gray-500"> · เติมให้ครบก่อนออกรายงาน</span></p>
+            <div className="flex flex-wrap gap-1.5 mt-1.5">
+              {incomplete.checks.filter((c) => c.count > 0).sort((a, b) => b.count - a.count).slice(0, 4).map((c) => (
+                <span key={c.key} className="px-2 py-0.5 rounded-full text-[11px] font-bold border bg-amber-50 text-amber-700 border-amber-200 whitespace-nowrap">ไม่มี{c.label} {c.count}</span>
+              ))}
+            </div>
+          </div>
+          <span className="text-xs text-orange-600 font-bold flex items-center gap-1 group-hover:text-orange-700 whitespace-nowrap">ไปเติมข้อมูล <ArrowRight size={12} /></span>
+        </button>
       )}
 
       {/* ═══ EMPTY STATE — ยังไม่มีข้อมูล (แบบ onboarding) ═══ */}

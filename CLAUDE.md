@@ -46,8 +46,10 @@ web app สำหรับจัดการข้อมูลคนพิกา
 │                              unit/ (ฟังก์ชันล้วน) · api/ (ยิง API จริง) · e2e/ (กดหน้าเว็บจริงผ่าน Chrome headless)
 │                              ผล + ภาพหน้าจอ → tests/.output/ (ไม่ขึ้น git)
 │
-└── docs/deploy/             ← nginx-kmutt.conf, backup.sh (ตี 2 ทุกวัน เก็บ 14 วัน),
-                               healthcheck.sh (ทุก 5 นาที กู้เอง + แจ้ง Telegram)
+└── docs/deploy/             ← ย้ายเครื่อง.md (ย้ายเซิร์ฟเวอร์ทีละขั้น) · กู้ข้อมูล.md · deploy.sh · backup.sh (ตี 2 ทุกวัน เก็บ 14 วัน)
+                               healthcheck.sh (ทุก 5 นาที กู้เอง + แจ้ง Telegram) · kmutt-backend.service · 10-hardening.conf
+                               nginx-kmutt.conf (ของจริงหลัง certbot) · nginx-kmutt-start.conf (เครื่องใหม่ก่อนมี https)
+                               ⚠️ แก้ deploy.sh ที่นี่แล้วต้องก๊อปขึ้น /opt/kmutt/deploy.sh บนเครื่องด้วย (ตัวบนเครื่องไม่ได้อยู่ใน git)
 ```
 
 ---

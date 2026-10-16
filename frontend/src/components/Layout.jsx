@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, GraduationCap, Target, Building2, UserCog, LogOut, BookOpen, Printer, Menu, X, Sun, Moon, Layers, History, Accessibility, ClipboardCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { getIncomplete } from '../api';
 
 const menu = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/' },
@@ -25,7 +26,7 @@ const SIDEBAR_BG = `
   linear-gradient(165deg,#fb923c 0%,#f97316 42%,#ea580c 74%,#c2410c 100%)`;
 
 // อยู่นอก Layout — ถ้าประกาศข้างใน React จะสร้างปุ่มเมนูใหม่หมดทุกครั้งที่ Layout render (แอนิเมชันกระตุก)
-function NavItem({ label, icon: Icon, path, active, onNav }) {
+function NavItem({ label, icon: Icon, path, active, onNav, badge = 0 }) {
   return (
       <button onClick={() => onNav(path)}
         className={`group relative overflow-hidden w-full flex items-center gap-3 pl-4 pr-3 py-2.5 rounded-xl text-left transition-all duration-200
@@ -41,6 +42,12 @@ function NavItem({ label, icon: Icon, path, active, onNav }) {
           ${active ? 'h-6 bg-orange-500' : 'h-0 bg-transparent'}`} />
         <Icon size={17} className={`relative z-10 flex-shrink-0 transition-colors ${active ? 'text-orange-600' : 'text-white/70 group-hover:text-white'}`} />
         <span className={`relative z-10 text-sm flex-1 ${active ? 'font-bold' : 'font-medium'}`}>{label}</span>
+        {badge > 0 && (
+          <span data-nav-badge title={`${badge} คนยังขาดข้อมูล`}
+            className={`relative z-10 min-w-[22px] h-[22px] px-1.5 rounded-full text-[11px] font-black flex items-center justify-center flex-shrink-0 ${active ? 'bg-orange-600 text-white' : 'bg-white text-orange-700 shadow-sm'}`}>
+            {badge > 99 ? '99+' : badge}
+          </span>
+        )}
       </button>
   );
 }
@@ -55,6 +62,12 @@ export default function Layout({ children }) {
   const handleLogout = () => { logout(); navigate('/login', { replace: true }); };
   const handleNav = (path) => { navigate(path); setOpen(false); };
   const nav = (path) => ({ path, active: location.pathname === path, onNav: handleNav });
+
+  // ตัวเลขข้างเมนู "ข้อมูลยังไม่ครบ" — เช็คใหม่ทุกครั้งที่เปลี่ยนหน้า (จำผลไว้ 30 วิ แก้ข้อมูลแล้วล้างเอง)
+  const [incomplete, setIncomplete] = useState(0);
+  useEffect(() => {
+    getIncomplete().then((r) => setIncomplete(r.data.items.length)).catch(() => {});
+  }, [location.pathname]);
 
   return (
     <div className="flex min-h-screen">
@@ -109,7 +122,7 @@ export default function Layout({ children }) {
         {/* ── Menu ── */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           <p className="text-white/60 text-[10px] font-bold tracking-[0.15em] px-4 mb-2 uppercase">เมนูหลัก</p>
-          {menu.map((m) => <NavItem key={m.path} label={m.label} icon={m.icon} {...nav(m.path)} />)}
+          {menu.map((m) => <NavItem key={m.path} label={m.label} icon={m.icon} {...nav(m.path)} badge={m.path === '/data-check' ? incomplete : 0} />)}
 
           {isAdmin && (
             <>

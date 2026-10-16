@@ -48,6 +48,7 @@ const plain = (u, name) => { const x = new URL(u); x.pathname = '/' + name; x.se
 const ENV = {
   ...process.env,
   KMUTT_TEST: '1',
+  API_RATE_MAX: '100000',   // ทั้งชุดยิงเกิน 2000 คำขอ/15 นาที (เพดานของระบบจริง) — เทสต์ท้ายๆ เคยโดนบล็อกจนโหลดหน้าไม่ขึ้น
   DATABASE_URL: TEST_DB, DB_URL: TEST_DB,
   UPLOAD_ROOT: path.join(OUT, 'uploads'), BACKUP_DIR: path.join(OUT, 'backups'),
   PORT: String(PORT.api), CORS_ORIGIN: APP_URL,
