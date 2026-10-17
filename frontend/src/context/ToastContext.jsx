@@ -23,9 +23,9 @@ const VARIANTS = {
   info: {
     icon: Info,
     ring: 'ring-orange-500/30',
-    bar: 'linear-gradient(180deg,#fb923c,#ea580c)',
-    iconBg: 'linear-gradient(135deg,#fb923c,#ea580c)',
-    glow: '0 10px 30px -8px rgba(234,88,12,0.45)',
+    bar: 'linear-gradient(180deg,#f2622b,#e74111)',
+    iconBg: 'linear-gradient(135deg,#f2622b,#e74111)',
+    glow: '0 10px 30px -8px rgba(231,65,17,0.45)',
   },
 };
 
@@ -100,7 +100,7 @@ export function ToastProvider({ children }) {
           <div className="relative bg-white rounded-3xl shadow-2xl w-[380px] max-w-[92vw] overflow-hidden animate-pop-in">
             <div className="p-6 text-center">
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                style={{ background: dialog.danger ? 'linear-gradient(135deg,#fecaca,#fca5a5)' : 'linear-gradient(135deg,#fed7aa,#fdba74)' }}>
+                style={{ background: dialog.danger ? 'linear-gradient(135deg,#fecaca,#fca5a5)' : 'linear-gradient(135deg,#ffcdb6,#ffa783)' }}>
                 {dialog.danger
                   ? <Trash2 size={26} className="text-red-600" />
                   : <AlertTriangle size={26} className="text-orange-600" />}
@@ -116,8 +116,8 @@ export function ToastProvider({ children }) {
               <button onClick={() => closeDialog(true)}
                 className="flex-1 py-3 rounded-2xl text-sm font-black text-white active:scale-95 transition-all"
                 style={{
-                  background: dialog.danger ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'linear-gradient(135deg,#ea580c,#c2410c)',
-                  boxShadow: dialog.danger ? '0 6px 18px rgba(220,38,38,0.4)' : '0 6px 18px rgba(234,88,12,0.4)',
+                  background: dialog.danger ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'linear-gradient(135deg,#e74111,#c9370c)',
+                  boxShadow: dialog.danger ? '0 6px 18px rgba(220,38,38,0.4)' : '0 6px 18px rgba(231,65,17,0.4)',
                 }}>
                 {dialog.confirmText}
               </button>

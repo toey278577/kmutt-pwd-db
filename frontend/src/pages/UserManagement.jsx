@@ -229,7 +229,7 @@ export default function UserManagement() {
       <dialog ref={modalRef} className="modal" onCancel={(e) => { e.preventDefault(); guard.request(form); }}>
         <div className="modal-box bg-white rounded-3xl shadow-2xl p-0 max-w-md w-full overflow-hidden">
           <div className="relative px-6 py-5 flex items-center gap-4 overflow-hidden"
-            style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
+            style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c260a 60%,#e74111 100%)' }}>
             <div className="absolute inset-0 opacity-5"
               style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
             <div className="relative w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
@@ -297,7 +297,7 @@ export default function UserManagement() {
               </button>
               <button type="submit" disabled={saving}
                 className="flex-1 py-2.5 rounded-2xl text-white font-bold text-sm transition-all active:scale-95 disabled:opacity-60"
-                style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', boxShadow: '0 4px 15px rgba(234,88,12,0.3)' }}>
+                style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)', boxShadow: '0 4px 15px rgba(231,65,17,0.3)' }}>
                 {saving
                   ? <div className="flex items-center justify-center gap-2"><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />บันทึก...</div>
                   : (editing ? 'บันทึก' : 'เพิ่มผู้ใช้')

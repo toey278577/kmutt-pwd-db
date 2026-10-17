@@ -90,7 +90,7 @@ export default function SessionGuard() {
       {open && (
       <form onSubmit={submit} className="modal-box max-w-sm p-0 overflow-hidden bg-white shadow-2xl rounded-3xl">
         <div className="relative px-6 py-5 flex items-center gap-4 overflow-hidden"
-          style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
+          style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c260a 60%,#e74111 100%)' }}>
           <div className="relative w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
             <Lock size={18} color="#fff" />
           </div>
@@ -120,7 +120,7 @@ export default function SessionGuard() {
             className="px-4 py-2.5 rounded-2xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-all">ออกจากระบบ</button>
           <button type="submit" disabled={busy}
             className="px-6 py-2.5 rounded-2xl text-sm font-bold text-white active:scale-95 transition-all disabled:opacity-60"
-            style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', boxShadow: '0 4px 15px rgba(234,88,12,0.3)' }}>
+            style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)', boxShadow: '0 4px 15px rgba(231,65,17,0.3)' }}>
             {busy ? 'กำลังเข้าระบบ...' : 'ใช้งานต่อ'}
           </button>
         </div>

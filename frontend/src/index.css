@@ -1,27 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 @plugin "daisyui" {
   themes: light;
 }
 
+/* ── ธีมส้มโลโก้ มจธ. (#E74111) แบบเดียวกับระบบจองห้องประชุม (พี่เต้ย 17 ต.ค. 69) ──
+   ฟอนต์บนจอ IBM Plex Sans Thai · ตอนพิมพ์/เอกสารยังเป็น Sarabun (หน้ากระดาษที่จัดพอดี A4 ไว้ไม่เลื่อน) */
 :root {
-  --font-sans: 'Sarabun', sans-serif;
-  /* Override DaisyUI primary → orange-600 */
-  --color-primary: oklch(0.646 0.222 41.116);
-  --color-primary-content: oklch(1 0 0);
-  --p: oklch(0.646 0.222 41.116);
-  --pc: oklch(1 0 0);
-  --pf: oklch(0.55 0.2 41.116);
+  --font-sans: 'IBM Plex Sans Thai', 'Sarabun', sans-serif;
+  /* ปุ่ม/ตัวหนังสือหลัก = ส้มเข้มกว่าโลโก้นิด (#d63b0e อ่านชัด 4.7:1 บนพื้นขาว) */
+  --color-primary: #d63b0e;
+  --color-primary-content: #ffffff;
+  --p: #d63b0e;
+  --pc: #ffffff;
+  --pf: #b4300a;
 }
 
-* { font-family: 'Sarabun', sans-serif; }
+* { font-family: 'IBM Plex Sans Thai', 'Sarabun', sans-serif; }
 
 /* ตัวหนังสือรอง — เดิม gray-400 จางเกิน (2.5:1 บนการ์ด) คนสายตาไม่ดี/จอมือถือกลางแดดอ่านแทบไม่เห็น
  * ปรับให้ผ่านเกณฑ์อ่านง่าย WCAG 4.5:1 และเลื่อน gray-500 เข้มตามลงไปนิด ให้ยังแยกระดับกันได้
- * (ทำที่ตัวสีได้เพราะ gray-400/500 ใช้กับตัวหนังสือ/ไอคอนเท่านั้น — gray-300 ใช้เป็นเส้นขอบ 71 จุด ห้ามแตะ) */
+ * (ทำที่ตัวสีได้เพราะ gray-400/500 ใช้กับตัวหนังสือ/ไอคอนเท่านั้น — gray-300 ใช้เป็นเส้นขอบ 71 จุด ห้ามแตะ)
+ * สีส้มทั้งชุด (orange-50…950 ที่ใช้ทั้งระบบ ~500 จุด) เลื่อนไปทางส้มโลโก้ มจธ. ที่นี่ที่เดียว */
 @theme {
   --color-gray-400: #6b7280;
   --color-gray-500: #5b6270;
+  --color-orange-50: #fff5f0;
+  --color-orange-100: #ffe7dc;
+  --color-orange-200: #ffcdb6;
+  --color-orange-300: #ffa783;
+  --color-orange-400: #fb7d4f;
+  --color-orange-500: #f25a22;
+  --color-orange-600: #d63b0e;
+  --color-orange-700: #b4300a;
+  --color-orange-800: #8f2911;
+  --color-orange-900: #742511;
+  --color-orange-950: #401006;
 }
 
 @keyframes bounce-in {
@@ -56,50 +70,61 @@
 .animate-glow-pulse { animation: glow-pulse 2.8s ease-in-out infinite; }
 
 body {
-  background: #f4ede3;
-  font-family: 'Sarabun', sans-serif;
+  background: #faf6f2;
+  font-family: var(--font-sans);
   color: #1c1917;
 }
+/* แสงส้มจางๆ มุมบน ให้พื้นไม่แบนจืด (เหมือนระบบจองห้อง) */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(900px 420px at 100% -10%, rgba(231, 65, 17, 0.07), transparent 70%),
+    radial-gradient(700px 380px at -10% 0%, rgba(245, 158, 11, 0.06), transparent 70%);
+}
+html.dark body::before { background: radial-gradient(900px 420px at 100% -10%, rgba(255, 106, 61, 0.08), transparent 70%); }
 
 /* Light mode — ลดความสว่างการ์ดขาวล้วน ให้นวลตา ไม่แสบ */
 html:not(.dark) main .bg-white { background-color: #fffdfa; }
 
+::selection { background: rgba(231, 65, 17, 0.2); }
+
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #fdba74; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #fb923c; }
+::-webkit-scrollbar-thumb { background: #ffa783; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #f2622b; }
 
 /* ─── สีกราฟบน Dashboard — สลับเองตาม light/dark ───
    ชุดสีผ่านการตรวจแล้วว่าคนตาบอดสีแยกออก (ส้มแบรนด์ + น้ำเงิน) */
 :root {
-  --viz-bar: linear-gradient(90deg, #fb923c, #ea580c);
-  --viz-col: linear-gradient(180deg, #fb923c, #ea580c);
-  --viz-1: #ea580c;
+  --viz-bar: linear-gradient(90deg, #f2622b, #e74111);
+  --viz-col: linear-gradient(180deg, #f2622b, #e74111);
+  --viz-1: #e74111;
   --viz-2: #2a78d6;
   --viz-track: #f1f5f9;
   --viz-ghost: #e2e8f0;
 }
 html.dark {
-  --viz-bar: linear-gradient(90deg, #fb923c, #f97316);
-  --viz-col: linear-gradient(180deg, #fb923c, #f97316);
-  --viz-1: #fb923c;
+  --viz-bar: linear-gradient(90deg, #ff8a5c, #ff6a3d);
+  --viz-col: linear-gradient(180deg, #ff8a5c, #ff6a3d);
+  --viz-1: #ff8a5c;
   --viz-2: #5a9ae8;
   --viz-track: #2f2f36;
   --viz-ghost: #3a3a42;
 }
 
 /* Vibrant orange utility */
-.btn-orange { background-image: linear-gradient(135deg,#fb923c,#ea580c); }
-.btn-orange:hover { background-image: linear-gradient(135deg,#f97316,#c2410c); }
+.btn-orange { background-image: linear-gradient(135deg,#f2622b,#e74111); }
+.btn-orange:hover { background-image: linear-gradient(135deg,#ec4f1a,#c9370c); }
 
 /* แถวตารางที่กดเข้าไปดูได้ — ชี้แล้วต้องรู้ทันทีว่ากดได้ (เดิม orange-50/30 จางจนมองไม่เห็น)
    พื้นส้มอ่อนทั้งแถว (รวมช่องปุ่มที่ติดขอบขวา) + แถบส้มซ้าย + ชื่อเป็นสีส้ม */
 .row-link { cursor: pointer; }
 .row-link > td { transition: background-color .15s, box-shadow .15s; }
-main tr.row-link:hover > td { background-color: #fff7ed; }  /* main tr = ชนะกฎพื้นครีม html:not(.dark) main .bg-white ของช่องปุ่ม */
-.row-link:hover > td:first-child { box-shadow: inset 3px 0 0 #ea580c; }
+main tr.row-link:hover > td { background-color: #fff5f0; }  /* main tr = ชนะกฎพื้นครีม html:not(.dark) main .bg-white ของช่องปุ่ม */
+.row-link:hover > td:first-child { box-shadow: inset 3px 0 0 #e74111; }
 .row-link-name { transition: color .15s; }
-.row-link:hover .row-link-name { color: #c2410c; }
+.row-link:hover .row-link-name { color: #c9370c; }
 
 /* กล่องผู้ใช้มุมซ้ายล่าง — การ์ดใส (กระจก) บนพื้นส้ม + ชื่อเรืองแสง */
 .user-card-glass {
@@ -160,9 +185,9 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #4a4a50; }
   html.dark main .text-gray-400          { color: #9b9ca4 !important; }
   html.dark main .text-gray-300          { color: #7f8088 !important; }
   html.dark main .text-amber-700         { color: #fbbf24 !important; }
-  html.dark main .text-orange-800        { color: #fb923c !important; }
+  html.dark main .text-orange-800        { color: #ff8a5c !important; }
   /* ปุ่มส้มอ่อน (เพิ่ม / เปลี่ยนรูป / กลับไปแก้ต่อ) — พื้นกลายเป็นเทาเข้ม ตัวหนังสือส้มเข้มจะจม */
-  html.dark main [class*="bg-orange-50"].text-orange-700 { color: #fdba74 !important; }
+  html.dark main [class*="bg-orange-50"].text-orange-700 { color: #ffb595 !important; }
   /* เส้นคั่นของ divide-y อยู่ที่ลูกแต่ละตัว ไม่ใช่กล่องนอก — เดิมทับแค่กล่องนอก เส้นระหว่างการ์ดมือถือเลยขาวสว่าง */
   html.dark main .divide-gray-50,
   html.dark main .divide-y,
@@ -187,7 +212,7 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #4a4a50; }
   html.dark main td, html.dark main th   { color: #f5f5f4 !important; }
   html.dark main .bg-gray-50 th          { color: #9b9ca4 !important; }
   html.dark main .row-link:hover > td    { background-color: #33302c !important; }
-  html.dark main .row-link:hover .row-link-name { color: #fb923c !important; }
+  html.dark main .row-link:hover .row-link-name { color: #ff8a5c !important; }
 
   /* Dividers */
   html.dark main .border-b               { border-color: #34343b !important; }
@@ -219,9 +244,13 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #4a4a50; }
 
 @page { margin: 0; }
 
+/* เอกสาร (รายงาน/ใบประกาศ) ใช้ Sarabun ทั้งบนจอและตอนพิมพ์ — หน้าตาเหมือนเอกสารราชการ และที่จัดพอดี A4 ไว้ไม่เลื่อน */
+.print-area, .print-area *, [style*="Sarabun"], [style*="Sarabun"] * { font-family: 'Sarabun', sans-serif; }
+
 @media print {
   body { background: white !important; color: black !important; }
-  * { color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body::before { display: none; }
+  * { color: black !important; font-family: 'Sarabun', sans-serif !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .print-hide { display: none !important; }
   aside { display: none !important; }
   main { padding: 0 !important; margin: 0 !important; }

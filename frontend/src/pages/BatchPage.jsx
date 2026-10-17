@@ -362,7 +362,7 @@ export default function BatchPage() {
                 </button>
                 <button onClick={handleSave} disabled={saving}
                   className="px-5 py-2 rounded-xl text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-60"
-                  style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
+                  style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)' }}>
                   {saving ? 'กำลังบันทึก...' : 'บันทึก'}
                 </button>
               </>)}

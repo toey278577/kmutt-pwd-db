@@ -180,7 +180,7 @@ export default function OrganizationList() {
       <dialog ref={modalRef} className="modal" onCancel={(e) => { e.preventDefault(); guard.request(form); }}>
         <div className="modal-box max-w-md p-0 overflow-hidden bg-white shadow-2xl rounded-3xl">
           <div className="relative px-6 py-5 flex items-center gap-4 overflow-hidden"
-            style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
+            style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c260a 60%,#e74111 100%)' }}>
             <div className="absolute inset-0 opacity-5"
               style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
             <div className="relative w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
@@ -220,7 +220,7 @@ export default function OrganizationList() {
               <button className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-all"
                 onClick={() => guard.request(form)}>ยกเลิก</button>
               <button className="px-6 py-2.5 rounded-2xl text-sm font-bold text-white active:scale-95 transition-all"
-                style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', boxShadow: '0 4px 15px rgba(234,88,12,0.3)' }}
+                style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)', boxShadow: '0 4px 15px rgba(231,65,17,0.3)' }}
                 onClick={handleSave}>บันทึก</button>
             </>)}
           </div>

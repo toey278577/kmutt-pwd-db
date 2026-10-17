@@ -8,7 +8,7 @@ const GENDER_LABELS = { MALE: 'ชาย', FEMALE: 'หญิง', OTHER: 'อ�
 const EMP_LABELS = { EMPLOYED: 'มีงานทำ', UNEMPLOYED: 'ว่างงาน', STUDYING: 'ศึกษาต่อ' };
 
 const statCards = [
-  { key: 'totalPersons', label: 'คนพิการทั้งหมด', icon: Users, grad: 'linear-gradient(135deg,#fb923c,#ea580c)' },
+  { key: 'totalPersons', label: 'คนพิการทั้งหมด', icon: Users, grad: 'linear-gradient(135deg,#f2622b,#e74111)' },
   { key: 'totalOrgs', label: 'สถานประกอบการ', icon: Building2, grad: 'linear-gradient(135deg,#22d3ee,#0891b2)' },
   { key: 'totalTraining', label: 'ผู้เข้าอบรม', icon: GraduationCap, grad: 'linear-gradient(135deg,#34d399,#059669)' },
 ];
@@ -36,14 +36,14 @@ export default function Dashboard() {
     <div className="flex flex-col items-center justify-center h-96 gap-4">
       <p className="text-gray-500 text-sm">โหลดข้อมูลไม่สำเร็จ</p>
       <button onClick={retry} className="px-4 py-2 rounded-xl text-white text-sm font-bold"
-        style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>ลองใหม่</button>
+        style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)' }}>ลองใหม่</button>
     </div>
   );
 
   if (!stats) return (
     <div className="flex items-center justify-center h-96">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl animate-pulse" style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }} />
+        <div className="w-12 h-12 rounded-2xl animate-pulse" style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)' }} />
         <span className="text-orange-400 text-sm font-semibold">กำลังโหลด...</span>
       </div>
     </div>
@@ -63,7 +63,7 @@ export default function Dashboard() {
 
       {/* ═══ HERO ═══ */}
       <div className="relative overflow-hidden rounded-3xl p-6 md:p-7 text-white shadow-lg"
-        style={{ background: 'linear-gradient(120deg,#fb923c 0%,#ea580c 50%,#c2410c 100%)' }}>
+        style={{ background: 'linear-gradient(120deg,#f2622b 0%,#e74111 50%,#c9370c 100%)' }}>
         <div className="absolute -top-16 -right-10 w-64 h-64 rounded-full opacity-25 blur-3xl" style={{ background: 'radial-gradient(circle,#fde68a,transparent 70%)' }} />
         <div className="absolute -bottom-16 left-1/3 w-56 h-56 rounded-full opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle,#fff,transparent 70%)' }} />
         <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '30px 30px' }} />
@@ -73,8 +73,8 @@ export default function Dashboard() {
             <h1 className="text-2xl md:text-3xl font-black leading-tight">ภาพรวมระบบ</h1>
             <p className="text-white/85 text-sm mt-1.5">ฐานข้อมูลคนพิการ · โครงการฝึกอบรม-ฝึกงาน เพื่อเตรียมความพร้อมสู่สถานประกอบการ</p>
           </div>
-          <div className="hidden md:flex w-20 h-20 rounded-2xl bg-white shadow-xl ring-4 ring-white/30 items-center justify-center flex-shrink-0">
-            <img src="/logo-icon.png" className="h-14 w-14 object-contain" alt="KMUTT" onError={e => { e.target.style.display='none'; }} />
+          <div className="hidden md:flex w-20 h-20 rounded-full bg-white shadow-xl ring-4 ring-white/30 items-center justify-center flex-shrink-0">
+            <img src="/logo-seal.png" className="h-[4.5rem] w-[4.5rem] rounded-full" alt="KMUTT" onError={e => { e.target.style.display='none'; }} />
           </div>
         </div>
       </div>
@@ -107,7 +107,7 @@ export default function Dashboard() {
         <div className="bg-white rounded-3xl border border-orange-100 shadow-sm overflow-hidden">
           <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-orange-50">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-orange-500" style={{ boxShadow: '0 0 6px #ea580c' }} />
+              <div className="w-2 h-2 rounded-full bg-orange-500" style={{ boxShadow: '0 0 6px #e74111' }} />
               <span className="font-bold text-gray-800 text-sm">สถานะรุ่นการฝึกอบรม</span>
             </div>
             <button onClick={() => navigate('/batches')}
@@ -184,7 +184,7 @@ export default function Dashboard() {
 
       {/* ═══ กราฟแถวล่าง — ตัวรอง 3 ตัว ═══ */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
-        <ChartCard title="แยกตามเพศ" accent="#ea580c" sub={`${stats.totalPersons} คน`} center>
+        <ChartCard title="แยกตามเพศ" accent="#e74111" sub={`${stats.totalPersons} คน`} center>
           {genderData.length > 0 ? <GenderSplit data={genderData} /> : <EmptyChart />}
         </ChartCard>
 

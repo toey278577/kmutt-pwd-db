@@ -272,7 +272,7 @@ export default function PersonDetail() {
         {/* รูปภาพ */}
         <div className="relative flex-shrink-0 group">
           <div className="w-16 h-20 rounded-xl overflow-hidden border-2 border-orange-200 flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)' }}>
+            style={{ background: 'linear-gradient(135deg,#ec4f1a,#e74111)' }}>
             {profilePhoto?.filePath
               ? <img src={profilePhoto.filePath} alt="รูปถ่าย" className="w-full h-full object-cover" />
               : <div className="w-full h-full flex items-center justify-center text-white text-lg font-black">
@@ -701,7 +701,7 @@ export default function PersonDetail() {
                   {canEdit && (
                     <button onClick={handleSaveAssessment} disabled={assessSaving}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-60"
-                      style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
+                      style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)' }}>
                       <Save size={15} />
                       {assessSaving ? 'กำลังบันทึก...' : 'บันทึกผลการประเมิน'}
                     </button>
@@ -800,7 +800,7 @@ export default function PersonDetail() {
       {/* Modal */}
       <dialog ref={modalRef} className="modal" onCancel={(e) => { e.preventDefault(); guard.request(form); }}>
         <div className="modal-box max-w-lg p-0 overflow-hidden bg-white shadow-2xl">
-          <div className="px-6 py-5 flex items-center gap-3" style={{ background: 'linear-gradient(135deg,#431407 0%,#c2410c 100%)' }}>
+          <div className="px-6 py-5 flex items-center gap-3" style={{ background: 'linear-gradient(135deg,#401006 0%,#c9370c 100%)' }}>
             <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
               {dialogType === 'training' && <GraduationCap size={20} color="#fff" />}
               {dialogType === 'workexp' && <Briefcase size={20} color="#fff" />}
@@ -890,7 +890,7 @@ export default function PersonDetail() {
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
             {guard.asking ? <DiscardBar guard={guard} /> : (<>
               <button className="px-5 py-2 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors" onClick={() => guard.request(form)}>ยกเลิก</button>
-              <button className="px-6 py-2 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg active:scale-95 transition-all" style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }} onClick={handleSave}>บันทึก</button>
+              <button className="px-6 py-2 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg active:scale-95 transition-all" style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)' }} onClick={handleSave}>บันทึก</button>
             </>)}
           </div>
         </div>

@@ -556,10 +556,10 @@ export default function PersonList() {
 
       {/* Search */}
       <div className="mb-4 flex-shrink-0">
-        <div className="flex items-center gap-2 bg-white rounded-2xl border border-orange-100 shadow-sm px-3 py-2.5 transition-all duration-200 focus-within:border-orange-400 focus-within:shadow-[0_0_0_3px_rgba(234,88,12,0.12)]">
+        <div className="flex items-center gap-2 bg-white rounded-2xl border border-orange-100 shadow-sm px-3 py-2.5 transition-all duration-200 focus-within:border-orange-400 focus-within:shadow-[0_0_0_3px_rgba(231,65,17,0.12)]">
           {/* Icon */}
           <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
+            style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)' }}>
             <Search size={14} color="white" />
           </div>
 
@@ -645,7 +645,7 @@ export default function PersonList() {
                     <div className="flex flex-col items-center gap-3">
                       <p className="text-sm text-gray-400">โหลดข้อมูลไม่สำเร็จ</p>
                       <button onClick={() => load(search)} className="px-4 py-2 rounded-xl text-white text-sm font-bold"
-                        style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>ลองใหม่</button>
+                        style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)' }}>ลองใหม่</button>
                     </div>
                   </td>
                 </tr>
@@ -727,7 +727,7 @@ export default function PersonList() {
             <div className="text-center py-12">
               <p className="text-sm text-gray-500 mb-3">โหลดข้อมูลไม่สำเร็จ</p>
               <button onClick={() => load(search)} className="px-4 py-2 rounded-xl text-white text-sm font-bold"
-                style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>ลองใหม่</button>
+                style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)' }}>ลองใหม่</button>
             </div>
           )}
           {!loadError && persons.length === 0 && (
@@ -790,7 +790,7 @@ export default function PersonList() {
                   ? <span key={`e-${idx}`} className="px-1 text-gray-400 text-xs">…</span>
                   : <button key={n} onClick={() => setPage(n)}
                       className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${page === n ? 'text-white shadow-sm' : 'border border-gray-100 text-gray-400 hover:bg-orange-50 hover:text-orange-600'}`}
-                      style={page === n ? { background: 'linear-gradient(135deg,#ea580c,#c2410c)' } : {}}>{n}</button>
+                      style={page === n ? { background: 'linear-gradient(135deg,#e74111,#c9370c)' } : {}}>{n}</button>
                 )}
               <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
                 className="w-8 h-8 rounded-xl text-sm font-bold border border-gray-100 text-gray-400 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all">→</button>
@@ -804,7 +804,7 @@ export default function PersonList() {
         <div className="modal-box max-w-3xl p-0 overflow-hidden bg-white shadow-2xl rounded-3xl">
           {/* Header */}
           <div className="relative px-6 py-5 flex items-center gap-4 overflow-hidden"
-            style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c2d12 60%,#ea580c 100%)' }}>
+            style={{ background: 'linear-gradient(135deg,#1c0a00 0%,#7c260a 60%,#e74111 100%)' }}>
             <div className="absolute inset-0 opacity-5"
               style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
             <div className="relative w-11 h-11 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
@@ -1046,7 +1046,7 @@ export default function PersonList() {
                 onClick={requestClose}>ยกเลิก</button>
               <button
                 className="px-6 py-2.5 rounded-2xl text-sm font-bold text-white shadow-lg active:scale-95 transition-all"
-                style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', boxShadow: '0 4px 15px rgba(234,88,12,0.3)' }}
+                style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)', boxShadow: '0 4px 15px rgba(231,65,17,0.3)' }}
                 onClick={handleSave}>บันทึกข้อมูล</button>
             </>)}
           </div>

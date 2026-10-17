@@ -28,7 +28,7 @@ const sections = [
 /* ── Shared Components ── */
 const H2 = ({ children }) => (
   <h2 className="text-lg font-extrabold text-gray-900 mb-4 flex items-center gap-2">
-    <div className="w-1 h-5 rounded-full" style={{ background: 'linear-gradient(180deg,#ea580c,#c2410c)' }} />
+    <div className="w-1 h-5 rounded-full" style={{ background: 'linear-gradient(180deg,#e74111,#c9370c)' }} />
     {children}
   </h2>
 );
@@ -51,7 +51,7 @@ const Warn = ({ children }) => (
 const Step = ({ n, children }) => (
   <div className="flex items-start gap-3 mb-2">
     <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black text-white flex-shrink-0 mt-0.5"
-      style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>{n}</div>
+      style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)' }}>{n}</div>
     <p className="text-sm text-gray-600 leading-snug pt-0.5">{children}</p>
   </div>
 );
@@ -112,7 +112,7 @@ const CONTENT = {
         ].map(({ icon: Icon, label, desc }) => (
           <div key={label} className="rounded-2xl border border-orange-100 bg-orange-50/30 p-3.5 flex items-start gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
+              style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)' }}>
               <Icon size={16} color="white" />
             </div>
             <div>
@@ -657,7 +657,7 @@ const CONTENT = {
       <H3>ประเภทรายงาน</H3>
       <div className="space-y-3 mb-5">
         {[
-          { icon: FileText, label: '1. รายชื่อคนพิการ', color: '#ea580c',
+          { icon: FileText, label: '1. รายชื่อคนพิการ', color: '#e74111',
             desc: 'ตารางรายชื่อพร้อมข้อมูลพื้นฐาน: ชื่อ อายุ วันเกิด เลขบัตร ประเภทความพิการ จังหวัด เบอร์โทร',
             use: 'ใช้สำหรับสรุปรายชื่อผู้เข้าร่วมโครงการ' },
           { icon: Users, label: '2. แบบสังเกตพฤติกรรมรายบุคคล', color: '#06b6d4',
@@ -816,7 +816,7 @@ export default function Help() {
               <button key={id} onClick={() => setActive(id)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all
                   ${active === id ? 'text-white shadow-sm' : 'text-gray-400 hover:text-gray-700 hover:bg-orange-50'}`}
-                style={active === id ? { background: 'linear-gradient(135deg,#ea580c,#c2410c)' } : {}}>
+                style={active === id ? { background: 'linear-gradient(135deg,#e74111,#c9370c)' } : {}}>
                 <Icon size={12} />
                 {label}
               </button>
@@ -849,7 +849,7 @@ export default function Help() {
                   ? 'text-orange-700 font-bold'
                   : 'text-gray-400 hover:text-gray-700 font-medium hover:bg-orange-50/50'
                 }`}
-              style={active === id ? { background: 'linear-gradient(90deg,rgba(234,88,12,0.08),transparent)', borderRight: '2px solid #ea580c' } : {}}>
+              style={active === id ? { background: 'linear-gradient(90deg,rgba(231,65,17,0.08),transparent)', borderRight: '2px solid #e74111' } : {}}>
               <Icon size={14} className={active === id ? 'text-orange-500' : 'text-gray-400'} />
               <span className="flex-1 leading-snug text-xs">{label}</span>
               {active === id && <ChevronRight size={12} className="text-orange-400" />}

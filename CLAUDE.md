@@ -164,9 +164,11 @@ ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /a
 
 ## ธีม
 
-- **Primary:** สีส้ม `orange-600` (#ea580c) · พื้นหลัง `orange-50` · การ์ดขอบ `orange-100`
-- **Sidebar:** ไล่ส้มสว่าง `#fb923c → #c2410c` + ลายจุดจางๆ
-- รองรับ dark mode (ThemeContext) · ฟอนต์ Sarabun
+- **ส้มโลโก้ มจธ. `#E74111`** แบบเดียวกับระบบจองห้องประชุม (17 ต.ค. 69) — ชุดสี `orange-50…950` ถูกตั้งใหม่ใน `@theme` ของ `index.css`
+  ใช้คลาส `orange-*` ตามปกติได้เลย · **Primary** `orange-600` = `#d63b0e` · พื้นหลัง `#faf6f2` · การ์ดขอบ `orange-100`
+  · สีที่ต้องเขียนรหัสตรงๆ (gradient/inline style): `#f2622b` (สว่าง) → `#e74111` (โลโก้) → `#c9370c` (เข้ม) · โหมดมืดตัวหนังสือส้ม `#ff8a5c`
+- **Sidebar:** ไล่ส้มโลโก้ `#f2622b → #c9370c` + ลายจุดจางๆ · โลโก้ = ตรา มจธ. วงกลม `public/logo-seal.png`
+- รองรับ dark mode (ThemeContext) · ฟอนต์บนจอ **IBM Plex Sans Thai** · รายงาน/ใบประกาศ/ตอนพิมพ์ = **Sarabun** (`.print-area` + `@media print` — ที่จัดพอดี A4 ไว้ไม่เลื่อน)
 
 ---
 

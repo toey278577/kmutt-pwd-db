@@ -15,7 +15,7 @@ export default function LoadError({ onRetry, message = 'โหลดข้อม
       {onRetry && (
         <button onClick={onRetry}
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-sm font-bold active:scale-95 transition-all"
-          style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}>
+          style={{ background: 'linear-gradient(135deg,#e74111,#c9370c)' }}>
           <RotateCw size={14} /> ลองใหม่
         </button>
       )}

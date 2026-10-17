@@ -20,19 +20,19 @@ const look = (i) => `(() => { const r = ${ROW(i)}, td = [...r.children], cs = (e
     await b.waitFor(`document.querySelectorAll('tbody tr.row-link').length >= 3`, 'ตารางรายชื่อ'); await sleep(300);
     await mouseAway();
     const before = await b.evaluate(look(1));
-    eq('ยังไม่ชี้: แถวไม่มีพื้นส้ม/แถบส้ม', [before.bg.includes('rgb(255, 247, 237)'), before.bar], [false, false]);
+    eq('ยังไม่ชี้: แถวไม่มีพื้นส้ม/แถบส้ม', [before.bg.includes('rgb(255, 245, 240)'), before.bar], [false, false]);
 
     await mouseTo(1);
     const on = await b.evaluate(look(1));
-    eq('ชี้แถว: พื้นส้มอ่อนทั้งแถว (รวมช่องปุ่มขวาสุด)', on.bg, ['rgb(255, 247, 237)']);
-    eq('ชี้แถว: แถบส้มซ้าย + ชื่อสีส้ม + เคอร์เซอร์มือ', [on.bar, on.name, on.cursor], [true, 'rgb(194, 65, 12)', 'pointer']);
+    eq('ชี้แถว: พื้นส้มอ่อนทั้งแถว (รวมช่องปุ่มขวาสุด)', on.bg, ['rgb(255, 245, 240)']);
+    eq('ชี้แถว: แถบส้มซ้าย + ชื่อสีส้ม + เคอร์เซอร์มือ', [on.bar, on.name, on.cursor], [true, 'rgb(201, 55, 12)', 'pointer']);
     eq('แถวอื่นไม่ติดสีไปด้วย', (await b.evaluate(look(0))).bar, false);
     await b.screenshot(shot('row-hover.png'));
 
     await b.evaluate(`document.documentElement.classList.add('dark'); true`);
     await mouseAway(); await mouseTo(1);
     const dark = await b.evaluate(look(1));
-    eq('โหมดมืด: ชี้แล้วพื้นเปลี่ยน + ชื่อส้มสว่าง + แถบส้ม', [dark.bg, dark.name, dark.bar], [['rgb(51, 48, 44)'], 'rgb(251, 146, 60)', true]);
+    eq('โหมดมืด: ชี้แล้วพื้นเปลี่ยน + ชื่อส้มสว่าง + แถบส้ม', [dark.bg, dark.name, dark.bar], [['rgb(51, 48, 44)'], 'rgb(255, 138, 92)', true]);
     await b.screenshot(shot('row-hover-dark.png'));
     await b.evaluate(`document.documentElement.classList.remove('dark'); true`);
 
@@ -50,7 +50,7 @@ const look = (i) => `(() => { const r = ${ROW(i)}, td = [...r.children], cs = (e
       await mouseAway(); await mouseTo(0);
       const s = await b.evaluate(look(0));
       await b.screenshot(shot(`row-hover-${url.slice(1)}${tab ? '-' + (tab === 'ตามรุ่นอบรม' ? 'batch' : 'records') : ''}.png`));
-      eq(`${label}: ชี้แถว → พื้นส้มทั้งแถว + แถบซ้าย + ชื่อส้ม + เคอร์เซอร์มือ`, [s.bg, s.bar, s.name, s.cursor], [['rgb(255, 247, 237)'], true, 'rgb(194, 65, 12)', 'pointer']);
+      eq(`${label}: ชี้แถว → พื้นส้มทั้งแถว + แถบซ้าย + ชื่อส้ม + เคอร์เซอร์มือ`, [s.bg, s.bar, s.name, s.cursor], [['rgb(255, 245, 240)'], true, 'rgb(201, 55, 12)', 'pointer']);
       const name = await b.evaluate(`${ROW(0)}.querySelector('.row-link-name').textContent.trim()`);
       await b.evaluate(`${ROW(0)}.children[2].click(), true`);
       await b.waitFor(`/^\\/persons\\/\\d+$/.test(location.pathname) && document.querySelector('main').innerText.includes(${JSON.stringify(name)})`, `${label}: หน้ารายละเอียด`);
