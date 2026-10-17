@@ -19,12 +19,6 @@ const menu = [
 
 const ROLE_LABEL = { ADMIN: 'ผู้ดูแลระบบ', STAFF: 'เจ้าหน้าที่', VIEWER: 'ผู้ดูข้อมูล' };
 
-// โทนส้มสว่าง (ลดสว่างลงนิด อิ่มขึ้น) + ลายจุดจางๆ + แสงเรืองมุมบน (รวมใน background เดียว — ปลอดภัย ไม่เพิ่ม DOM)
-const SIDEBAR_BG = `
-  radial-gradient(circle at 1px 1px, rgba(255,255,255,0.09) 1px, transparent 0) 0 0 / 22px 22px,
-  radial-gradient(125% 55% at 100% 0%, rgba(255,255,255,0.16), transparent 60%),
-  linear-gradient(165deg,#f2622b 0%,#ec4f1a 42%,#e74111 74%,#c9370c 100%)`;
-
 // อยู่นอก Layout — ถ้าประกาศข้างใน React จะสร้างปุ่มเมนูใหม่หมดทุกครั้งที่ Layout render (แอนิเมชันกระตุก)
 function NavItem({ label, icon: Icon, path, active, onNav, badge = 0 }) {
   return (
@@ -73,9 +67,8 @@ export default function Layout({ children }) {
     <div className="flex min-h-screen">
 
       {/* ── Mobile top bar ── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-30 shadow-sm print-hide"
+      <div className="sidebar-bg md:hidden fixed top-0 left-0 right-0 z-30 shadow-sm print-hide"
         style={{
-          background: SIDEBAR_BG,
           paddingTop: 'max(14px, env(safe-area-inset-top))',
           paddingBottom: '10px', paddingLeft: '16px', paddingRight: '16px',
         }}>
@@ -99,10 +92,9 @@ export default function Layout({ children }) {
 
       {/* ── Sidebar ── */}
       <aside
-        className={`fixed md:sticky md:top-0 md:h-screen inset-y-0 left-0 z-50 w-64 flex-shrink-0 flex flex-col
+        className={`sidebar-bg fixed md:sticky md:top-0 md:h-screen inset-y-0 left-0 z-50 w-64 flex-shrink-0 flex flex-col
           border-r border-black/20 transition-transform duration-300 ease-in-out
-          ${open ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
-        style={{ background: SIDEBAR_BG }}>
+          ${open ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
 
         {/* ── Logo ── */}
         <div className="px-4 pb-4 flex items-center gap-3 border-b border-white/15"

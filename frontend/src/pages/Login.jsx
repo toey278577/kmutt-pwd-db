@@ -67,12 +67,11 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex bg-orange-50/40 overflow-hidden">
+    <div className="login-page min-h-screen flex bg-orange-50/40 overflow-hidden">
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
 
       {/* ════════ LEFT — BRAND PANEL (desktop) ════════ */}
-      <div className="hidden lg:flex flex-col justify-between w-[52%] relative overflow-hidden p-12"
-        style={{ background: 'linear-gradient(140deg,#f2622b 0%,#e74111 45%,#c9370c 100%)' }}>
+      <div className="login-brand hidden lg:flex flex-col justify-between w-[52%] relative overflow-hidden p-12">
 
         {/* animated floating blobs */}
         <div className="absolute -top-20 -left-20 w-96 h-96 rounded-full opacity-30 blur-3xl pointer-events-none animate-[float1_14s_ease-in-out_infinite]"
@@ -149,19 +148,19 @@ export default function Login() {
       {/* ════════ RIGHT — FORM PANEL ════════ */}
       <div className="flex-1 flex items-center justify-center p-6 relative">
         {/* soft accent glows */}
-        <div className="absolute top-10 right-10 w-72 h-72 rounded-full opacity-30 blur-3xl pointer-events-none"
+        <div className="login-glow absolute top-10 right-10 w-72 h-72 rounded-full opacity-30 blur-3xl pointer-events-none"
           style={{ background: 'radial-gradient(circle,#ffcdb6,transparent 70%)' }} />
-        <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-20 blur-3xl pointer-events-none"
+        <div className="login-glow absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-20 blur-3xl pointer-events-none"
           style={{ background: 'radial-gradient(circle,#ffa783,transparent 70%)' }} />
 
         <div className="w-full max-w-sm relative z-10 animate-[cardIn_.5s_ease-out]">
           {/* Card */}
           <div className="relative">
             {/* static gradient ring (ขอบไล่สีคม สะอาด) */}
-            <div className="absolute -inset-[1.5px] rounded-[2rem] pointer-events-none"
+            <div className="login-ring absolute -inset-[1.5px] rounded-[2rem] pointer-events-none"
               style={{ background: 'linear-gradient(135deg,#ffa783,#ec4f1a,#e74111,#f2622b)' }} />
 
-            <div className="relative rounded-[1.9rem] bg-white/95 backdrop-blur-xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(231,65,17,0.35)]">
+            <div className="login-card relative rounded-[1.9rem] bg-white/95 backdrop-blur-xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(231,65,17,0.35)]">
               {/* top sheen line */}
               <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-orange-300/70 to-transparent" />
 
@@ -178,7 +177,7 @@ export default function Login() {
                       onError={e => { e.target.style.display='none'; }} />
                   </div>
                 </div>
-                <h2 className="font-black text-[1.7rem] leading-tight mb-1.5"
+                <h2 className="login-title font-black text-[1.7rem] leading-tight mb-1.5"
                   style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                     backgroundImage: 'linear-gradient(120deg,#9a2f0c,#e74111 55%,#ec4f1a)' }}>
                   ยินดีต้อนรับ 👋
@@ -230,7 +229,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="group relative w-full overflow-hidden py-3.5 rounded-2xl text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_34px_-6px_rgba(231,65,17,0.6)] active:scale-[0.98] disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none !mt-6"
+                  className="login-btn group relative w-full overflow-hidden py-3.5 rounded-2xl text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_34px_-6px_rgba(231,65,17,0.6)] active:scale-[0.98] disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none !mt-6"
                   style={{
                     background: loading ? '#9a2f0c' : 'linear-gradient(135deg,#f2622b,#e74111 55%,#c9370c)',
                     boxShadow: loading ? 'none' : '0 6px 22px -4px rgba(231,65,17,0.55)',

@@ -168,6 +168,8 @@ ADMIN: /api/users[/:id] · /api/system/stats · POST /api/system/reset · GET /a
   ใช้คลาส `orange-*` ตามปกติได้เลย · **Primary** `orange-600` = `#d63b0e` · พื้นหลัง `#faf6f2` · การ์ดขอบ `orange-100`
   · สีที่ต้องเขียนรหัสตรงๆ (gradient/inline style): `#f2622b` (สว่าง) → `#e74111` (โลโก้) → `#c9370c` (เข้ม) · โหมดมืดตัวหนังสือส้ม `#ff8a5c`
 - **Sidebar:** ไล่ส้มโลโก้ `#f2622b → #c9370c` + ลายจุดจางๆ · โลโก้ = ตรา มจธ. วงกลม `public/logo-seal.png`
+- **โหมดมืด (แบบจองห้อง):** เมนูซ้าย/แถบมือถือ/กล่องหัว Dashboard/หน้าเข้าสู่ระบบ เป็นส้มอิฐเข้ม `#9a2f0c → #4a1706` (คลาส `.sidebar-bg` `.hero-bg` `.login-*` ใน `index.css`)
+  · พื้น `#151518` · การ์ด `#1f1f23` · เส้น `#34343b` · ช่องกรอก `#19191c`
 - รองรับ dark mode (ThemeContext) · ฟอนต์บนจอ **IBM Plex Sans Thai** · รายงาน/ใบประกาศ/ตอนพิมพ์ = **Sarabun** (`.print-area` + `@media print` — ที่จัดพอดี A4 ไว้ไม่เลื่อน)
 
 ---

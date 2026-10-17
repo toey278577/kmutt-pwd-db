@@ -146,7 +146,7 @@ html.dark .page-title { color: #f5f5f4 !important; }
 
 /* ─── Dark Mode — โทนเทาเข้มอบอุ่น (stone) สะอาด เข้ากับ sidebar ─── */
 html.dark body {
-  background-color: #1a1a1d;
+  background-color: #151518;
   color: #f5f5f4;
 }
 
@@ -155,12 +155,12 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #4a4a50; }
 
 @media not print {
   /* Surfaces — การ์ด/พื้นหลัง */
-  html.dark main .bg-white               { background-color: #242428 !important; }
-  html.dark main [class*="bg-orange-50"] { background-color: #28282d !important; }
-  html.dark main .bg-gray-50             { background-color: #1e1e22 !important; }
-  html.dark main .bg-gray-100            { background-color: #2a2a2f !important; }
+  html.dark main .bg-white               { background-color: #1f1f23 !important; }
+  html.dark main [class*="bg-orange-50"] { background-color: #26262b !important; }
+  html.dark main .bg-gray-50             { background-color: #19191c !important; }
+  html.dark main .bg-gray-100            { background-color: #27272c !important; }
   html.dark main .bg-gray-900            { background-color: #0a0a0a !important; }
-  html.dark main [class*="bg-amber-50"]  { background-color: #28282d !important; }
+  html.dark main [class*="bg-amber-50"]  { background-color: #26262b !important; }
   /* การ์ดสีพาสเทล (Pre/Post test, Soft Skills, badge สถานะ) — ปล่อยพาสเทลสว่าง
      เพื่อให้ตัวอักษรสีเข้มข้างในอ่านได้ (เหมือน chip) ไม่ทำให้เข้มจนมองไม่เห็น */
 
@@ -196,19 +196,19 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #4a4a50; }
 
   /* Inputs & forms */
   html.dark main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]) {
-    background-color: #1e1e22 !important;
+    background-color: #19191c !important;
     border-color: #34343b !important;
     color: #f5f5f4 !important;
   }
   /* เดิม #4a4a50 (1.9:1) มืดจนไม่เห็นว่าช่องให้กรอกอะไร */
   html.dark main input::placeholder,
   html.dark main textarea::placeholder   { color: #75767e !important; }
-  html.dark main select                  { background-color: #1e1e22 !important; border-color: #34343b !important; color: #f5f5f4 !important; }
-  html.dark main textarea                { background-color: #1e1e22 !important; border-color: #34343b !important; color: #f5f5f4 !important; }
+  html.dark main select                  { background-color: #19191c !important; border-color: #34343b !important; color: #f5f5f4 !important; }
+  html.dark main textarea                { background-color: #19191c !important; border-color: #34343b !important; color: #f5f5f4 !important; }
 
   /* Tables */
-  html.dark main tr.bg-white             { background-color: #242428 !important; }
-  html.dark main tr.bg-gray-50           { background-color: #1e1e22 !important; }
+  html.dark main tr.bg-white             { background-color: #1f1f23 !important; }
+  html.dark main tr.bg-gray-50           { background-color: #19191c !important; }
   html.dark main td, html.dark main th   { color: #f5f5f4 !important; }
   html.dark main .bg-gray-50 th          { color: #9b9ca4 !important; }
   html.dark main .row-link:hover > td    { background-color: #33302c !important; }
@@ -236,11 +236,43 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: #4a4a50; }
   html.dark main .recharts-text tspan           { fill: #9b9ca4 !important; }
   html.dark main .recharts-legend-item-text     { color: #9b9ca4 !important; fill: #9b9ca4 !important; }
   html.dark main .recharts-tooltip-wrapper .recharts-default-tooltip {
-    background: #242428 !important;
+    background: #1f1f23 !important;
     border-color: #34343b !important;
     color: #f5f5f4 !important;
   }
 }
+
+/* ─── แถบส้มที่เปลี่ยนตามโหมด — สว่าง = ส้มโลโก้สด · มืด = ส้มอิฐเข้มไล่น้ำตาล (แบบแถบหัวระบบจองห้อง) ─── */
+.sidebar-bg {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.09) 1px, transparent 0) 0 0 / 22px 22px,
+    radial-gradient(125% 55% at 100% 0%, rgba(255,255,255,0.16), transparent 60%),
+    linear-gradient(165deg,#f2622b 0%,#ec4f1a 42%,#e74111 74%,#c9370c 100%);
+}
+html.dark .sidebar-bg {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0) 0 0 / 22px 22px,
+    radial-gradient(125% 55% at 100% 0%, rgba(255,255,255,0.07), transparent 60%),
+    linear-gradient(165deg,#9a2f0c 0%,#7c260a 55%,#4a1706 100%);
+}
+.hero-bg { background: linear-gradient(120deg,#f2622b 0%,#e74111 50%,#c9370c 100%); }
+html.dark .hero-bg { background: linear-gradient(120deg,#9a2f0c 0%,#7c260a 55%,#4a1706 100%); }
+html.dark .hero-glow { opacity: 0.12; }
+
+/* ─── หน้าเข้าสู่ระบบ โหมดมืด — อยู่นอก <main> จึงมีชุดสีของตัวเอง ─── */
+.login-brand { background: linear-gradient(140deg,#f2622b 0%,#e74111 45%,#c9370c 100%); }
+html.dark .login-page { background: #151518; }
+html.dark .login-brand { background: linear-gradient(140deg,#9a2f0c 0%,#7c260a 55%,#4a1706 100%); }
+html.dark .login-glow { opacity: 0.06; }
+html.dark .login-ring { background: #34343b !important; }
+html.dark .login-card { background: #1f1f23; box-shadow: 0 20px 60px -15px rgba(0,0,0,0.7); }
+html.dark .login-title { background-image: linear-gradient(120deg,#ffffff,#ffd2bf 55%,#ff8a5c) !important; }
+html.dark .login-btn:not(:disabled) { background: linear-gradient(135deg,#ff8a5c,#ff6a3d 55%,#e74111) !important; }
+html.dark .login-page .text-gray-400 { color: #9b9ca4; }
+html.dark .login-page .text-gray-500 { color: #bcbdc4; }
+html.dark .login-page input { background-color: #19191c !important; border-color: #34343b !important; color: #f5f5f4 !important; }
+html.dark .login-page input::placeholder { color: #75767e; }
+html.dark .login-page input:focus { border-color: #ff6a3d !important; }
 
 @page { margin: 0; }
 

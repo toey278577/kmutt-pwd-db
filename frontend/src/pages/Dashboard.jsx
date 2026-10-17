@@ -62,9 +62,8 @@ export default function Dashboard() {
     <div className="space-y-6">
 
       {/* ═══ HERO ═══ */}
-      <div className="relative overflow-hidden rounded-3xl p-6 md:p-7 text-white shadow-lg"
-        style={{ background: 'linear-gradient(120deg,#f2622b 0%,#e74111 50%,#c9370c 100%)' }}>
-        <div className="absolute -top-16 -right-10 w-64 h-64 rounded-full opacity-25 blur-3xl" style={{ background: 'radial-gradient(circle,#fde68a,transparent 70%)' }} />
+      <div className="hero-bg relative overflow-hidden rounded-3xl p-6 md:p-7 text-white shadow-lg">
+        <div className="hero-glow absolute -top-16 -right-10 w-64 h-64 rounded-full opacity-25 blur-3xl" style={{ background: 'radial-gradient(circle,#fde68a,transparent 70%)' }} />
         <div className="absolute -bottom-16 left-1/3 w-56 h-56 rounded-full opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle,#fff,transparent 70%)' }} />
         <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '30px 30px' }} />
         <div className="relative flex items-center justify-between gap-4">

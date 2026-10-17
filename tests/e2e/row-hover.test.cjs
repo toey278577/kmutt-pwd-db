@@ -16,6 +16,7 @@ const look = (i) => `(() => { const r = ${ROW(i)}, td = [...r.children], cs = (e
   const mouseAway = async () => { await b.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 5, y: 5 }); await sleep(400); };
   try {
     await b.login(staff.id);
+    await b.evaluate(`localStorage.setItem('theme', 'light'), true`);   // เช็คสีโหมดสว่างก่อน — กันค่าโหมดมืดค้างใน Chrome ของชุดทดสอบ
     await b.nav('/persons');
     await b.waitFor(`document.querySelectorAll('tbody tr.row-link').length >= 3`, 'ตารางรายชื่อ'); await sleep(300);
     await mouseAway();

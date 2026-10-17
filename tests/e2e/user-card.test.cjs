@@ -24,7 +24,8 @@ const CARD = `document.querySelector('aside [data-user-card]')`;
 
     const lightColor = await b.evaluate(`getComputedStyle(${CARD}.querySelector('p')).color`);
     await b.evaluate(`document.documentElement.classList.add('dark'); true`); await sleep(300);
-    eq('โหมดมืด: การ์ดเหมือนโหมดสว่าง (แถบเมนูสีส้มเหมือนเดิม)', await b.evaluate(`[getComputedStyle(${CARD}).backgroundColor, getComputedStyle(${CARD}.querySelector('p')).color]`), ['rgba(0, 0, 0, 0)', lightColor]);
+    eq('โหมดมืด: การ์ดใส ชื่อขาวเหมือนโหมดสว่าง', await b.evaluate(`[getComputedStyle(${CARD}).backgroundColor, getComputedStyle(${CARD}.querySelector('p')).color]`), ['rgba(0, 0, 0, 0)', lightColor]);
+    eq('โหมดมืด: แถบเมนูเป็นส้มอิฐเข้ม (แบบระบบจองห้อง) · สว่าง = ส้มโลโก้', await b.evaluate(`(() => { const bg = () => getComputedStyle(document.querySelector('aside')).backgroundImage; const d = bg().includes('rgb(154, 47, 12)'); document.documentElement.classList.remove('dark'); const l = bg().includes('rgb(242, 98, 43)'); document.documentElement.classList.add('dark'); return [d, l]; })()`), [true, true]);
     await b.evaluate(`document.documentElement.classList.remove('dark'); true`);
 
     await b.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
