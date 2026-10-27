@@ -19,3 +19,6 @@ tests/.output/
 
 # รหัสลับเซ็นตั๋วเข้าระบบ ที่หลังบ้านสุ่มสร้างเองเมื่อไม่ได้ตั้ง JWT_SECRET — ห้ามขึ้น repo
 backend/.jwt-secret
+
+# เอกสารโครงการ: HTML ชั่วคราว + ภาพตรวจหน้า (สร้างใหม่ได้จาก build.cjs / preview.cjs)
+docs/project-docs/out/

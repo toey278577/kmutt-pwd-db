@@ -11,6 +11,11 @@ web app สำหรับจัดการข้อมูลคนพิกา
 
 - **ระบบจริง:** https://kmutt-pwd.duckdns.org (VPS Vultr สิงคโปร์ — nginx + node)
 - **บันทึกการพัฒนา:** `CHANGELOG.md` · **คู่มือผู้ใช้:** `docs/คู่มือการใช้งาน.pdf/.html`
+- **เอกสารประกอบการพัฒนาระบบ (SDLC):** `docs/project-docs/pdf/` (ฉบับรวม + BA/SA/Design/Test/Dev-Ops) — **อัปเดตทุกครั้งที่ระบบเปลี่ยน** (คำสั่ง `/เอกสาร`)
+  · เนื้อหา `content/*.cjs` (FR/BR/CR/ข้อบกพร่อง/เวอร์ชันพิมพ์ไว้ในไฟล์) · ภาพ `node docs/project-docs/shots.cjs` (= `npm test -- docs` ข้อมูลสมมติ)
+  · ผลทดสอบ: รัน `npm test` ครบชุดแล้วก๊อป `tests/.output/last-run.log` → `data/test-run.txt` · สร้าง `node docs/project-docs/build.cjs` · ดูหน้า `preview.cjs <pdf> <แรก> <สุดท้าย> 4`
+  · ตารางใหม่ต้องวางตำแหน่งใน `lib/erd.cjs` (ไม่งั้น build ไม่ผ่าน) + คำอธิบายใน `content/04-design.cjs`
+  · ความต้องการจากหน่วยงาน = `docs/*.pdf` 6 ฉบับ (requement · สิ่งที่พี่บอยอยากให้เพิ่ม · เพิ่มเติม · 25/06/2569 · Timeline · 10 ก.ค. 2569)
 
 ---
 
@@ -44,6 +49,7 @@ web app สำหรับจัดการข้อมูลคนพิกา
 │
 ├── tests/                   ← ชุดทดสอบ (npm test): run.cjs ตัวรัน · lib.cjs ตัวช่วย · fixtures/seed.cjs ข้อมูลตั้งต้น
 │                              unit/ (ฟังก์ชันล้วน) · api/ (ยิง API จริง) · e2e/ (กดหน้าเว็บจริงผ่าน Chrome headless)
+│                              docs/ (ถ่ายภาพให้เอกสารโครงการ — รันเฉพาะ `npm test -- docs`)
 │                              ผล + ภาพหน้าจอ → tests/.output/ (ไม่ขึ้น git)
 │
 └── docs/deploy/             ← ย้ายเครื่อง.md (ย้ายเซิร์ฟเวอร์ทีละขั้น) · กู้ข้อมูล.md · deploy.sh · backup.sh (ตี 2 ทุกวัน เก็บ 14 วัน)

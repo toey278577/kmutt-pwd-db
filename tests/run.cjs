@@ -28,10 +28,13 @@ const args = process.argv.slice(2);
 const all = ['unit', 'api', 'e2e'].flatMap((g) => fs.readdirSync(path.join(T, g))
   .filter((f) => /\.test\.(c|m)?js$/.test(f)).sort()
   .map((f) => ({ group: g, file: path.join(T, g, f), name: `${g}/${f.replace(/\.test\.\w+$/, '')}` })));
-const picked = args.length ? all.filter((t) => args.some((a) => t.group === a || t.name.includes(a))) : all;
+// tests/docs/ = ถ่ายภาพหน้าจอให้เอกสารโครงการ — ไม่อยู่ในชุดปกติ รันเฉพาะตอนสั่ง `npm test -- docs`
+const docs = args.includes('docs') ? fs.readdirSync(path.join(T, 'docs')).filter((f) => /\.test\.(c|m)?js$/.test(f)).sort()
+  .map((f) => ({ group: 'docs', file: path.join(T, 'docs', f), name: `docs/${f.replace(/\.test\.\w+$/, '')}` })) : [];
+const picked = args.length ? [...all, ...docs].filter((t) => args.some((a) => t.group === a || t.name.includes(a))) : all;
 if (!picked.length) { console.error('ไม่เจอชุดทดสอบที่ตรงกับ: ' + args.join(' ')); process.exit(2); }
 const needDb = picked.some((t) => t.group !== 'unit');
-const needWeb = picked.some((t) => t.group === 'e2e');
+const needWeb = picked.some((t) => t.group === 'e2e' || t.group === 'docs');
 
 // ── ฐานข้อมูลทดสอบ (ไม่ใช่ฐาน dev)
 require(path.join(B, 'node_modules/dotenv')).config({ path: path.join(B, '.env'), quiet: true });
